@@ -1,0 +1,24 @@
+{
+  "name": "eat-sheet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modern digital menu platform for restaurants",
+  "scripts": {
+    "backend:dev": "pnpm --filter @eat-sheet/backend dev",
+    "backend:build": "pnpm --filter @eat-sheet/backend build",
+    "backend:test": "pnpm --filter @eat-sheet/backend test",
+    "frontend:dev": "pnpm --filter @eat-sheet/frontend dev",
+    "frontend:build": "pnpm --filter @eat-sheet/frontend build",
+    "frontend:test": "pnpm --filter @eat-sheet/frontend test",
+    "frontend:storybook": "pnpm --filter @eat-sheet/frontend storybook",
+    "infra:preview": "pnpm --filter @eat-sheet/infrastructure preview",
+    "infra:deploy": "pnpm --filter @eat-sheet/infrastructure deploy",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

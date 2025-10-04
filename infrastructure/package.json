@@ -1,0 +1,20 @@
+{
+  "name": "@eat-sheet/infrastructure",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "preview": "pulumi preview",
+    "deploy": "pulumi up",
+    "destroy": "pulumi destroy",
+    "stack": "pulumi stack"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.68.0",
+    "@pulumi/pulumi": "^3.146.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
