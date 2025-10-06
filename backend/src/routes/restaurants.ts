@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { db } from '../db/index.js';
-import { restaurants } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { restaurants, restaurantMaintainers } from '../db/schema.js';
+import { eq, and } from 'drizzle-orm';
 import {
   restaurantSchema,
   createRestaurantSchema,
@@ -9,6 +9,7 @@ import {
   restaurantSlugParamSchema,
   restaurantIdParamSchema,
 } from '../schemas/restaurant.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const app = new OpenAPIHono();
 
@@ -133,7 +134,12 @@ const createRestaurantRoute = createRoute({
 });
 
 app.openapi(createRestaurantRoute, async (c) => {
+  // Check auth
+  const authResult = await requireAuth(c, async () => {});
+  if (authResult) return authResult;
+
   const body = c.req.valid('json');
+  const user = c.get('user');
 
   // Check if slug already exists
   const [existing] = await db
@@ -146,12 +152,24 @@ app.openapi(createRestaurantRoute, async (c) => {
     return c.json({ error: 'Restaurant with this slug already exists' }, 409);
   }
 
-  const [restaurant] = await db
-    .insert(restaurants)
-    .values(body)
-    .returning();
+  // Create restaurant and make user the owner in a transaction
+  const result = await db.transaction(async (tx) => {
+    const [restaurant] = await tx
+      .insert(restaurants)
+      .values(body)
+      .returning();
 
-  return c.json({ data: restaurant }, 201);
+    // Make the creator the owner
+    await tx.insert(restaurantMaintainers).values({
+      restaurantId: restaurant.id,
+      userId: user.id,
+      role: 'owner',
+    });
+
+    return restaurant;
+  });
+
+  return c.json({ data: result }, 201);
 });
 
 // PATCH /restaurants/:id - Update restaurant (requires auth - will add later)
@@ -194,8 +212,24 @@ const updateRestaurantRoute = createRoute({
 });
 
 app.openapi(updateRestaurantRoute, async (c) => {
+  // Check auth
+  const authResult = await requireAuth(c, async () => {});
+  if (authResult) return authResult;
+
   const { id } = c.req.valid('param');
   const body = c.req.valid('json');
+  const user = c.get('user');
+
+  // Check if user is a maintainer of this restaurant
+  const [maintainer] = await db
+    .select()
+    .from(restaurantMaintainers)
+    .where(and(eq(restaurantMaintainers.restaurantId, id), eq(restaurantMaintainers.userId, user.id)))
+    .limit(1);
+
+  if (!maintainer) {
+    return c.json({ error: 'Forbidden: You are not a maintainer of this restaurant' }, 403);
+  }
 
   const [restaurant] = await db
     .update(restaurants)
@@ -236,7 +270,23 @@ const deleteRestaurantRoute = createRoute({
 });
 
 app.openapi(deleteRestaurantRoute, async (c) => {
+  // Check auth
+  const authResult = await requireAuth(c, async () => {});
+  if (authResult) return authResult;
+
   const { id } = c.req.valid('param');
+  const user = c.get('user');
+
+  // Check if user is the owner of this restaurant
+  const [maintainer] = await db
+    .select()
+    .from(restaurantMaintainers)
+    .where(and(eq(restaurantMaintainers.restaurantId, id), eq(restaurantMaintainers.userId, user.id)))
+    .limit(1);
+
+  if (!maintainer || maintainer.role !== 'owner') {
+    return c.json({ error: 'Forbidden: Only owners can delete restaurants' }, 403);
+  }
 
   const result = await db
     .delete(restaurants)

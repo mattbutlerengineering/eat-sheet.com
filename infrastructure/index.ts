@@ -104,9 +104,8 @@ const userPoolClient = new aws.cognito.UserPoolClient(`${projectName}-web-client
   // Prevent user existence errors
   preventUserExistenceErrors: 'ENABLED',
 
-  // Read/write attributes
+  // Read attributes
   readAttributes: ['email', 'name'],
-  writeAttributes: ['name'],
 });
 
 // Create User Pool Domain (for hosted UI - optional for MVP)

@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
@@ -27,7 +27,7 @@ function getKey(header: any, callback: any) {
 // Verify JWT token
 function verifyToken(token: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    verify(
+    jwt.verify(
       token,
       getKey,
       {
