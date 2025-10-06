@@ -1,0 +1,3 @@
+name: eat-sheet-infrastructure
+runtime: nodejs
+description: Infrastructure for Eat-Sheet digital menu platform
