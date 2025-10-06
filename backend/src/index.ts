@@ -18,6 +18,8 @@ app.use('*', cors({
 
 // Import routes
 import restaurantsRoutes from './routes/restaurants.js';
+import menusRoutes from './routes/menus.js';
+import menuItemsRoutes from './routes/menuItems.js';
 
 // Health check endpoint
 app.get('/health', (c) => {
@@ -26,6 +28,10 @@ app.get('/health', (c) => {
 
 // Mount routes
 app.route('/api/restaurants', restaurantsRoutes);
+app.route('/api/restaurants', menusRoutes);
+app.route('/api/menus', menusRoutes);
+app.route('/api/menus', menuItemsRoutes);
+app.route('/api/items', menuItemsRoutes);
 
 // OpenAPI documentation
 app.doc('/api/openapi.json', {
