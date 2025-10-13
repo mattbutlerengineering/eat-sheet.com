@@ -290,6 +290,12 @@ Eat-Sheet is a modern digital menu platform that provides exceptional user exper
 - AWS Certificate Manager (SSL)
 - Pulumi (Infrastructure as Code - TypeScript)
 
+**Monorepo Management:**
+- Rush (Microsoft's scalable monorepo manager)
+- PNPM as package manager (Rush-compatible)
+- Incremental builds and distributed caching
+- Parallel project builds
+
 **DNS:**
 - Squarespace (domain management)
 - CNAME to CloudFront distribution
@@ -1739,5 +1745,275 @@ This specification provides a comprehensive blueprint for building Eat-Sheet, a 
 5. Beta test with friendly restaurants
 
 **Estimated Timeline:** 8-10 weeks to MVP launch
+
+---
+
+## Appendix O: Rush Monorepo Configuration
+
+### Why Rush?
+
+**Rush over pnpm workspaces:**
+- Incremental builds across projects
+- Build caching and distribution
+- Parallel project builds with dependency awareness
+- Repo-wide policy management
+- Better scaling for larger teams
+- Built-in version policy management
+
+**Rush + PNPM:**
+- Rush uses PNPM as the package manager
+- Efficient disk space usage (hardlinks)
+- Fast installation
+- Strict dependency management
+
+### Repository Structure
+
+```
+eat-sheet/
+├── rush.json                # Rush configuration
+├── .rush/                   # Rush metadata
+├── common/                  # Common configs
+│   ├── config/
+│   │   ├── rush/            # Rush policies
+│   │   └── .pnpmfile.cjs   # PNPM hooks
+│   └── scripts/             # Build scripts
+├── apps/
+│   ├── backend/             # Hono API
+│   └── frontend/            # React PWA
+├── packages/
+│   ├── shared/              # Shared types/utilities
+│   └── config/              # Shared configs
+└── infrastructure/          # Pulumi IaC
+```
+
+### Common Rush Commands
+
+```bash
+# Install all dependencies
+rush update
+
+# Build all projects
+rush build
+
+# Build just backend
+rush build --to @eat-sheet/backend
+
+# Rebuild only changed projects
+rush build --changed
+
+# Run backend dev server
+rushx dev -p @eat-sheet/backend
+
+# Run tests across all projects
+rush test
+
+# Add dependency to a project
+cd apps/backend
+rush add -p express --make-consistent
+
+# Bulk operations
+rush rebuild    # Clean build all projects
+rush purge      # Remove node_modules
+```
+
+### rush.json Configuration
+
+```json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.115.0",
+  "pnpmVersion": "8.15.0",
+  "repository": {
+    "url": "https://github.com/your-org/eat-sheet",
+    "defaultBranch": "main"
+  },
+  "projects": [
+    {
+      "packageName": "@eat-sheet/backend",
+      "projectFolder": "apps/backend",
+      "reviewCategory": "production"
+    },
+    {
+      "packageName": "@eat-sheet/frontend",
+      "projectFolder": "apps/frontend",
+      "reviewCategory": "production"
+    },
+    {
+      "packageName": "@eat-sheet/infrastructure",
+      "projectFolder": "infrastructure",
+      "reviewCategory": "tools"
+    },
+    {
+      "packageName": "@eat-sheet/shared",
+      "projectFolder": "packages/shared",
+      "reviewCategory": "production"
+    }
+  ]
+}
+```
+
+### Build Orchestration
+
+**Dependency graph:**
+```
+frontend → shared
+backend → shared
+infrastructure (independent)
+```
+
+**Build order (Rush determines automatically):**
+1. `@eat-sheet/shared` (no dependencies)
+2. `@eat-sheet/backend` and `@eat-sheet/frontend` (parallel)
+3. `@eat-sheet/infrastructure` (parallel with above)
+
+### Caching Strategy
+
+Rush provides build caching:
+- Local caching (in `.rush/build-cache/`)
+- Cloud caching (optional, via Rush BuildXL)
+- Cache keys based on:
+  - Source files
+  - Dependencies
+  - Configuration files
+
+**Enable caching in `common/config/rush/build-cache.json`:**
+```json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/build-cache.schema.json",
+  "buildCacheEnabled": true,
+  "cacheProvider": "local-only"
+}
+```
+
+### Development Workflow with Rush
+
+**Initial setup:**
+```bash
+# Install Rush globally
+npm install -g @microsoft/rush
+
+# Clone repo and install
+git clone https://github.com/your-org/eat-sheet
+cd eat-sheet
+rush update
+```
+
+**Daily development:**
+```bash
+# Pull latest and update dependencies
+git pull
+rush update
+
+# Build changed projects
+rush build --changed
+
+# Start backend dev server
+cd apps/backend
+rushx dev
+
+# Or from root
+rush dev --to @eat-sheet/backend
+```
+
+**Adding a new package:**
+```bash
+# Create new package directory
+mkdir -p packages/new-package
+cd packages/new-package
+
+# Create package.json
+npm init -y
+
+# Add to rush.json manually, then
+rush update
+```
+
+### CI/CD Integration
+
+**GitHub Actions with Rush:**
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # For rush --changed
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      - name: Build changed projects
+        run: rush build --verbose --changed
+
+      - name: Test changed projects
+        run: rush test --verbose --changed
+
+      - name: Deploy (main branch only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          rush build --to @eat-sheet/backend
+          rush build --to @eat-sheet/frontend
+          # Deploy steps...
+```
+
+### Version Management
+
+Rush supports lockstep versioning:
+
+**common/config/rush/version-policies.json:**
+```json
+[
+  {
+    "definitionName": "lockStepVersion",
+    "policyName": "production",
+    "version": "1.0.0",
+    "nextBump": "patch"
+  }
+]
+```
+
+**Versioning workflow:**
+```bash
+# Bump version across all production packages
+rush version --bump
+
+# Publish (if publishing to npm)
+rush publish --apply
+```
+
+### Advantages for Eat-Sheet
+
+1. **Faster CI/CD:** Only rebuild/test changed projects
+2. **Better caching:** Local and cloud caching support
+3. **Type safety:** Shared types package ensures consistency
+4. **Incremental migration:** Can migrate from pnpm workspaces gradually
+5. **Scalability:** Ready for future growth (mobile apps, admin panel, etc.)
+
+### Migration from pnpm Workspaces
+
+**Steps:**
+1. Install Rush globally
+2. Run `rush init` in project root
+3. Configure `rush.json` with existing packages
+4. Move from `pnpm-workspace.yaml` to Rush
+5. Update CI/CD to use Rush commands
+6. Migrate scripts from root `package.json` to Rush automation
+
+**Backward compatibility:**
+- Rush uses PNPM under the hood
+- Existing `package.json` files remain largely unchanged
+- `pnpm` commands still work within individual packages
 
 Good luck building Eat-Sheet! 🍽️

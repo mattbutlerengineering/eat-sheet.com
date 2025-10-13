@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.160.1",
+  "pnpmVersion": "9.15.0",
+  "nodeSupportedVersionRange": ">=20.0.0 <25.0.0",
+
+  "repository": {
+    "url": "https://github.com/your-org/eat-sheet",
+    "defaultBranch": "main",
+    "defaultRemote": "origin"
+  },
+
+  "projectFolderMinDepth": 2,
+  "projectFolderMaxDepth": 2,
+
+  "projects": [
+    {
+      "packageName": "@eat-sheet/backend",
+      "projectFolder": "apps/backend",
+      "reviewCategory": "production",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@eat-sheet/frontend",
+      "projectFolder": "apps/frontend",
+      "reviewCategory": "production",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@eat-sheet/infrastructure",
+      "projectFolder": "apps/infrastructure",
+      "reviewCategory": "tools",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@eat-sheet/shared",
+      "projectFolder": "packages/shared",
+      "reviewCategory": "production",
+      "shouldPublish": false
+    }
+  ]
+}

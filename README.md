@@ -26,45 +26,68 @@ A modern digital menu platform for restaurants. Provides beautiful, themeable me
 
 ## Quick Start
 
+This is a Rush monorepo. Rush provides better build orchestration, caching, and parallel execution than pnpm workspaces alone.
+
 ### Install Dependencies
 
 ```bash
-pnpm install            # Install all workspace dependencies
+rush update             # Install all dependencies (recommended)
+# or
+pnpm install            # Also works (backward compatible)
 ```
 
 ### Backend Development
 
 ```bash
-pnpm backend:dev        # Start development server
-pnpm --filter @eat-sheet/backend db:migrate    # Run database migrations
-pnpm --filter @eat-sheet/backend db:studio     # Open database GUI
+rush build --to @eat-sheet/backend    # Build backend + dependencies
+rushx dev -p @eat-sheet/backend       # Start development server
+
+# Or navigate to project:
+cd apps/backend
+rushx dev                              # Start development server
+rushx db:migrate                       # Run database migrations
+rushx db:studio                        # Open database GUI
 ```
 
 ### Frontend Development
 
 ```bash
-pnpm frontend:dev       # Start development server
-pnpm frontend:storybook # Start Storybook for component development
+cd apps/frontend
+rushx dev               # Start development server
+rushx storybook         # Start Storybook for component development
 ```
 
 ### Infrastructure Deployment
 
 ```bash
-cd infrastructure
+cd apps/infrastructure
 pulumi stack init dev
 pulumi config set aws:region us-east-1
-pnpm infra:deploy      # Deploy infrastructure
+rushx deploy            # Deploy infrastructure
+```
+
+### Common Rush Commands
+
+```bash
+rush update             # Install all dependencies
+rush build              # Build all projects
+rush build --changed    # Build only changed projects
+rush rebuild            # Clean + build all projects
+rush purge              # Remove all node_modules
 ```
 
 ## Project Structure
 
 ```
 eat-sheet/
-├── backend/           # Hono API (Lambda)
-├── frontend/          # React PWA
-├── infrastructure/    # Pulumi IaC
-├── shared/           # Shared types
-└── docs/            # Documentation
+├── apps/
+│   ├── backend/          # Hono API (Lambda)
+│   ├── frontend/         # React PWA
+│   └── infrastructure/   # Pulumi IaC
+├── packages/
+│   └── shared/          # Shared types and utilities
+├── common/              # Rush configuration
+└── docs/                # Documentation
 ```
 
 ## Development
