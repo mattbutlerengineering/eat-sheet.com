@@ -96,7 +96,7 @@ export default app;
 
 ### Step 3.2: Menu Routes
 
-**File: `backend/src/routes/menus.ts`**
+**File: `apps/backend/src/routes/menus.ts`**
 ```typescript
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
@@ -199,7 +199,7 @@ export default app;
 
 ### Step 3.3: Image Upload Routes
 
-**File: `backend/src/routes/images.ts`**
+**File: `apps/backend/src/routes/images.ts`**
 ```typescript
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -269,7 +269,7 @@ export default app;
 
 ### Step 3.4: AI Modification Suggestions
 
-**File: `backend/src/routes/items.ts`**
+**File: `apps/backend/src/routes/items.ts`**
 ```typescript
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { db } from "../db";
@@ -379,7 +379,7 @@ export default app;
 
 ### Step 3.5: Reviews Routes
 
-**File: `backend/src/routes/reviews.ts`**
+**File: `apps/backend/src/routes/reviews.ts`**
 ```typescript
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { db } from "../db";
@@ -502,7 +502,7 @@ export default app;
 
 ### Step 3.6: Saved Orders Routes
 
-**File: `backend/src/routes/orders.ts`**
+**File: `apps/backend/src/routes/orders.ts`**
 ```typescript
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { db } from "../db";
@@ -620,7 +620,7 @@ export default app;
 
 ### Step 3.7: Analytics Routes
 
-**File: `backend/src/routes/analytics.ts`**
+**File: `apps/backend/src/routes/analytics.ts`**
 ```typescript
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { db } from "../db";
@@ -723,12 +723,12 @@ export default app;
 ### Step 4.1: Initialize React Project
 
 ```bash
-cd frontend
+cd apps/frontend
 npm create vite@latest . -- --template react-ts
 npm install
 ```
 
-**File: `frontend/package.json` (add dependencies)**
+**File: `apps/frontend/package.json` (add dependencies)**
 ```json
 {
   "dependencies": {
@@ -755,7 +755,7 @@ npm install
 
 ### Step 4.2: Set Up Mantine & Theme
 
-**File: `frontend/src/main.tsx`**
+**File: `apps/frontend/src/main.tsx`**
 ```typescript
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -779,7 +779,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ### Step 4.3: Set Up Routing
 
-**File: `frontend/src/App.tsx`**
+**File: `apps/frontend/src/App.tsx`**
 ```typescript
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppShell } from '@mantine/core';
@@ -812,7 +812,7 @@ export default App;
 
 ### Step 4.4: API Client Setup
 
-**File: `frontend/src/lib/api.ts`**
+**File: `apps/frontend/src/lib/api.ts`**
 ```typescript
 import axios from 'axios';
 
@@ -834,7 +834,7 @@ export default api;
 
 ### Step 4.5: React Query Hooks
 
-**File: `frontend/src/hooks/useRestaurant.ts`**
+**File: `apps/frontend/src/hooks/useRestaurant.ts`**
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
@@ -860,7 +860,7 @@ export function useRestaurantMenus(restaurantId: string) {
 }
 ```
 
-**File: `frontend/src/hooks/useMenu.ts`**
+**File: `apps/frontend/src/hooks/useMenu.ts`**
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
@@ -890,7 +890,7 @@ export function useMenuItems(menuId: string) {
 
 ### Step 4.6: Key Pages
 
-**File: `frontend/src/pages/Restaurant.tsx`**
+**File: `apps/frontend/src/pages/Restaurant.tsx`**
 ```typescript
 import { useParams } from 'react-router-dom';
 import { Container, Title, Text, Grid, Card, Image, Badge } from '@mantine/core';
@@ -952,7 +952,7 @@ export default function RestaurantPage() {
 }
 ```
 
-**File: `frontend/src/pages/Menu.tsx`**
+**File: `apps/frontend/src/pages/Menu.tsx`**
 ```typescript
 import { useParams } from 'react-router-dom';
 import { Container, Title, Grid } from '@mantine/core';
@@ -997,7 +997,7 @@ export default function MenuPage() {
 
 ### Step 4.7: PWA Configuration
 
-**File: `frontend/vite.config.ts`**
+**File: `apps/frontend/vite.config.ts`**
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -1072,7 +1072,7 @@ export default defineConfig({
 
 ### Step 5.1: Build Backend for Lambda
 
-**File: `backend/tsup.config.ts`**
+**File: `apps/backend/tsup.config.ts`**
 ```typescript
 import { defineConfig } from 'tsup';
 
@@ -1098,14 +1098,14 @@ npm run build
 
 ### Step 5.2: Update Pulumi Lambda with Real Code
 
-**File: `infrastructure/lambda.ts` (update)**
+**File: `apps/infrastructure/lambda.ts` (update)**
 ```typescript
 // Replace placeholder Lambda with actual code
 const apiLambda = new aws.lambda.Function("api-lambda", {
   runtime: aws.lambda.Runtime.NodeJS20dX,
   role: lambdaRole.arn,
   handler: "index.handler",
-  code: new pulumi.asset.FileArchive("../backend/dist"), // Point to built code
+  code: new pulumi.asset.FileArchive("../apps/backend/dist"), // Point to built code
   timeout: 30,
   memorySize: 1024, // Increase for better performance
   environment: {
@@ -1134,7 +1134,7 @@ const apiLambda = new aws.lambda.Function("api-lambda", {
 
 **Build frontend:**
 ```bash
-cd frontend
+cd apps/frontend
 npm run build
 # Creates dist/ folder
 ```
@@ -1147,7 +1147,7 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 export function deployFrontend(bucket: aws.s3.Bucket) {
-  const frontendDir = "../frontend/dist";
+  const frontendDir = "../apps/frontend/dist";
   
   // Upload all files from dist to S3
   const files = pulumi.output(
@@ -1164,7 +1164,7 @@ export function deployFrontend(bucket: aws.s3.Bucket) {
 **Alternative: Use AWS CLI for frontend deployment:**
 ```bash
 # Build
-cd frontend && npm run build
+cd apps/frontend && npm run build
 
 # Upload to S3
 aws s3 sync dist/ s3://eat-sheet-frontend-dev --delete
@@ -1193,7 +1193,7 @@ cd backend
 npm run test
 ```
 
-**Create test file: `backend/src/__tests__/restaurants.test.ts`**
+**Create test file: `apps/backend/src/__tests__/restaurants.test.ts`**
 ```typescript
 import { describe, it, expect } from 'vitest';
 import app from '../index';
@@ -1238,7 +1238,7 @@ describe('Restaurants API', () => {
 - Code splitting
 - Tree shaking
 
-**File: `frontend/src/App.tsx` (lazy loading)**
+**File: `apps/frontend/src/App.tsx` (lazy loading)**
 ```typescript
 import { lazy, Suspense } from 'react';
 
@@ -1516,7 +1516,7 @@ npm run lint
 npm run type-check
 
 # Frontend linting
-cd frontend
+cd apps/frontend
 npm run lint
 npm run type-check
 
@@ -1582,7 +1582,7 @@ const client = postgres(connectionString, {
 cd backend && npm run dev
 
 # Start frontend locally
-cd frontend && npm run dev
+cd apps/frontend && npm run dev
 
 # Database migrations
 cd backend && npm run db:generate && npm run db:migrate
@@ -1601,7 +1601,7 @@ cd backend && npm run build
 cd ../infrastructure && pulumi up
 
 # Deploy frontend
-cd frontend && npm run build
+cd apps/frontend && npm run build
 aws s3 sync dist/ s3://eat-sheet-frontend-prod --delete
 ```
 
@@ -1719,14 +1719,14 @@ pulumi (installed globally)
 
 ```
 eat-sheet/
-├── infrastructure/          # Pulumi IaC
+├── apps/infrastructure/          # Pulumi IaC
 │   ├── index.ts
 │   ├── cognito.ts
 │   ├── lambda.ts
 │   ├── s3.ts
 │   ├── cloudfront.ts
 │   └── apigateway.ts
-├── backend/                 # Hono API
+├── apps/backend/                 # Hono API
 │   ├── src/
 │   │   ├── index.ts
 │   │   ├── routes/
@@ -1737,7 +1737,7 @@ eat-sheet/
 │   ├── drizzle/            # Migrations
 │   ├── drizzle.config.ts
 │   └── package.json
-├── frontend/                # React PWA
+├── apps/frontend/                # React PWA
 │   ├── src/
 │   │   ├── pages/
 │   │   ├── components/
@@ -1771,7 +1771,7 @@ echo "node_modules\n.env\n*.log\ndist\nbuild" > .gitignore
 
 ### Step 1.2: Set Up Pulumi Infrastructure
 
-**File: `infrastructure/package.json`**
+**File: `apps/infrastructure/package.json`**
 ```json
 {
   "name": "eat-sheet-infrastructure",
@@ -1789,7 +1789,7 @@ echo "node_modules\n.env\n*.log\ndist\nbuild" > .gitignore
 }
 ```
 
-**File: `infrastructure/tsconfig.json`**
+**File: `apps/infrastructure/tsconfig.json`**
 ```json
 {
   "compilerOptions": {
@@ -1806,14 +1806,14 @@ echo "node_modules\n.env\n*.log\ndist\nbuild" > .gitignore
 }
 ```
 
-**File: `infrastructure/Pulumi.yaml`**
+**File: `apps/infrastructure/Pulumi.yaml`**
 ```yaml
 name: eat-sheet
 runtime: nodejs
 description: Eat-Sheet infrastructure
 ```
 
-**File: `infrastructure/index.ts`**
+**File: `apps/infrastructure/index.ts`**
 ```typescript
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
@@ -1838,7 +1838,7 @@ export const frontendUrl = pulumi.output("https://eat-sheet.com");
 
 ### Step 1.3: Create Cognito User Pool
 
-**File: `infrastructure/cognito.ts`**
+**File: `apps/infrastructure/cognito.ts`**
 ```typescript
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
@@ -1913,7 +1913,7 @@ export function createCognito() {
 }
 ```
 
-Update `infrastructure/index.ts`:
+Update `apps/infrastructure/index.ts`:
 ```typescript
 import { createCognito } from "./cognito";
 
@@ -1925,7 +1925,7 @@ export const cognitoClientId = cognito.userPoolClientId;
 
 ### Step 1.4: Create S3 Buckets
 
-**File: `infrastructure/s3.ts`**
+**File: `apps/infrastructure/s3.ts`**
 ```typescript
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
@@ -1984,7 +1984,7 @@ export function createS3Buckets() {
 
 ### Step 1.5: Create Lambda & API Gateway
 
-**File: `infrastructure/lambda.ts`**
+**File: `apps/infrastructure/lambda.ts`**
 ```typescript
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
@@ -2064,7 +2064,7 @@ export function createLambda(
 }
 ```
 
-**File: `infrastructure/apigateway.ts`**
+**File: `apps/infrastructure/apigateway.ts`**
 ```typescript
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
@@ -2115,7 +2115,7 @@ export function createApiGateway(lambda: aws.lambda.Function) {
 }
 ```
 
-Update `infrastructure/index.ts`:
+Update `apps/infrastructure/index.ts`:
 ```typescript
 import { createS3Buckets } from "./s3";
 import { createLambda } from "./lambda";
@@ -2131,7 +2131,7 @@ export const apiEndpoint = apiGateway.apiUrl;
 
 ### Step 1.6: Create CloudFront Distribution
 
-**File: `infrastructure/cloudfront.ts`**
+**File: `apps/infrastructure/cloudfront.ts`**
 ```typescript
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
@@ -2248,7 +2248,7 @@ export function createCloudFront(
 }
 ```
 
-Update `infrastructure/index.ts`:
+Update `apps/infrastructure/index.ts`:
 ```typescript
 import { createCloudFront } from "./cloudfront";
 
@@ -2275,7 +2275,7 @@ export const certificateValidation = cloudfront.certificateValidationRecords;
 
 ### Step 2.1: Initialize Backend Project
 
-**File: `backend/package.json`**
+**File: `apps/backend/package.json`**
 ```json
 {
   "name": "eat-sheet-api",
@@ -2312,7 +2312,7 @@ export const certificateValidation = cloudfront.certificateValidationRecords;
 }
 ```
 
-**File: `backend/tsconfig.json`**
+**File: `apps/backend/tsconfig.json`**
 ```json
 {
   "compilerOptions": {
@@ -2340,7 +2340,7 @@ export const certificateValidation = cloudfront.certificateValidationRecords;
 
 ### Step 2.2: Set Up Database Schema with Drizzle
 
-**File: `backend/drizzle.config.ts`**
+**File: `apps/backend/drizzle.config.ts`**
 ```typescript
 import type { Config } from "drizzle-kit";
 
@@ -2354,7 +2354,7 @@ export default {
 } satisfies Config;
 ```
 
-**File: `backend/src/db/schema.ts`**
+**File: `apps/backend/src/db/schema.ts`**
 ```typescript
 import {
   pgTable,
@@ -2555,7 +2555,7 @@ export type SavedOrder = typeof savedOrders.$inferSelect;
 export type NewSavedOrder = typeof savedOrders.$inferInsert;
 ```
 
-**File: `backend/src/db/index.ts`**
+**File: `apps/backend/src/db/index.ts`**
 ```typescript
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -2569,7 +2569,7 @@ const client = postgres(connectionString, { prepare: false });
 export const db = drizzle(client, { schema });
 ```
 
-**File: `backend/src/db/migrate.ts`**
+**File: `apps/backend/src/db/migrate.ts`**
 ```typescript
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
@@ -2593,7 +2593,7 @@ runMigrations().catch((err) => {
 });
 ```
 
-**File: `backend/.env.example`**
+**File: `apps/backend/.env.example`**
 ```
 DATABASE_URL=postgresql://user:password@host:5432/database
 COGNITO_USER_POOL_ID=us-east-1_xxxxx
@@ -2613,7 +2613,7 @@ NODE_ENV=development
 
 ### Step 2.3: Set Up Hono API with OpenAPI
 
-**File: `backend/src/index.ts`**
+**File: `apps/backend/src/index.ts`**
 ```typescript
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -2683,7 +2683,7 @@ export const handler = app.fetch;
 
 ### Step 2.4: Create Authentication Middleware
 
-**File: `backend/src/middleware/auth.ts`**
+**File: `apps/backend/src/middleware/auth.ts`**
 ```typescript
 import { Context, Next } from "hono";
 import { verify } from "jsonwebtoken";
@@ -2776,7 +2776,7 @@ export async function optionalAuth(c: Context, next: Next) {
 }
 ```
 
-**File: `backend/src/middleware/maintainer.ts`**
+**File: `apps/backend/src/middleware/maintainer.ts`**
 ```typescript
 import { Context, Next } from "hono";
 import { db } from "../db";
@@ -2823,7 +2823,7 @@ export async function requireOwner(c: Context, next: Next) {
 
 ### Step 2.5: Create Zod Schemas
 
-**File: `backend/src/schemas/restaurant.ts`**
+**File: `apps/backend/src/schemas/restaurant.ts`**
 ```typescript
 import { z } from "@hono/zod-openapi";
 
@@ -2858,7 +2858,7 @@ export const CreateRestaurantSchema = z.object({
 export const UpdateRestaurantSchema = CreateRestaurantSchema.partial();
 ```
 
-**File: `backend/src/schemas/menu.ts`**
+**File: `apps/backend/src/schemas/menu.ts`**
 ```typescript
 import { z } from "@hono/zod-openapi";
 
@@ -2890,7 +2890,7 @@ export const CreateMenuSchema = z.object({
 export const UpdateMenuSchema = CreateMenuSchema.partial();
 ```
 
-**File: `backend/src/schemas/item.ts`**
+**File: `apps/backend/src/schemas/item.ts`**
 ```typescript
 import { z } from "@hono/zod-openapi";
 
@@ -2936,7 +2936,7 @@ export const UpdateMenuItemSchema = CreateMenuItemSchema.partial();
 
 ### Step 3.1: Restaurant Routes
 
-**File: `backend/src/routes/restaurants.ts`**
+**File: `apps/backend/src/routes/restaurants.ts`**
 ```typescript
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { z } from "zod";

@@ -68,10 +68,10 @@ After creating the user pool, you'll need these values:
 
 ## Step 3: Configure Backend Environment
 
-Add Cognito configuration to `backend/.env`:
+Add Cognito configuration to `apps/backend/.env`:
 
 ```bash
-# backend/.env
+# apps/backend/.env
 DATABASE_URL=postgresql://...
 NODE_ENV=development
 
@@ -116,7 +116,7 @@ If using Amazon SES for emails:
 For deployment, set Cognito values as Pulumi secrets:
 
 ```bash
-cd infrastructure
+cd apps/infrastructure
 
 # Set Cognito configuration
 pulumi config set cognitoUserPoolId "us-east-1_xxxxx"

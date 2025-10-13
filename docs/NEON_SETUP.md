@@ -54,10 +54,10 @@ postgresql://eat_sheet_owner:AbCd1234XyZ@ep-cool-name-123456.us-east-1.aws.neon.
 
 ### For Local Development
 
-Create a `.env` file in the `backend/` directory:
+Create a `.env` file in the `apps/backend/` directory:
 
 ```bash
-# backend/.env
+# apps/backend/.env
 DATABASE_URL=postgresql://[user]:[password]@[host]/[database]?sslmode=require
 ```
 
@@ -68,7 +68,7 @@ The `.env` file is already in `.gitignore`, so it won't be committed.
 You'll set this as a Pulumi secret later:
 
 ```bash
-cd infrastructure
+cd apps/infrastructure
 pulumi config set --secret databaseUrl "postgresql://[user]:[password]@[host]/[database]?sslmode=require"
 ```
 
@@ -103,7 +103,7 @@ psql "postgresql://..." -c "SELECT version();"
 
 1. Navigate to backend directory:
    ```bash
-   cd backend
+   cd apps/backend
    ```
 
 2. Create `.env` file (if it doesn't exist):
@@ -129,7 +129,7 @@ Once you have the connection string configured:
 
 ```bash
 # From backend directory
-cd backend
+cd apps/backend
 
 # Generate initial migration (creates migration files)
 pnpm db:generate
@@ -141,7 +141,7 @@ pnpm db:migrate
 pnpm db:studio
 ```
 
-This will create all the tables defined in `backend/src/db/schema.ts`.
+This will create all the tables defined in `apps/backend/src/db/schema.ts`.
 
 ## Step 8: Monitor Database Usage
 
@@ -191,7 +191,7 @@ Neon automatically backs up your database. You can restore to any point in the l
 Neon provides built-in connection pooling. For serverless (Lambda), use:
 
 ```typescript
-// backend/src/db/index.ts
+// apps/backend/src/db/index.ts
 import postgres from 'postgres';
 
 const sql = postgres(process.env.DATABASE_URL!, {

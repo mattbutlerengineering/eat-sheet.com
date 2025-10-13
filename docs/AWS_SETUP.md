@@ -195,7 +195,7 @@ pulumi login s3://eat-sheet-pulumi-state-UNIQUE-NAME
 
 ```bash
 # Navigate to infrastructure directory
-cd infrastructure
+cd apps/infrastructure
 
 # Initialize stack
 pulumi stack init dev
@@ -226,7 +226,7 @@ aws s3 ls
 pulumi whoami
 
 # 4. Pulumi can access AWS
-cd infrastructure
+cd apps/infrastructure
 pulumi preview
 ```
 

@@ -38,6 +38,10 @@ Eat-Sheet is a modern digital menu platform that provides exceptional user exper
 - AWS S3 (static hosting + images)
 - AWS CloudFront (CDN)
 
+**Monorepo Management:**
+- Rush - Microsoft's monorepo manager for build orchestration
+- PNPM - Fast, disk-space efficient package manager
+
 **External Services:**
 - OpenAI API for AI-powered modification suggestions
 
@@ -45,110 +49,109 @@ Eat-Sheet is a modern digital menu platform that provides exceptional user exper
 
 ```
 eat-sheet/
-├── infrastructure/          # Pulumi IaC (TypeScript)
-│   ├── index.ts            # Main infrastructure entry point
-│   ├── cognito.ts          # AWS Cognito User Pool setup
-│   ├── lambda.ts           # Lambda function configuration
-│   ├── s3.ts              # S3 buckets (images + frontend)
-│   ├── cloudfront.ts      # CloudFront CDN distribution
-│   └── apigateway.ts      # API Gateway configuration
-├── backend/                # Hono API
-│   ├── src/
-│   │   ├── index.ts       # Main API entry point
-│   │   ├── routes/        # API route handlers
-│   │   ├── middleware/    # Auth & validation middleware
-│   │   ├── schemas/       # Zod schemas for validation
-│   │   ├── db/           # Drizzle ORM configuration
-│   │   └── lib/          # Utility functions
-│   └── drizzle/          # Database migrations
-├── frontend/              # React PWA
-│   ├── src/
-│   │   ├── pages/        # Page components
-│   │   ├── components/   # Reusable components
-│   │   ├── hooks/        # React Query hooks
-│   │   ├── lib/          # Utilities (API client, etc.)
-│   │   ├── App.tsx       # Main app with routing
-│   │   └── main.tsx      # React entry point
-│   ├── public/           # Static assets
-│   └── .storybook/       # Storybook configuration
-├── shared/               # Shared types
-└── docs/                # Documentation
+├── apps/
+│   ├── backend/                # Hono API
+│   │   ├── src/
+│   │   │   ├── index.ts       # Main API entry point
+│   │   │   ├── routes/        # API route handlers
+│   │   │   ├── middleware/    # Auth & validation middleware
+│   │   │   ├── schemas/       # Zod schemas for validation
+│   │   │   ├── db/           # Drizzle ORM configuration
+│   │   │   └── lib/          # Utility functions
+│   │   └── drizzle/          # Database migrations
+│   ├── frontend/              # React PWA
+│   │   ├── src/
+│   │   │   ├── pages/        # Page components
+│   │   │   ├── components/   # Reusable components
+│   │   │   ├── hooks/        # React Query hooks
+│   │   │   ├── lib/          # Utilities (API client, etc.)
+│   │   │   ├── App.tsx       # Main app with routing
+│   │   │   └── main.tsx      # React entry point
+│   │   ├── public/           # Static assets
+│   │   └── .storybook/       # Storybook configuration
+│   └── infrastructure/        # Pulumi IaC (TypeScript)
+│       ├── index.ts          # Main infrastructure entry point
+│       └── ...               # AWS resource definitions
+├── packages/
+│   └── shared/               # Shared types and utilities
+├── common/                   # Rush configuration
+│   └── config/rush/         # Rush config files
+└── docs/                    # Documentation
 ```
 
 ## Common Development Commands
 
+This monorepo uses Rush for build orchestration. Rush provides better caching, parallel builds, and dependency management compared to pnpm workspaces alone.
+
 ### Backend Development
 
 ```bash
-# Install all workspace dependencies (from root)
-pnpm install
+# Install all dependencies (from root)
+rush update
 
 # Start local development server
-pnpm backend:dev
+rushx dev -p @eat-sheet/backend
 
 # Or from backend directory
-cd backend
-pnpm dev
+cd apps/backend
+rushx dev
 
 # Generate database migrations
-pnpm db:generate
+rushx db:generate
 
 # Run database migrations
-pnpm db:migrate
+rushx db:migrate
 
 # Open Drizzle Studio (database GUI)
-pnpm db:studio
+rushx db:studio
 
 # Build for Lambda deployment
-pnpm build
+rushx build
 
 # Run tests
-pnpm test
+rushx test
 
 # Lint code
-pnpm lint
+rushx lint
 
 # Type check
-pnpm type-check
+rushx type-check
 ```
 
 ### Frontend Development
 
 ```bash
-# Install all workspace dependencies (from root)
-pnpm install
+# Install all dependencies (from root)
+rush update
 
 # Start development server
-pnpm frontend:dev
-
-# Or from frontend directory
-cd frontend
-pnpm dev
+cd apps/frontend
+rushx dev
 
 # Build for production
-pnpm build
+rushx build
 
 # Preview production build
-pnpm preview
+rushx preview
 
 # Run tests
-pnpm test
+rushx test
 
 # Lint code
-pnpm lint
+rushx lint
 
 # Start Storybook
-pnpm storybook
+rushx storybook
 
 # Build Storybook for deployment
-pnpm build-storybook
+rushx build-storybook
 ```
 
 ### Infrastructure Deployment
 
 ```bash
 # Initialize Pulumi stack (first time only)
-cd infrastructure
+cd apps/infrastructure
 pulumi stack init dev
 pulumi config set aws:region us-east-1
 pulumi config set eat-sheet:domain eat-sheet.com
@@ -170,20 +173,49 @@ pulumi stack output
 pulumi destroy
 ```
 
+### Rush Commands
+
+```bash
+# Install all dependencies
+rush update
+
+# Build all projects
+rush build
+
+# Build only changed projects
+rush build --changed
+
+# Build a specific project and its dependencies
+rush build --to @eat-sheet/backend
+
+# Rebuild all (clean + build)
+rush rebuild
+
+# Run script in specific project (from root)
+rushx dev -p @eat-sheet/backend
+
+# Remove all node_modules
+rush purge
+
+# Check for circular dependencies
+rush check
+```
+
 ### Full Deployment Workflow
 
 ```bash
 # 1. Build backend
-pnpm backend:build
+rush build --to @eat-sheet/backend
 
 # 2. Deploy infrastructure (includes Lambda)
-pnpm infra:deploy
+cd apps/infrastructure
+pulumi up
 
 # 3. Build frontend
-pnpm frontend:build
+rush build --to @eat-sheet/frontend
 
 # 4. Deploy frontend to S3
-aws s3 sync frontend/dist/ s3://eat-sheet-frontend-prod --delete
+aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-prod --delete
 
 # 5. Invalidate CloudFront cache
 aws cloudfront create-invalidation --distribution-id <ID> --paths "/*"
@@ -283,9 +315,9 @@ When viewing a menu item, consumers can get AI-suggested modifications:
 
 ### Creating a New API Endpoint
 
-1. Define Zod schema in `backend/src/schemas/`
-2. Create route with `@hono/zod-openapi` in `backend/src/routes/`
-3. Add route to `backend/src/index.ts`
+1. Define Zod schema in `apps/backend/src/schemas/`
+2. Create route with `@hono/zod-openapi` in `apps/backend/src/routes/`
+3. Add route to `apps/backend/src/index.ts`
 4. Use middleware for auth/validation as needed
 5. Document with OpenAPI annotations
 
@@ -314,17 +346,17 @@ app.openapi(route, requireAuth, async (c) => {
 
 ### Adding a Database Table
 
-1. Add table definition to `backend/src/db/schema.ts`
+1. Add table definition to `apps/backend/src/db/schema.ts`
 2. Export TypeScript types: `export type MyTable = typeof myTable.$inferSelect`
-3. Generate migration: `npm run db:generate`
+3. Generate migration: `rushx db:generate` (from apps/backend)
 4. Review migration in `drizzle/` folder
-5. Apply migration: `npm run db:migrate`
+5. Apply migration: `rushx db:migrate` (from apps/backend)
 
 ### Creating a Frontend Page
 
-1. Create page component in `frontend/src/pages/`
-2. Add route in `frontend/src/App.tsx`
-3. Create React Query hook in `frontend/src/hooks/` for data fetching
+1. Create page component in `apps/frontend/src/pages/`
+2. Add route in `apps/frontend/src/App.tsx`
+3. Create React Query hook in `apps/frontend/src/hooks/` for data fetching
 4. Use Mantine components for UI
 5. Handle loading/error states
 
@@ -343,7 +375,7 @@ export function useRestaurant(slug: string) {
 
 ### Creating a Reusable Component with Storybook
 
-1. Create component in `frontend/src/components/`
+1. Create component in `apps/frontend/src/components/`
 2. Define clear prop interfaces with TypeScript
 3. Create Storybook story file alongside component (e.g., `Button.stories.tsx`)
 4. Document all component variants and states in Storybook
@@ -424,7 +456,7 @@ export const SoldOut: Story = {
 
 ### PWA Implementation
 
-- Vite PWA plugin configured in `frontend/vite.config.ts`
+- Vite PWA plugin configured in `apps/frontend/vite.config.ts`
 - Service worker caches static assets and images
 - Offline support for previously viewed menus
 - Installable on mobile devices
@@ -464,7 +496,7 @@ export const SoldOut: Story = {
 
 ## Environment Variables
 
-### Backend (`backend/.env`)
+### Backend (`apps/backend/.env`)
 ```
 DATABASE_URL=postgresql://user:password@host:5432/database
 COGNITO_USER_POOL_ID=us-east-1_xxxxx
@@ -475,7 +507,7 @@ OPENAI_API_KEY=sk-xxxxx
 NODE_ENV=development
 ```
 
-### Frontend (`frontend/.env`)
+### Frontend (`apps/frontend/.env`)
 ```
 VITE_API_URL=https://api.eat-sheet.com
 VITE_COGNITO_USER_POOL_ID=us-east-1_xxxxx
@@ -491,7 +523,7 @@ VITE_COGNITO_REGION=us-east-1
 - Consider keeping functions warm with CloudWatch Events
 
 **CORS errors:**
-- Verify API Gateway CORS configuration in `infrastructure/apigateway.ts`
+- Verify API Gateway CORS configuration in `apps/infrastructure/apigateway.ts`
 - Check allowed origins match frontend URL
 - Ensure preflight OPTIONS requests handled
 
@@ -862,13 +894,13 @@ Every API endpoint must validate:
 
 1. **Build backend:**
    ```bash
-   pnpm backend:build
-   # Verify backend/dist/index.js exists and is <6MB
+   rush build --to @eat-sheet/backend
+   # Verify apps/backend/dist/index.js exists and is <6MB
    ```
 
 2. **Deploy infrastructure (includes Lambda):**
    ```bash
-   cd infrastructure
+   cd apps/infrastructure
    pulumi preview  # Review changes first
    pulumi up       # Deploy
    ```
@@ -880,13 +912,13 @@ Every API endpoint must validate:
 
 4. **Build frontend:**
    ```bash
-   pnpm frontend:build
-   # Verify frontend/dist/ directory size is reasonable
+   rush build --to @eat-sheet/frontend
+   # Verify apps/frontend/dist/ directory size is reasonable
    ```
 
 5. **Deploy frontend to S3:**
    ```bash
-   aws s3 sync frontend/dist/ s3://eat-sheet-frontend-prod --delete
+   aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-prod --delete
    ```
 
 6. **Invalidate CloudFront cache:**
@@ -915,7 +947,7 @@ Every API endpoint must validate:
 
 2. **Redeploy previous version:**
    ```bash
-   cd infrastructure
+   cd apps/infrastructure
    pulumi up  # Deploys reverted version
    ```
 
@@ -987,17 +1019,17 @@ Every API endpoint must validate:
 - Identify dependencies and potential risks
 
 **2. Database Changes** (if needed)
-- Update schema in `backend/src/db/schema.ts`
+- Update schema in `apps/backend/src/db/schema.ts`
 - Add appropriate indexes for new queries
-- Generate migration: `npm run db:generate`
+- Generate migration: `rushx db:generate` (from apps/backend)
 - Review generated SQL in `drizzle/` folder
-- Apply locally: `npm run db:migrate`
-- Test with Drizzle Studio: `npm run db:studio`
+- Apply locally: `rushx db:migrate` (from apps/backend)
+- Test with Drizzle Studio: `rushx db:studio` (from apps/backend)
 - Document any breaking changes
 
 **3. Backend Implementation**
-- Create Zod validation schema in `backend/src/schemas/`
-- Implement route handler in `backend/src/routes/`
+- Create Zod validation schema in `apps/backend/src/schemas/`
+- Implement route handler in `apps/backend/src/routes/`
 - Add middleware as needed (auth, validation, rate limiting)
 - Add business logic to separate service functions
 - Write unit tests for business logic
@@ -1006,12 +1038,12 @@ Every API endpoint must validate:
 - Test locally with Postman or similar
 
 **4. Frontend Implementation**
-- Create React Query hook in `frontend/src/hooks/`
-- Build reusable components in `frontend/src/components/`
+- Create React Query hook in `apps/frontend/src/hooks/`
+- Build reusable components in `apps/frontend/src/components/`
 - Create Storybook stories for each component (`.stories.tsx` files)
 - Document component props and variants in Storybook
 - Test component accessibility with Storybook a11y addon
-- Add page component if needed in `frontend/src/pages/`
+- Add page component if needed in `apps/frontend/src/pages/`
 - Use Mantine components for UI consistency
 - Implement proper loading states
 - Implement error handling with error boundaries
@@ -1160,7 +1192,7 @@ aws cloudwatch get-metric-statistics \
 **Backend debugging:**
 ```bash
 # Run with debugger
-cd backend
+cd apps/backend
 node --inspect-brk node_modules/.bin/tsx src/index.ts
 
 # Then attach VS Code debugger or Chrome DevTools
