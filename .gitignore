@@ -66,4 +66,4 @@ workbox-*.js
 # Misc
 *.pem
 *.key
-.history/
+.history/.playwright-mcp/
