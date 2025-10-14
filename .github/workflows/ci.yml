@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      - name: Lint backend
+        run: rushx lint -p @eat-sheet/backend
+        continue-on-error: true
+
+      - name: Type check backend
+        run: rushx type-check -p @eat-sheet/backend
+
+      - name: Lint frontend
+        run: rushx lint -p @eat-sheet/frontend
+        continue-on-error: true
+
+      - name: Type check frontend
+        run: rushx type-check -p @eat-sheet/frontend
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      - name: Run backend tests
+        run: rushx test -p @eat-sheet/backend
+        continue-on-error: true
+
+      - name: Run frontend tests
+        run: rushx test -p @eat-sheet/frontend
+        continue-on-error: true
+
+  build:
+    name: Build Applications
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      - name: Build all projects
+        run: rush build
+
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: apps/backend/dist/
+          retention-days: 7
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: apps/frontend/dist/
+          retention-days: 7
