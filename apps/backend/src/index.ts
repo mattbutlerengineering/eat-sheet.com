@@ -20,6 +20,7 @@ app.use('*', cors({
 import restaurantsRoutes from './routes/restaurants.js';
 import menusRoutes from './routes/menus.js';
 import menuItemsRoutes from './routes/menuItems.js';
+import imagesRoutes from './routes/images.js';
 
 // Health check endpoint
 app.get('/health', (c) => {
@@ -32,6 +33,7 @@ app.route('/api/restaurants', menusRoutes);
 app.route('/api/menus', menusRoutes);
 app.route('/api/menus', menuItemsRoutes);
 app.route('/api/items', menuItemsRoutes);
+app.route('/api/images', imagesRoutes);
 
 // OpenAPI documentation
 app.doc('/api/openapi.json', {

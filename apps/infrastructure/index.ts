@@ -122,9 +122,84 @@ export const cognitoRegion = aws.config.region;
 export const cognitoUserPoolEndpoint = userPool.endpoint;
 export const cognitoDomain = pulumi.interpolate`${userPoolDomain.domain}.auth.${aws.config.region}.amazoncognito.com`;
 
+// Create S3 bucket for image uploads
+const imagesBucket = new aws.s3.BucketV2(`${projectName}-images-${environment}`, {
+  bucket: `${projectName}-images-${environment}`,
+  tags: {
+    Project: projectName,
+    Environment: environment,
+    ManagedBy: 'Pulumi',
+  },
+});
+
+// Block public access by default (will use pre-signed URLs)
+const bucketPublicAccessBlock = new aws.s3.BucketPublicAccessBlock(
+  `${projectName}-images-public-access-${environment}`,
+  {
+    bucket: imagesBucket.id,
+    blockPublicAcls: true,
+    blockPublicPolicy: true,
+    ignorePublicAcls: true,
+    restrictPublicBuckets: true,
+  }
+);
+
+// Enable versioning for safety
+const bucketVersioning = new aws.s3.BucketVersioningV2(
+  `${projectName}-images-versioning-${environment}`,
+  {
+    bucket: imagesBucket.id,
+    versioningConfiguration: {
+      status: 'Enabled',
+    },
+  }
+);
+
+// Configure CORS for direct uploads from browser
+const bucketCors = new aws.s3.BucketCorsConfigurationV2(
+  `${projectName}-images-cors-${environment}`,
+  {
+    bucket: imagesBucket.id,
+    corsRules: [
+      {
+        allowedHeaders: ['*'],
+        allowedMethods: ['GET', 'PUT', 'POST', 'HEAD'],
+        allowedOrigins: environment === 'prod'
+          ? ['https://eat-sheet.com', 'https://www.eat-sheet.com']
+          : ['*'],
+        exposeHeaders: ['ETag'],
+        maxAgeSeconds: 3000,
+      },
+    ],
+  }
+);
+
+// Lifecycle policy to clean up incomplete uploads
+const bucketLifecycle = new aws.s3.BucketLifecycleConfigurationV2(
+  `${projectName}-images-lifecycle-${environment}`,
+  {
+    bucket: imagesBucket.id,
+    rules: [
+      {
+        id: 'abort-incomplete-multipart-uploads',
+        status: 'Enabled',
+        abortIncompleteMultipartUpload: {
+          daysAfterInitiation: 7,
+        },
+      },
+    ],
+  }
+);
+
+// Export S3 bucket info
+export const imagesBucketName = imagesBucket.id;
+export const imagesBucketArn = imagesBucket.arn;
+
 // Export for easy configuration
 export const backendEnvVars = pulumi.interpolate`
 COGNITO_USER_POOL_ID=${userPool.id}
 COGNITO_REGION=${aws.config.region}
 COGNITO_CLIENT_ID=${userPoolClient.id}
+S3_BUCKET_NAME=${imagesBucket.id}
+AWS_REGION=${aws.config.region}
 `;

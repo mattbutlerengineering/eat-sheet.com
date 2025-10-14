@@ -8,6 +8,7 @@ import {
   updateMenuSchema,
   menuIdParamSchema,
 } from '../schemas/menu.js';
+import QRCode from 'qrcode';
 
 const app = new OpenAPIHono();
 
@@ -268,6 +269,110 @@ app.openapi(deleteMenuRoute, async (c) => {
   }
 
   return c.body(null, 204);
+});
+
+// GET /menus/:id/qr-code - Generate QR code for menu
+const generateQRCodeRoute = createRoute({
+  method: 'get',
+  path: '/:id/qr-code',
+  tags: ['menus'],
+  request: {
+    params: menuIdParamSchema,
+    query: z.object({
+      format: z.enum(['png', 'svg']).optional().default('png'),
+      size: z.coerce.number().int().min(100).max(1000).optional().default(300),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        'image/png': {
+          schema: z.instanceof(Buffer),
+        },
+        'image/svg+xml': {
+          schema: z.string(),
+        },
+      },
+      description: 'QR code generated successfully',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+      description: 'Menu not found',
+    },
+  },
+});
+
+app.openapi(generateQRCodeRoute, async (c) => {
+  const { id } = c.req.valid('param');
+  const { format, size } = c.req.valid('query');
+
+  // Get menu and restaurant info to build URL
+  const [menu] = await db
+    .select({
+      menu: menus,
+      restaurant: restaurants,
+    })
+    .from(menus)
+    .innerJoin(restaurants, eq(menus.restaurantId, restaurants.id))
+    .where(eq(menus.id, id))
+    .limit(1);
+
+  if (!menu) {
+    return c.json({ error: 'Menu not found' }, 404);
+  }
+
+  // Build the menu URL
+  const baseUrl = process.env.FRONTEND_URL || 'https://eat-sheet.com';
+  const menuUrl = `${baseUrl}/${menu.restaurant.slug}/${menu.menu.slug}`;
+
+  try {
+    if (format === 'svg') {
+      // Generate SVG QR code
+      const svg = await QRCode.toString(menuUrl, {
+        type: 'svg',
+        width: size,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      });
+
+      return c.body(svg, 200, {
+        'Content-Type': 'image/svg+xml',
+        'Content-Disposition': `inline; filename="menu-${menu.menu.slug}-qr.svg"`,
+      });
+    } else {
+      // Generate PNG QR code
+      const png = await QRCode.toBuffer(menuUrl, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      });
+
+      return c.body(png, 200, {
+        'Content-Type': 'image/png',
+        'Content-Disposition': `inline; filename="menu-${menu.menu.slug}-qr.png"`,
+      });
+    }
+  } catch (error) {
+    console.error('Failed to generate QR code:', error);
+    return c.json(
+      {
+        error: 'Failed to generate QR code',
+      },
+      500
+    );
+  }
 });
 
 export default app;
