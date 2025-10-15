@@ -11,8 +11,8 @@ export const menuSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().nullable(),
   status: menuStatusEnum,
-  themeConfig: z.record(z.any()).default({}),
-  displayOrder: z.number().int().default(0),
+  themeConfig: z.record(z.any()).nullable(),
+  displayOrder: z.number().int(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

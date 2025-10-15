@@ -12,14 +12,14 @@ import QRCode from 'qrcode';
 
 const app = new OpenAPIHono();
 
-// GET /restaurants/:restaurantId/menus - List menus for a restaurant
+// GET /restaurants/:restaurantSlugOrId/menus - List menus for a restaurant (by slug or UUID)
 const listMenusRoute = createRoute({
   method: 'get',
-  path: '/:restaurantId/menus',
+  path: '/:restaurantSlugOrId/menus',
   tags: ['menus'],
   request: {
     params: z.object({
-      restaurantId: z.string().uuid(),
+      restaurantSlugOrId: z.string(),
     }),
   },
   responses: {
@@ -33,19 +33,53 @@ const listMenusRoute = createRoute({
       },
       description: 'List of menus',
     },
+    404: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+      description: 'Restaurant not found',
+    },
   },
 });
 
 app.openapi(listMenusRoute, async (c) => {
-  const { restaurantId } = c.req.valid('param');
+  const { restaurantSlugOrId } = c.req.valid('param');
+
+  // Try to get restaurant by UUID or slug
+  let restaurant;
+
+  // Check if it's a UUID format
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(restaurantSlugOrId);
+
+  if (isUuid) {
+    [restaurant] = await db
+      .select()
+      .from(restaurants)
+      .where(eq(restaurants.id, restaurantSlugOrId))
+      .limit(1);
+  } else {
+    [restaurant] = await db
+      .select()
+      .from(restaurants)
+      .where(eq(restaurants.slug, restaurantSlugOrId))
+      .limit(1);
+  }
+
+  if (!restaurant) {
+    return c.json({ error: 'Restaurant not found' }, 404);
+  }
 
   const data = await db
     .select()
     .from(menus)
-    .where(eq(menus.restaurantId, restaurantId))
+    .where(eq(menus.restaurantId, restaurant.id))
     .orderBy(menus.displayOrder);
 
-  return c.json({ data });
+  return c.json({ data }, 200);
 });
 
 // GET /restaurants/:restaurantSlug/menus/:menuSlug - Get menu by slug

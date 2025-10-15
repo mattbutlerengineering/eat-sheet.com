@@ -1,10 +1,12 @@
-import { useParams } from 'react-router-dom';
-import { Stack, Title, Text, Card, Group, Loader, Center, Alert } from '@mantine/core';
+import { useParams, Link } from 'react-router-dom';
+import { Stack, Title, Text, Card, Group, Loader, Center, Alert, Button, Badge } from '@mantine/core';
 import { useRestaurant } from '@/hooks/useRestaurant';
+import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
 
 export default function RestaurantPage() {
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
   const { data: restaurant, isLoading, error } = useRestaurant(restaurantSlug!);
+  const { data: menusData, isLoading: isLoadingMenus } = useRestaurantMenus(restaurantSlug!);
 
   if (isLoading) {
     return (
@@ -78,12 +80,54 @@ export default function RestaurantPage() {
           View our available menus below
         </Text>
 
-        {/* Placeholder for menus - will be implemented when we have the data */}
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Text c="dimmed" ta="center" py="xl">
-            No menus available yet. Check back soon!
-          </Text>
-        </Card>
+        {isLoadingMenus ? (
+          <Center>
+            <Loader size="md" />
+          </Center>
+        ) : menusData && menusData.menus && menusData.menus.length > 0 ? (
+          <Group gap="md">
+            {menusData.menus
+              .filter((menu) => menu.status === 'active')
+              .map((menu) => (
+                <Card
+                  key={menu.id}
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{ minWidth: '250px' }}
+                >
+                  <Stack gap="sm">
+                    <Group justify="space-between">
+                      <Title order={3}>{menu.name}</Title>
+                      {menu.status === 'active' && (
+                        <Badge color="green" variant="light">Active</Badge>
+                      )}
+                    </Group>
+                    {menu.description && (
+                      <Text size="sm" c="dimmed">
+                        {menu.description}
+                      </Text>
+                    )}
+                    <Button
+                      component={Link}
+                      to={`/${restaurantSlug}/${menu.slug}`}
+                      variant="light"
+                      fullWidth
+                    >
+                      View Menu
+                    </Button>
+                  </Stack>
+                </Card>
+              ))}
+          </Group>
+        ) : (
+          <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Text c="dimmed" ta="center" py="xl">
+              No menus available yet. Check back soon!
+            </Text>
+          </Card>
+        )}
       </Stack>
     </Stack>
   );

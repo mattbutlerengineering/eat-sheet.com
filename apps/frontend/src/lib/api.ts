@@ -64,8 +64,9 @@ class ApiClient {
   }
 
   // Menus
-  async getRestaurantMenus(restaurantId: string): Promise<MenusResponse> {
-    return this.request<MenusResponse>(`/api/restaurants/${restaurantId}/menus`);
+  async getRestaurantMenus(restaurantSlugOrId: string): Promise<MenusResponse> {
+    const response = await this.request<{ data: Menu[] }>(`/api/restaurants/${restaurantSlugOrId}/menus`);
+    return { menus: response.data };
   }
 
   async getMenu(restaurantSlug: string, menuSlug: string): Promise<Menu> {
