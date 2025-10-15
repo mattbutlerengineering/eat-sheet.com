@@ -1,0 +1,101 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allow manual deployment
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      # Build backend
+      - name: Build backend
+        run: rush build --to @eat-sheet/backend
+
+      # Deploy infrastructure with Pulumi
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install Pulumi CLI
+        uses: pulumi/actions@v5
+
+      - name: Deploy Infrastructure to Staging
+        working-directory: apps/infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi stack select staging --create
+          pulumi up --yes --stack staging
+
+      # Deploy Lambda (if using separate Lambda deployment)
+      # Note: If Pulumi handles Lambda deployment, this can be skipped
+      - name: Package Lambda Function
+        working-directory: apps/backend
+        run: |
+          mkdir -p lambda-package
+          cp -r dist/* lambda-package/
+          cp package.json lambda-package/
+          cd lambda-package
+          npm install --production
+          zip -r ../lambda.zip .
+
+      # Build frontend
+      - name: Build frontend
+        run: rush build --to @eat-sheet/frontend
+
+      # Deploy frontend to S3
+      - name: Deploy Frontend to S3
+        run: |
+          aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-staging --delete
+
+      # Invalidate CloudFront cache (if CloudFront is set up)
+      - name: Invalidate CloudFront Cache
+        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          if [ ! -z "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+          fi
+
+      # Run database migrations
+      - name: Run Database Migrations
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          pnpm db:migrate
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Staging deployment completed successfully"
+          echo "🌐 Frontend: https://staging.eat-sheet.com (or S3 URL)"
+          echo "🔌 API: https://api-staging.eat-sheet.com"

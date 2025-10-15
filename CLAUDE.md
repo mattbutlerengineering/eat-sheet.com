@@ -203,23 +203,41 @@ rush check
 
 ### Full Deployment Workflow
 
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for comprehensive deployment guide.
+
+**Quick deployment via GitHub Actions:**
+
+```bash
+# Deploy to staging (automatic on push to main)
+git push origin main
+
+# Deploy to production (manual with confirmation)
+gh workflow run deploy-production.yml -f confirm=deploy
+```
+
+**Manual deployment steps:**
+
 ```bash
 # 1. Build backend
 rush build --to @eat-sheet/backend
 
 # 2. Deploy infrastructure (includes Lambda)
 cd apps/infrastructure
-pulumi up
+pulumi up --stack staging  # or prod
 
 # 3. Build frontend
 rush build --to @eat-sheet/frontend
 
 # 4. Deploy frontend to S3
-aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-prod --delete
+aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-staging --delete
 
 # 5. Invalidate CloudFront cache
 aws cloudfront create-invalidation --distribution-id <ID> --paths "/*"
 ```
+
+**Deployment Environments:**
+- **Staging**: Auto-deploys on push to `main` branch
+- **Production**: Manual deployment with required approval
 
 ## Architecture Overview
 

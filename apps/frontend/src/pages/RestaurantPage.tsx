@@ -1,7 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
-import { Stack, Title, Text, Card, Group, Loader, Center, Alert, Button, Badge } from '@mantine/core';
+import { useParams } from 'react-router-dom';
+import { Stack, Title, Text, Card, Group, Loader, Center, Alert } from '@mantine/core';
 import { useRestaurant } from '@/hooks/useRestaurant';
 import { useRestaurantMenus } from '@/hooks/useRestaurantMenus';
+import MenuCard from '@/components/MenuCard';
 
 export default function RestaurantPage() {
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
@@ -89,36 +90,11 @@ export default function RestaurantPage() {
             {menusData.menus
               .filter((menu) => menu.status === 'active')
               .map((menu) => (
-                <Card
+                <MenuCard
                   key={menu.id}
-                  shadow="sm"
-                  padding="lg"
-                  radius="md"
-                  withBorder
-                  style={{ minWidth: '250px' }}
-                >
-                  <Stack gap="sm">
-                    <Group justify="space-between">
-                      <Title order={3}>{menu.name}</Title>
-                      {menu.status === 'active' && (
-                        <Badge color="green" variant="light">Active</Badge>
-                      )}
-                    </Group>
-                    {menu.description && (
-                      <Text size="sm" c="dimmed">
-                        {menu.description}
-                      </Text>
-                    )}
-                    <Button
-                      component={Link}
-                      to={`/${restaurantSlug}/${menu.slug}`}
-                      variant="light"
-                      fullWidth
-                    >
-                      View Menu
-                    </Button>
-                  </Stack>
-                </Card>
+                  menu={menu}
+                  restaurantSlug={restaurantSlug!}
+                />
               ))}
           </Group>
         ) : (

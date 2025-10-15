@@ -1,0 +1,180 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch: # Only allow manual deployment to production
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        default: ''
+
+jobs:
+  # Require confirmation before deploying to production
+  validate-deployment:
+    name: Validate Deployment Confirmation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Confirmation
+        if: github.event.inputs.confirm != 'deploy'
+        run: |
+          echo "❌ Deployment cancelled. You must type 'deploy' to confirm."
+          exit 1
+
+  deploy-production:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+    environment: production
+    needs: validate-deployment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rush
+        run: npm install -g @microsoft/rush
+
+      - name: Install dependencies
+        run: rush update
+
+      # Run all tests before production deployment
+      - name: Run all tests
+        run: |
+          rushx test -p @eat-sheet/backend
+          rushx test -p @eat-sheet/frontend
+
+      # Type check everything
+      - name: Type check all projects
+        run: |
+          rushx type-check -p @eat-sheet/backend
+          rushx type-check -p @eat-sheet/frontend
+
+      # Build backend
+      - name: Build backend
+        run: rush build --to @eat-sheet/backend
+
+      # Verify backend build
+      - name: Verify backend build
+        working-directory: apps/backend
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Backend build failed - dist/index.js not found"
+            exit 1
+          fi
+          BUILD_SIZE=$(du -sh dist | cut -f1)
+          echo "✅ Backend build successful - Size: $BUILD_SIZE"
+
+      # Deploy infrastructure with Pulumi
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Install Pulumi CLI
+        uses: pulumi/actions@v5
+
+      # Preview infrastructure changes before deploying
+      - name: Preview Infrastructure Changes
+        working-directory: apps/infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi stack select prod --create
+          pulumi preview --stack prod
+
+      - name: Deploy Infrastructure to Production
+        working-directory: apps/infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: |
+          pulumi up --yes --stack prod
+
+      # Deploy Lambda (if using separate Lambda deployment)
+      # Note: If Pulumi handles Lambda deployment, this can be skipped
+      - name: Package Lambda Function
+        working-directory: apps/backend
+        run: |
+          mkdir -p lambda-package
+          cp -r dist/* lambda-package/
+          cp package.json lambda-package/
+          cd lambda-package
+          npm install --production
+          zip -r ../lambda.zip .
+
+      # Build frontend
+      - name: Build frontend
+        run: rush build --to @eat-sheet/frontend
+
+      # Verify frontend build
+      - name: Verify frontend build
+        working-directory: apps/frontend
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Frontend build failed - dist directory not found"
+            exit 1
+          fi
+          BUILD_SIZE=$(du -sh dist | cut -f1)
+          echo "✅ Frontend build successful - Size: $BUILD_SIZE"
+
+      # Deploy frontend to S3
+      - name: Deploy Frontend to S3
+        run: |
+          aws s3 sync apps/frontend/dist/ s3://eat-sheet-frontend-prod --delete
+
+      # Invalidate CloudFront cache
+      - name: Invalidate CloudFront Cache
+        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          if [ ! -z "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+          fi
+
+      # Run database migrations (with extra caution)
+      - name: Run Database Migrations
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          echo "🔄 Running production database migrations..."
+          pnpm db:migrate
+
+      # Verify deployment
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying production deployment..."
+          # Add health check or smoke tests here
+          # curl -f https://api.eat-sheet.com/health || exit 1
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Production deployment completed successfully"
+          echo "🌐 Frontend: https://eat-sheet.com"
+          echo "🔌 API: https://api.eat-sheet.com"
+          echo "📊 Monitor CloudWatch logs for any issues"
+
+      # Notify on deployment (optional)
+      - name: Notify Deployment Success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          # Add Slack/Discord notification here if desired
+
+      - name: Notify Deployment Failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment failed!"
+          # Add Slack/Discord notification here if desired
