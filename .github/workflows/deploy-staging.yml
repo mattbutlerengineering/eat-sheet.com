@@ -105,13 +105,13 @@ jobs:
       #       aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
       #     fi
 
-      # Run database migrations
-      - name: Run Database Migrations
-        working-directory: apps/backend
-        env:
-          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
-        run: |
-          pnpm db:migrate
+      # TODO: Run database migrations once migration files are bundled in build
+      # - name: Run Database Migrations
+      #   working-directory: apps/backend
+      #   env:
+      #     DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+      #   run: |
+      #     pnpm db:migrate
 
       - name: Deployment Summary
         run: |
