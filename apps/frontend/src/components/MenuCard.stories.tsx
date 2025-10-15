@@ -37,7 +37,7 @@ const baseMenu: Menu = {
   name: 'Dinner Menu',
   description: 'Our delicious dinner offerings',
   status: 'active',
-  themeConfig: null,
+  themeConfig: {},
   displayOrder: 0,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
