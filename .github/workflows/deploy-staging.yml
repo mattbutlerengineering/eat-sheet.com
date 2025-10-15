@@ -33,6 +33,8 @@ jobs:
 
       # Build backend
       - name: Build backend
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
         run: rush build --to @eat-sheet/backend
 
       # Deploy infrastructure with Pulumi
@@ -68,6 +70,8 @@ jobs:
 
       # Build frontend
       - name: Build frontend
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
         run: rush build --to @eat-sheet/frontend
 
       # Deploy frontend to S3

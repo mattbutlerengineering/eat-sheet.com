@@ -60,6 +60,8 @@ jobs:
 
       # Build backend
       - name: Build backend
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
         run: rush build --to @eat-sheet/backend
 
       # Verify backend build
@@ -114,6 +116,8 @@ jobs:
 
       # Build frontend
       - name: Build frontend
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
         run: rush build --to @eat-sheet/frontend
 
       # Verify frontend build
