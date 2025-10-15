@@ -28,6 +28,18 @@ jobs:
       - name: Install Rush
         run: npm install -g @microsoft/rush
 
+      # Cache Rush install state
+      - name: Cache Rush install state
+        uses: actions/cache@v4
+        with:
+          path: |
+            common/temp/install-run
+            common/temp/pnpm-store
+            ~/.rush
+          key: ${{ runner.os }}-rush-${{ hashFiles('common/config/rush/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-rush-
+
       - name: Install dependencies
         run: rush update
 
@@ -36,6 +48,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
         run: rush build --to @eat-sheet/backend
+
+      # Build infrastructure
+      - name: Build infrastructure
+        run: rush build --to @eat-sheet/infrastructure
 
       # Deploy infrastructure with Pulumi
       - name: Configure AWS Credentials

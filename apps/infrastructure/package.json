@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "tsc",
     "preview": "pulumi preview",
     "deploy": "pulumi up",
     "destroy": "pulumi destroy",
