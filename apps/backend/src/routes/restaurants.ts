@@ -32,7 +32,7 @@ const listRestaurantsRoute = createRoute({
   },
 });
 
-app.openapi(listRestaurantsRoute, async (c) => {
+app.openapi(listRestaurantsRoute, async (c): Promise<any> => {
   const data = await db.select().from(restaurants).where(eq(restaurants.isActive, true));
   return c.json({ data });
 });
@@ -69,7 +69,7 @@ const getRestaurantRoute = createRoute({
   },
 });
 
-app.openapi(getRestaurantRoute, async (c) => {
+app.openapi(getRestaurantRoute, async (c): Promise<any> => {
   const { slug } = c.req.valid('param');
 
   const [restaurant] = await db
@@ -120,6 +120,16 @@ const createRestaurantRoute = createRoute({
       },
       description: 'Invalid request',
     },
+    401: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+      description: 'Unauthorized',
+    },
     409: {
       content: {
         'application/json': {
@@ -133,7 +143,7 @@ const createRestaurantRoute = createRoute({
   },
 });
 
-app.openapi(createRestaurantRoute, async (c) => {
+app.openapi(createRestaurantRoute, async (c): Promise<any> => {
   // Check auth
   const authResult = await requireAuth(c, async () => {});
   if (authResult) return authResult;
@@ -198,6 +208,26 @@ const updateRestaurantRoute = createRoute({
       },
       description: 'Restaurant updated',
     },
+    401: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+      description: 'Unauthorized',
+    },
+    403: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+          }),
+        },
+      },
+      description: 'Forbidden',
+    },
     404: {
       content: {
         'application/json': {
@@ -211,7 +241,7 @@ const updateRestaurantRoute = createRoute({
   },
 });
 
-app.openapi(updateRestaurantRoute, async (c) => {
+app.openapi(updateRestaurantRoute, async (c): Promise<any> => {
   // Check auth
   const authResult = await requireAuth(c, async () => {});
   if (authResult) return authResult;
@@ -269,7 +299,7 @@ const deleteRestaurantRoute = createRoute({
   },
 });
 
-app.openapi(deleteRestaurantRoute, async (c) => {
+app.openapi(deleteRestaurantRoute, async (c): Promise<any> => {
   // Check auth
   const authResult = await requireAuth(c, async () => {});
   if (authResult) return authResult;

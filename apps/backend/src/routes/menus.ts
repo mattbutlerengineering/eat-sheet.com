@@ -46,7 +46,7 @@ const listMenusRoute = createRoute({
   },
 });
 
-app.openapi(listMenusRoute, async (c) => {
+app.openapi(listMenusRoute, async (c): Promise<any> => {
   const { restaurantSlugOrId } = c.req.valid('param');
 
   // Try to get restaurant by UUID or slug
@@ -117,7 +117,7 @@ const getMenuBySlugRoute = createRoute({
   },
 });
 
-app.openapi(getMenuBySlugRoute, async (c) => {
+app.openapi(getMenuBySlugRoute, async (c): Promise<any> => {
   const { restaurantSlug, menuSlug } = c.req.valid('param');
 
   // First get restaurant by slug
@@ -186,7 +186,7 @@ const createMenuRoute = createRoute({
   },
 });
 
-app.openapi(createMenuRoute, async (c) => {
+app.openapi(createMenuRoute, async (c): Promise<any> => {
   const { restaurantId } = c.req.valid('param');
   const body = c.req.valid('json');
 
@@ -251,7 +251,7 @@ const updateMenuRoute = createRoute({
   },
 });
 
-app.openapi(updateMenuRoute, async (c) => {
+app.openapi(updateMenuRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
   const body = c.req.valid('json');
 
@@ -293,7 +293,7 @@ const deleteMenuRoute = createRoute({
   },
 });
 
-app.openapi(deleteMenuRoute, async (c) => {
+app.openapi(deleteMenuRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
 
   const result = await db.delete(menus).where(eq(menus.id, id)).returning();
@@ -342,7 +342,7 @@ const generateQRCodeRoute = createRoute({
   },
 });
 
-app.openapi(generateQRCodeRoute, async (c) => {
+app.openapi(generateQRCodeRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
   const { format, size } = c.req.valid('query');
 
@@ -393,7 +393,7 @@ app.openapi(generateQRCodeRoute, async (c) => {
         },
       });
 
-      return c.body(png, 200, {
+      return c.body(new Uint8Array(png), 200, {
         'Content-Type': 'image/png',
         'Content-Disposition': `inline; filename="menu-${menu.menu.slug}-qr.png"`,
       });

@@ -35,7 +35,7 @@ const listMenuItemsRoute = createRoute({
   },
 });
 
-app.openapi(listMenuItemsRoute, async (c) => {
+app.openapi(listMenuItemsRoute, async (c): Promise<any> => {
   const { menuId } = c.req.valid('param');
 
   const data = await db
@@ -79,7 +79,7 @@ const getMenuItemRoute = createRoute({
   },
 });
 
-app.openapi(getMenuItemRoute, async (c) => {
+app.openapi(getMenuItemRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
 
   const [item] = await db
@@ -126,7 +126,7 @@ const createMenuItemRoute = createRoute({
   },
 });
 
-app.openapi(createMenuItemRoute, async (c) => {
+app.openapi(createMenuItemRoute, async (c): Promise<any> => {
   const { menuId } = c.req.valid('param');
   const body = c.req.valid('json');
 
@@ -180,7 +180,7 @@ const updateMenuItemRoute = createRoute({
   },
 });
 
-app.openapi(updateMenuItemRoute, async (c) => {
+app.openapi(updateMenuItemRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
   const body = c.req.valid('json');
 
@@ -222,7 +222,7 @@ const deleteMenuItemRoute = createRoute({
   },
 });
 
-app.openapi(deleteMenuItemRoute, async (c) => {
+app.openapi(deleteMenuItemRoute, async (c): Promise<any> => {
   const { id } = c.req.valid('param');
 
   const result = await db.delete(menuItems).where(eq(menuItems.id, id)).returning();

@@ -45,12 +45,34 @@ const generateUploadUrlRoute = createRoute({
       },
       description: 'Invalid request',
     },
+    401: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Unauthorized',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Internal server error',
+    },
   },
   security: [{ Bearer: [] }],
   tags: ['Images'],
 });
 
-app.openapi(generateUploadUrlRoute, async (c) => {
+app.openapi(generateUploadUrlRoute, async (c): Promise<any> => {
   // Check auth
   const user = c.get('user');
   if (!user) {
@@ -157,14 +179,47 @@ const confirmUploadRoute = createRoute({
           }),
         },
       },
-      description: 'Invalid request or file not found',
+      description: 'Invalid request',
+    },
+    401: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Unauthorized',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'File not found',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Internal server error',
     },
   },
   security: [{ Bearer: [] }],
   tags: ['Images'],
 });
 
-app.openapi(confirmUploadRoute, async (c) => {
+app.openapi(confirmUploadRoute, async (c): Promise<any> => {
   // Check auth
   const user = c.get('user');
   if (!user) {

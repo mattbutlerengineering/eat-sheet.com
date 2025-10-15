@@ -46,7 +46,7 @@ function verifyToken(token: string): Promise<any> {
 }
 
 // Auth middleware
-export async function requireAuth(c: Context, next: Next) {
+export async function requireAuth(c: Context, next: Next): Promise<Response | void> {
   try {
     // Get token from Authorization header
     const authHeader = c.req.header('Authorization');
