@@ -62,7 +62,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Install Pulumi CLI
-        uses: pulumi/actions@v5
+        uses: pulumi/actions@v6
 
       - name: Deploy Infrastructure to Staging
         working-directory: apps/infrastructure

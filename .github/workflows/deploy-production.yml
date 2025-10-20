@@ -100,7 +100,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Install Pulumi CLI
-        uses: pulumi/actions@v5
+        uses: pulumi/actions@v6
 
       # Preview infrastructure changes before deploying
       - name: Preview Infrastructure Changes
