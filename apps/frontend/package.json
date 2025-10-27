@@ -43,7 +43,7 @@
     "postcss": "^8.4.49",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
-    "storybook": "^8.4.7",
+    "storybook": "^9.1.15",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "^0.21.1",
