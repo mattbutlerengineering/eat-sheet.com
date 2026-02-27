@@ -1,0 +1,8 @@
+name = "eat-sheet-api"
+compatibility_date = "2025-01-01"
+main = "src/server/index.ts"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eat-sheet-db"
+database_id = "placeholder-replace-after-creation"
