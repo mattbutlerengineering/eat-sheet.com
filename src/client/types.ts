@@ -2,6 +2,7 @@ export interface Member {
   readonly id: string;
   readonly family_id: string;
   readonly name: string;
+  readonly is_admin: boolean;
 }
 
 export interface Restaurant {
