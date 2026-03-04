@@ -50,4 +50,5 @@ export interface JwtPayload {
 export interface Env {
   DB: D1Database;
   JWT_SECRET: string;
+  PHOTOS: R2Bucket;
 }
