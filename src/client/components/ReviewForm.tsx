@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ScoreSlider } from "./ScoreSlider";
+import { PhotoUpload } from "./PhotoUpload";
 import type { Review } from "../types";
 
 interface ReviewFormProps {
+  readonly token: string;
   readonly existingReview?: Review;
   readonly onSubmit: (data: ReviewData) => Promise<void>;
   readonly onCancel: () => void;
@@ -15,10 +17,11 @@ export interface ReviewData {
   readonly ambiance_score: number | null;
   readonly value_score: number | null;
   readonly notes: string;
+  readonly photo_url: string | null;
   readonly visited_at: string;
 }
 
-export function ReviewForm({ existingReview, onSubmit, onCancel }: ReviewFormProps) {
+export function ReviewForm({ token, existingReview, onSubmit, onCancel }: ReviewFormProps) {
   const [overall, setOverall] = useState<number | null>(existingReview?.overall_score ?? 5);
   const [food, setFood] = useState<number | null>(existingReview?.food_score ?? null);
   const [service, setService] = useState<number | null>(existingReview?.service_score ?? null);
@@ -28,6 +31,7 @@ export function ReviewForm({ existingReview, onSubmit, onCancel }: ReviewFormPro
   const [visitedAt, setVisitedAt] = useState(
     existingReview?.visited_at ?? new Date().toISOString().split("T")[0]!
   );
+  const [photoUrl, setPhotoUrl] = useState<string | null>(existingReview?.photo_url ?? null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,6 +49,7 @@ export function ReviewForm({ existingReview, onSubmit, onCancel }: ReviewFormPro
         ambiance_score: ambiance,
         value_score: value,
         notes: notes.trim(),
+        photo_url: photoUrl,
         visited_at: visitedAt,
       });
     } catch (err) {
@@ -95,6 +100,8 @@ export function ReviewForm({ existingReview, onSubmit, onCancel }: ReviewFormPro
           className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors resize-none"
         />
       </div>
+
+      <PhotoUpload token={token} onUploaded={setPhotoUrl} existingUrl={existingReview?.photo_url} />
 
       {error && (
         <p className="text-red-500 text-sm text-center">{error}</p>
