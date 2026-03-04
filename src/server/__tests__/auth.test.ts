@@ -99,7 +99,7 @@ describe("GET /api/auth/me", () => {
 
   it("returns member data with valid token", async () => {
     const { db } = createMockDb({
-      first: { "SELECT id, family_id, name FROM members": TEST_MEMBER },
+      first: { "SELECT id, family_id, name, is_admin FROM members": TEST_MEMBER },
     });
     const token = await makeToken();
     const res = await app.request(
@@ -129,5 +129,61 @@ describe("GET /api/auth/members", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data).toHaveLength(2);
+  });
+});
+
+describe("GET /api/auth/invite-code", () => {
+  it("returns invite code for admin", async () => {
+    const { db } = createMockDb({
+      first: { "SELECT invite_code FROM families": { invite_code: "TEST123" } },
+    });
+    const token = await makeToken({ is_admin: true });
+    const res = await app.request(
+      "/api/auth/invite-code",
+      { headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.invite_code).toBe("TEST123");
+  });
+
+  it("returns 403 for non-admin", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken({ is_admin: false });
+    const res = await app.request(
+      "/api/auth/invite-code",
+      { headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("POST /api/auth/regenerate-code", () => {
+  it("regenerates code for admin", async () => {
+    const { db } = createMockDb({
+      first: { "UPDATE families SET invite_code": { invite_code: "NEWCODE1" } },
+    });
+    const token = await makeToken({ is_admin: true });
+    const res = await app.request(
+      "/api/auth/regenerate-code",
+      { method: "POST", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.invite_code).toBeDefined();
+  });
+
+  it("returns 403 for non-admin", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken({ is_admin: false });
+    const res = await app.request(
+      "/api/auth/regenerate-code",
+      { method: "POST", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(403);
   });
 });

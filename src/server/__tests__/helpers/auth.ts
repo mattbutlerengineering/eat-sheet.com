@@ -13,6 +13,7 @@ export const TEST_MEMBER = {
   id: "member-1",
   family_id: "family-1",
   name: "Matt",
+  is_admin: 1,
   created_at: "2026-01-01T00:00:00Z",
 };
 
@@ -20,6 +21,7 @@ export const TEST_MEMBER_2 = {
   id: "member-2",
   family_id: "family-1",
   name: "Sarah",
+  is_admin: 0,
   created_at: "2026-01-01T00:00:00Z",
 };
 
@@ -50,13 +52,14 @@ export const TEST_REVIEW = {
 };
 
 export async function makeToken(
-  overrides: Partial<{ member_id: string; family_id: string; name: string }> = {}
+  overrides: Partial<{ member_id: string; family_id: string; name: string; is_admin: boolean }> = {}
 ): Promise<string> {
   return sign(
     {
       member_id: overrides.member_id ?? TEST_MEMBER.id,
       family_id: overrides.family_id ?? TEST_MEMBER.family_id,
       name: overrides.name ?? TEST_MEMBER.name,
+      is_admin: overrides.is_admin ?? true,
       exp: Math.floor(Date.now() / 1000) + 3600,
     },
     TEST_SECRET
