@@ -1,3 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <text y=".9em" font-size="80">🍽️</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background -->
+  <rect width="100" height="100" rx="18" fill="#1c1917"/>
+
+  <!-- Plate outer ring -->
+  <circle cx="50" cy="50" r="38" fill="#f9731622" stroke="#f97316" stroke-width="1.5"/>
+  <circle cx="50" cy="50" r="34" fill="none" stroke="#f9731644" stroke-width="0.5"/>
+  <circle cx="50" cy="50" r="30" fill="none" stroke="#f9731633" stroke-width="0.3"/>
+
+  <!-- Fork (left side) -->
+  <g stroke="#f97316" stroke-width="1.7999999999999998" stroke-linecap="round" fill="none">
+    <!-- Fork handle -->
+    <line x1="36" y1="52" x2="36" y2="72"/>
+    <!-- Fork head / tines -->
+    <line x1="33.5" y1="28" x2="33.5" y2="38"/>
+    <line x1="36" y1="28" x2="36" y2="38"/>
+    <line x1="38.5" y1="28" x2="38.5" y2="38"/>
+    <!-- Fork bridge -->
+    <path d="M33.5 38 Q36 40 38.5 38" />
+  </g>
+
+  <!-- Knife (right side) -->
+  <g stroke="#f97316" stroke-width="1.7999999999999998" stroke-linecap="round" fill="none">
+    <!-- Knife handle -->
+    <line x1="64" y1="52" x2="64" y2="72"/>
+    <!-- Knife blade -->
+    <path d="M64 28 L64 40 Q68 33 64 28" fill="#f9731644"/>
+  </g>
+
+  <!-- "ES" text at bottom -->
+  <text x="50" y="88" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="9" fill="#f97316" letter-spacing="1.5">EAT SHEET</text>
 </svg>
