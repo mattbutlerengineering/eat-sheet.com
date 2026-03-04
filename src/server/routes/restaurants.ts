@@ -99,6 +99,50 @@ restaurants.post("/", async (c) => {
   return c.json({ data: restaurant }, 201);
 });
 
+restaurants.put("/:id", async (c) => {
+  const payload = c.get("jwtPayload");
+  const id = c.req.param("id");
+  const body = await c.req.json<{
+    name: string;
+    cuisine?: string;
+    address?: string;
+    photo_url?: string;
+  }>();
+
+  if (!body.name?.trim()) {
+    return c.json({ error: "Restaurant name is required" }, 400);
+  }
+
+  const db = c.env.DB;
+  const existing = await db
+    .prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
+    .bind(id, payload.family_id)
+    .first();
+
+  if (!existing) {
+    return c.json({ error: "Restaurant not found" }, 404);
+  }
+
+  const restaurant = await db
+    .prepare(
+      `UPDATE restaurants
+       SET name = ?, cuisine = ?, address = ?, photo_url = ?
+       WHERE id = ? AND family_id = ?
+       RETURNING *`
+    )
+    .bind(
+      body.name.trim(),
+      body.cuisine?.trim() || null,
+      body.address?.trim() || null,
+      body.photo_url?.trim() || null,
+      id,
+      payload.family_id
+    )
+    .first();
+
+  return c.json({ data: restaurant });
+});
+
 restaurants.delete("/:id", async (c) => {
   const payload = c.get("jwtPayload");
   const id = c.req.param("id");

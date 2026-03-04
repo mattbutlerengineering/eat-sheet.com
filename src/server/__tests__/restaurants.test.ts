@@ -121,6 +121,72 @@ describe("POST /api/restaurants", () => {
   });
 });
 
+describe("PUT /api/restaurants/:id", () => {
+  it("updates a restaurant", async () => {
+    const { db } = createMockDb({
+      first: {
+        "SELECT id FROM restaurants": { id: "rest-1" },
+        "UPDATE restaurants": {
+          ...TEST_RESTAURANT,
+          name: "Updated Name",
+          photo_url: "/api/photos/family-1/new.jpeg",
+        },
+      },
+    });
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/restaurants/rest-1",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({
+          name: "Updated Name",
+          cuisine: "Italian",
+          address: "123 Main St",
+          photo_url: "/api/photos/family-1/new.jpeg",
+        }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.name).toBe("Updated Name");
+    expect(body.data.photo_url).toBe("/api/photos/family-1/new.jpeg");
+  });
+
+  it("returns 400 if name is missing", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/restaurants/rest-1",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({ cuisine: "Italian" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 404 for nonexistent restaurant", async () => {
+    const { db } = createMockDb({
+      first: { "SELECT id FROM restaurants": null },
+    });
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/restaurants/nope",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({ name: "Test" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("DELETE /api/restaurants/:id", () => {
   it("deletes restaurant when creator", async () => {
     const { db } = createMockDb({
