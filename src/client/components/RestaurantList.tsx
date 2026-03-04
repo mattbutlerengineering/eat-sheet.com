@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
+import { InviteCodePanel } from "./InviteCodePanel";
 
 interface RestaurantListProps {
   readonly token: string;
@@ -27,6 +28,7 @@ function scoreBadgeColor(score: number | null): string {
 export function RestaurantList({ token, member, onLogout }: RestaurantListProps) {
   const { data: restaurants, loading } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
   const [sort, setSort] = useState<SortMode>("recent");
+  const [showInviteCode, setShowInviteCode] = useState(false);
 
   const sorted = restaurants
     ? [...restaurants].sort((a, b) => {
@@ -47,6 +49,14 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-stone-400">{member.name}</span>
+            {member.is_admin && (
+              <button
+                onClick={() => setShowInviteCode(true)}
+                className="text-xs text-orange-500/70 hover:text-orange-400 transition-colors"
+              >
+                Invite
+              </button>
+            )}
             <button
               onClick={onLogout}
               className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
@@ -145,6 +155,10 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
       >
         <span className="text-2xl text-white leading-none">+</span>
       </Link>
+
+      {showInviteCode && (
+        <InviteCodePanel token={token} onClose={() => setShowInviteCode(false)} />
+      )}
     </div>
   );
 }
