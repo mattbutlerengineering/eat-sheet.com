@@ -10,6 +10,26 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^\/api\/restaurants/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "api-restaurants",
+              expiration: { maxEntries: 50, maxAgeSeconds: 86400 },
+            },
+          },
+          {
+            urlPattern: /^\/api\/photos\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "api-photos",
+              expiration: { maxEntries: 200, maxAgeSeconds: 2592000 },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "Eat Sheet",
         short_name: "EatSheet",

@@ -4,6 +4,7 @@ import { JoinScreen } from "./components/JoinScreen";
 import { RestaurantList } from "./components/RestaurantList";
 import { RestaurantDetail } from "./components/RestaurantDetail";
 import { AddRestaurant } from "./components/AddRestaurant";
+import { OfflineBanner } from "./components/OfflineBanner";
 
 export function App() {
   const { auth, loading, join, logout } = useAuth();
@@ -24,6 +25,7 @@ export function App() {
 
   return (
     <BrowserRouter>
+      <OfflineBanner />
       <Routes>
         <Route
           path="/"
