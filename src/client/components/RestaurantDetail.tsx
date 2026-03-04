@@ -100,6 +100,16 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
         </div>
       </header>
 
+      {restaurant.photo_url && (
+        <div className="w-full max-h-64 overflow-hidden">
+          <img
+            src={restaurant.photo_url}
+            alt={restaurant.name}
+            className="w-full h-64 object-cover"
+          />
+        </div>
+      )}
+
       <div className="px-4 max-w-lg mx-auto">
         {/* Restaurant Info */}
         <div className="py-6">
@@ -239,6 +249,14 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 {/* Notes */}
                 {review.notes && (
                   <p className="mt-3 text-sm text-stone-300 leading-relaxed">{review.notes}</p>
+                )}
+
+                {review.photo_url && (
+                  <img
+                    src={review.photo_url}
+                    alt="Review photo"
+                    className="mt-3 w-full h-40 object-cover rounded-lg border border-stone-800/50"
+                  />
                 )}
 
                 {/* Delete own review */}
