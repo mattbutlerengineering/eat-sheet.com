@@ -2,7 +2,11 @@ name = "eat-sheet-api"
 compatibility_date = "2025-01-01"
 main = "src/server/index.ts"
 
+routes = [
+  { pattern = "eat-sheet.com/api/*", zone_name = "eat-sheet.com" }
+]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "eat-sheet-db"
-database_id = "placeholder-replace-after-creation"
+database_id = "a606f1f7-605f-4f8e-9c5d-9e3b1a789752"
