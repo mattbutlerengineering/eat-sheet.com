@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
+import { PhotoUpload } from "./PhotoUpload";
 import type { Restaurant } from "../types";
 
 interface AddRestaurantProps {
@@ -13,6 +14,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
   const [name, setName] = useState("");
   const [cuisine, setCuisine] = useState("");
   const [address, setAddress] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,6 +29,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         name: name.trim(),
         cuisine: cuisine.trim() || undefined,
         address: address.trim() || undefined,
+        photo_url: photoUrl ?? undefined,
       });
       navigate(`/restaurant/${restaurant.id}`);
     } catch (err) {
@@ -92,6 +95,8 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
           />
         </div>
+
+        <PhotoUpload token={token} onUploaded={setPhotoUrl} />
 
         {error && (
           <p className="text-red-500 text-sm text-center">{error}</p>
