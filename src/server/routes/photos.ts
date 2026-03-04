@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB server-side limit
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 const EXT_MAP: Record<string, string> = {
@@ -23,6 +24,10 @@ photos.post("/upload", authMiddleware, async (c) => {
 
   if (!(file instanceof File)) {
     return c.json({ error: "No file provided" }, 400);
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return c.json({ error: "File too large. Maximum size is 10MB" }, 413);
   }
 
   if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {

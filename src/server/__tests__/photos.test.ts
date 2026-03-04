@@ -75,6 +75,31 @@ describe("POST /api/photos/upload", () => {
     expect(body.error).toBe("Invalid file type. Allowed: jpeg, png, webp");
   });
 
+  it("rejects file exceeding size limit", async () => {
+    const { db } = createMockDb();
+    const { bucket } = createMockR2();
+    const token = await makeToken();
+
+    // Create a file that reports as > 10MB
+    const largeData = new Uint8Array(11 * 1024 * 1024);
+    const formData = new FormData();
+    formData.append("file", new File([largeData], "huge.jpg", { type: "image/jpeg" }));
+
+    const res = await app.request(
+      "/api/photos/upload",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      },
+      env(db, bucket)
+    );
+
+    expect(res.status).toBe(413);
+    const body: any = await res.json();
+    expect(body.error).toBe("File too large. Maximum size is 10MB");
+  });
+
   it("requires authentication", async () => {
     const { db } = createMockDb();
     const { bucket } = createMockR2();
