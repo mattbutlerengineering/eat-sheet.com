@@ -114,4 +114,45 @@ auth.get("/members", authMiddleware, async (c) => {
   return c.json({ data: results });
 });
 
+auth.get("/invite-code", authMiddleware, async (c) => {
+  const payload = c.get("jwtPayload");
+  if (!payload.is_admin) {
+    return c.json({ error: "Admin access required" }, 403);
+  }
+
+  const db = c.env.DB;
+  const family = await db
+    .prepare("SELECT invite_code FROM families WHERE id = ?")
+    .bind(payload.family_id)
+    .first<{ invite_code: string }>();
+
+  if (!family) {
+    return c.json({ error: "Family not found" }, 404);
+  }
+
+  return c.json({ data: { invite_code: family.invite_code } });
+});
+
+auth.post("/regenerate-code", authMiddleware, async (c) => {
+  const payload = c.get("jwtPayload");
+  if (!payload.is_admin) {
+    return c.json({ error: "Admin access required" }, 403);
+  }
+
+  const db = c.env.DB;
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const code = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+
+  const family = await db
+    .prepare("UPDATE families SET invite_code = ? WHERE id = ? RETURNING invite_code")
+    .bind(code, payload.family_id)
+    .first<{ invite_code: string }>();
+
+  if (!family) {
+    return c.json({ error: "Family not found" }, 404);
+  }
+
+  return c.json({ data: { invite_code: family.invite_code } });
+});
+
 export { auth as authRoutes };
