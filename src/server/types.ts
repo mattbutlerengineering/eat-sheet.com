@@ -34,6 +34,7 @@ export interface Review {
   readonly ambiance_score: number | null;
   readonly value_score: number | null;
   readonly notes: string | null;
+  readonly photo_url: string | null;
   readonly visited_at: string | null;
   readonly created_at: string;
   readonly updated_at: string;

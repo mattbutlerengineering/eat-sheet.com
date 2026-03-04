@@ -46,6 +46,7 @@ export const TEST_REVIEW = {
   ambiance_score: 8,
   value_score: 7,
   notes: "Great pizza",
+  photo_url: null,
   visited_at: "2026-01-10",
   created_at: "2026-01-15T00:00:00Z",
   updated_at: "2026-01-15T00:00:00Z",

@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   ambiance_score INTEGER CHECK(ambiance_score BETWEEN 1 AND 10),
   value_score INTEGER CHECK(value_score BETWEEN 1 AND 10),
   notes TEXT,
+  photo_url TEXT,
   visited_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
