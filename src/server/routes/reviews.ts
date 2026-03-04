@@ -19,6 +19,7 @@ reviews.post("/:restaurantId", async (c) => {
     ambiance_score?: number;
     value_score?: number;
     notes?: string;
+    photo_url?: string;
     visited_at?: string;
   }>();
 
@@ -48,8 +49,8 @@ reviews.post("/:restaurantId", async (c) => {
 
   const review = await db
     .prepare(
-      `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, visited_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, photo_url, visited_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -61,6 +62,7 @@ reviews.post("/:restaurantId", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
+      body.photo_url?.trim() || null,
       body.visited_at || null
     )
     .first();
@@ -78,6 +80,7 @@ reviews.put("/:id", async (c) => {
     ambiance_score?: number | null;
     value_score?: number | null;
     notes?: string | null;
+    photo_url?: string | null;
     visited_at?: string | null;
   }>();
 
@@ -99,7 +102,7 @@ reviews.put("/:id", async (c) => {
   const review = await db
     .prepare(
       `UPDATE reviews
-       SET overall_score = ?, food_score = ?, service_score = ?, ambiance_score = ?, value_score = ?, notes = ?, visited_at = ?, updated_at = datetime('now')
+       SET overall_score = ?, food_score = ?, service_score = ?, ambiance_score = ?, value_score = ?, notes = ?, photo_url = ?, visited_at = ?, updated_at = datetime('now')
        WHERE id = ? AND member_id = ?
        RETURNING *`
     )
@@ -110,6 +113,7 @@ reviews.put("/:id", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
+      body.photo_url?.trim() || null,
       body.visited_at || null,
       id,
       payload.member_id

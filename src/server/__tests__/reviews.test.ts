@@ -102,6 +102,35 @@ describe("POST /api/reviews/:restaurantId", () => {
     );
     expect(res.status).toBe(404);
   });
+
+  it("creates a review with photo_url", async () => {
+    const { db } = createMockDb({
+      first: {
+        "FROM restaurants": { id: "rest-1" },
+        "FROM reviews WHERE restaurant_id": null,
+        "INSERT INTO reviews": {
+          ...TEST_REVIEW,
+          photo_url: "/api/photos/family-1/abc.jpeg",
+        },
+      },
+    });
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/reviews/rest-1",
+      {
+        method: "POST",
+        headers: authHeader(token),
+        body: JSON.stringify({
+          overall_score: 8,
+          photo_url: "/api/photos/family-1/abc.jpeg",
+        }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(201);
+    const body: any = await res.json();
+    expect(body.data.photo_url).toBe("/api/photos/family-1/abc.jpeg");
+  });
 });
 
 describe("PUT /api/reviews/:id", () => {
@@ -158,6 +187,34 @@ describe("PUT /api/reviews/:id", () => {
       env(db)
     );
     expect(res.status).toBe(400);
+  });
+
+  it("updates a review with photo_url", async () => {
+    const { db } = createMockDb({
+      first: {
+        "SELECT id FROM reviews": { id: "review-1" },
+        "UPDATE reviews": {
+          ...TEST_REVIEW,
+          photo_url: "/api/photos/family-1/xyz.jpeg",
+        },
+      },
+    });
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/reviews/review-1",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({
+          overall_score: 9,
+          photo_url: "/api/photos/family-1/xyz.jpeg",
+        }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.photo_url).toBe("/api/photos/family-1/xyz.jpeg");
   });
 });
 
