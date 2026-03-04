@@ -9,6 +9,7 @@ export interface Member {
   readonly id: string;
   readonly family_id: string;
   readonly name: string;
+  readonly is_admin: number;
   readonly created_at: string;
 }
 
@@ -42,6 +43,7 @@ export interface JwtPayload {
   readonly member_id: string;
   readonly family_id: string;
   readonly name: string;
+  readonly is_admin: boolean;
   readonly exp: number;
 }
 
