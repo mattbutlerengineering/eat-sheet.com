@@ -5,7 +5,7 @@ import { authMiddleware } from "../middleware/auth";
 
 const auth = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: { member_id: string; family_id: string; name: string; is_admin: boolean } };
 }>();
 
 auth.post("/join", async (c) => {
@@ -33,9 +33,16 @@ auth.post("/join", async (c) => {
     .first<Member>();
 
   if (!member) {
+    const memberCount = await db
+      .prepare("SELECT COUNT(*) as count FROM members WHERE family_id = ?")
+      .bind(family.id)
+      .first<{ count: number }>();
+
+    const isFirst = (memberCount?.count ?? 0) === 0;
+
     const result = await db
-      .prepare("INSERT INTO members (family_id, name) VALUES (?, ?) RETURNING *")
-      .bind(family.id, name)
+      .prepare("INSERT INTO members (family_id, name, is_admin) VALUES (?, ?, ?) RETURNING *")
+      .bind(family.id, name, isFirst ? 1 : 0)
       .first<Member>();
     member = result;
   }
@@ -53,6 +60,7 @@ auth.post("/join", async (c) => {
       member_id: member.id,
       family_id: member.family_id,
       name: member.name,
+      is_admin: member.is_admin === 1,
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
     },
     secret
@@ -65,6 +73,7 @@ auth.post("/join", async (c) => {
         id: member.id,
         family_id: member.family_id,
         name: member.name,
+        is_admin: member.is_admin === 1,
       },
     },
   });
@@ -75,7 +84,7 @@ auth.get("/me", authMiddleware, async (c) => {
   const db = c.env.DB;
 
   const member = await db
-    .prepare("SELECT id, family_id, name FROM members WHERE id = ?")
+    .prepare("SELECT id, family_id, name, is_admin FROM members WHERE id = ?")
     .bind(payload.member_id)
     .first<Member>();
 
@@ -83,7 +92,14 @@ auth.get("/me", authMiddleware, async (c) => {
     return c.json({ error: "Member not found" }, 404);
   }
 
-  return c.json({ data: member });
+  return c.json({
+    data: {
+      id: member.id,
+      family_id: member.family_id,
+      name: member.name,
+      is_admin: member.is_admin === 1,
+    },
+  });
 });
 
 auth.get("/members", authMiddleware, async (c) => {
