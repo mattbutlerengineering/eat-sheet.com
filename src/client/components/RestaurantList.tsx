@@ -123,6 +123,13 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             >
               <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 active:scale-[0.98] transition-transform">
                 <div className="flex items-start justify-between gap-3">
+                  {restaurant.photo_url && (
+                    <img
+                      src={restaurant.photo_url}
+                      alt=""
+                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                    />
+                  )}
                   <div className="min-w-0 flex-1">
                     <h3 className="font-display font-bold text-lg text-stone-50 truncate">
                       {restaurant.name}
