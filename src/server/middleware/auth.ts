@@ -16,7 +16,10 @@ export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
   }
 
   const token = authHeader.slice(7);
-  const secret = c.env.JWT_SECRET || "dev-secret-change-in-production";
+  const secret = c.env.JWT_SECRET;
+  if (!secret) {
+    return c.json({ error: "Server configuration error" }, 500);
+  }
 
   try {
     const payload = (await verify(token, secret, "HS256")) as unknown as JwtPayload;

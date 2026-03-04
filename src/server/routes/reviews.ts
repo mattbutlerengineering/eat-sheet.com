@@ -119,4 +119,23 @@ reviews.put("/:id", async (c) => {
   return c.json({ data: review });
 });
 
+reviews.delete("/:id", async (c) => {
+  const payload = c.get("jwtPayload");
+  const id = c.req.param("id");
+  const db = c.env.DB;
+
+  const existing = await db
+    .prepare("SELECT id FROM reviews WHERE id = ? AND member_id = ?")
+    .bind(id, payload.member_id)
+    .first();
+
+  if (!existing) {
+    return c.json({ error: "Review not found or not yours" }, 404);
+  }
+
+  await db.prepare("DELETE FROM reviews WHERE id = ?").bind(id).run();
+
+  return c.json({ data: { deleted: true } });
+});
+
 export { reviews as reviewRoutes };

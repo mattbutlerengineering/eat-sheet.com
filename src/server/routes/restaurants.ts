@@ -99,4 +99,30 @@ restaurants.post("/", async (c) => {
   return c.json({ data: restaurant }, 201);
 });
 
+restaurants.delete("/:id", async (c) => {
+  const payload = c.get("jwtPayload");
+  const id = c.req.param("id");
+  const db = c.env.DB;
+
+  const restaurant = await db
+    .prepare("SELECT id, created_by FROM restaurants WHERE id = ? AND family_id = ?")
+    .bind(id, payload.family_id)
+    .first();
+
+  if (!restaurant) {
+    return c.json({ error: "Restaurant not found" }, 404);
+  }
+
+  if (restaurant.created_by !== payload.member_id) {
+    return c.json({ error: "Only the creator can delete this restaurant" }, 403);
+  }
+
+  await db.batch([
+    db.prepare("DELETE FROM reviews WHERE restaurant_id = ?").bind(id),
+    db.prepare("DELETE FROM restaurants WHERE id = ?").bind(id),
+  ]);
+
+  return c.json({ data: { deleted: true } });
+});
+
 export { restaurants as restaurantRoutes };

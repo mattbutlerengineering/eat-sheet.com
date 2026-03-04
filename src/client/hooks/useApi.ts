@@ -49,7 +49,20 @@ export function useApi(token: string | undefined) {
     [headers]
   );
 
-  return { get, post, put };
+  const del = useCallback(
+    async <T>(url: string): Promise<T> => {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: headers(),
+      });
+      const json = (await res.json()) as ApiResponse<T>;
+      if (!res.ok || json.error) throw new Error(json.error || "Request failed");
+      return json.data as T;
+    },
+    [headers]
+  );
+
+  return { get, post, put, del };
 }
 
 export function useFetch<T>(token: string | undefined, url: string | null) {

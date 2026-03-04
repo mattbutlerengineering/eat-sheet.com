@@ -33,14 +33,28 @@ function formatDate(dateStr: string | null): string {
 export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { post, put } = useApi(token);
+  const { post, put, del } = useApi(token);
   const { data: restaurant, loading, refresh } = useFetch<RestaurantDetailType>(
     token,
     id ? `/api/restaurants/${id}` : null
   );
   const [showForm, setShowForm] = useState(false);
 
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
   const myReview = restaurant?.reviews.find((r) => r.member_id === member.id);
+  const isCreator = restaurant?.created_by === member.id;
+
+  const handleDeleteRestaurant = async () => {
+    await del(`/api/restaurants/${id}`);
+    navigate("/");
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    await del(`/api/reviews/${reviewId}`);
+    setConfirmDelete(null);
+    refresh();
+  };
 
   const handleSubmitReview = async (data: ReviewData) => {
     if (myReview) {
@@ -111,6 +125,35 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             </div>
           )}
         </div>
+
+        {/* Delete Restaurant (creator only) */}
+        {isCreator && (
+          <div className="mb-4">
+            {confirmDelete === "restaurant" ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeleteRestaurant}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-colors"
+                >
+                  Confirm Delete
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="flex-1 py-2.5 bg-stone-800 text-stone-300 text-sm font-medium rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete("restaurant")}
+                className="text-xs text-stone-500 hover:text-red-400 transition-colors"
+              >
+                Delete Restaurant
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Add/Edit Review Button */}
         {!showForm && (
@@ -195,6 +238,35 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 {/* Notes */}
                 {review.notes && (
                   <p className="mt-3 text-sm text-stone-300 leading-relaxed">{review.notes}</p>
+                )}
+
+                {/* Delete own review */}
+                {review.member_id === member.id && (
+                  <div className="mt-3 pt-2 border-t border-stone-800/50">
+                    {confirmDelete === review.id ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDeleteReview(review.id)}
+                          className="text-xs text-red-400 font-medium"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="text-xs text-stone-500"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(review.id)}
+                        className="text-xs text-stone-500 hover:text-red-400 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             ))}

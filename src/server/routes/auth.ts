@@ -44,7 +44,10 @@ auth.post("/join", async (c) => {
     return c.json({ error: "Failed to create member" }, 500);
   }
 
-  const secret = c.env.JWT_SECRET || "dev-secret-change-in-production";
+  const secret = c.env.JWT_SECRET;
+  if (!secret) {
+    return c.json({ error: "Server configuration error" }, 500);
+  }
   const token = await sign(
     {
       member_id: member.id,
