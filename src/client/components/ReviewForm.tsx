@@ -21,6 +21,24 @@ export interface ReviewData {
   readonly visited_at: string;
 }
 
+function toDateString(date: Date): string {
+  return date.toISOString().split("T")[0]!;
+}
+
+function quickDates(): readonly { readonly label: string; readonly value: string }[] {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const lastWeek = new Date(today);
+  lastWeek.setDate(lastWeek.getDate() - 7);
+
+  return [
+    { label: "Today", value: toDateString(today) },
+    { label: "Yesterday", value: toDateString(yesterday) },
+    { label: "Last week", value: toDateString(lastWeek) },
+  ];
+}
+
 export function ReviewForm({ token, existingReview, onSubmit, onCancel }: ReviewFormProps) {
   const [overall, setOverall] = useState<number | null>(existingReview?.overall_score ?? 5);
   const [food, setFood] = useState<number | null>(existingReview?.food_score ?? null);
@@ -29,7 +47,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
   const [value, setValue] = useState<number | null>(existingReview?.value_score ?? null);
   const [notes, setNotes] = useState(existingReview?.notes ?? "");
   const [visitedAt, setVisitedAt] = useState(
-    existingReview?.visited_at ?? new Date().toISOString().split("T")[0]!
+    existingReview?.visited_at ?? toDateString(new Date())
   );
   const [photoUrl, setPhotoUrl] = useState<string | null>(existingReview?.photo_url ?? null);
   const [error, setError] = useState("");
@@ -58,8 +76,11 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
     }
   };
 
+  const dates = quickDates();
+  const isReady = overall !== null && !submitting;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5 animate-slide-up">
       <h3 className="font-display font-bold text-lg text-stone-50">
         {existingReview ? "Edit Your Review" : "Add Your Review"}
       </h3>
@@ -78,6 +99,22 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         <label htmlFor="visit-date" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
           Visited
         </label>
+        <div className="flex gap-2 mb-2">
+          {dates.map((d) => (
+            <button
+              key={d.label}
+              type="button"
+              onClick={() => setVisitedAt(d.value)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                visitedAt === d.value
+                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                  : "bg-stone-800 text-stone-400 border border-stone-700 hover:border-stone-600"
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
         <input
           id="visit-date"
           type="date"
@@ -117,8 +154,10 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         </button>
         <button
           type="submit"
-          disabled={submitting || !overall}
-          className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-bold rounded-xl transition-all active:scale-[0.98]"
+          disabled={!isReady}
+          className={`flex-1 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-bold rounded-xl transition-all active:scale-[0.98] ${
+            isReady ? "animate-submit-pulse" : ""
+          }`}
         >
           {submitting ? "Saving..." : "Save Review"}
         </button>

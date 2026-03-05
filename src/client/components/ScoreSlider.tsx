@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { sliderPersonality } from "../utils/personality";
 
 interface ScoreSliderProps {
   readonly label: string;
@@ -96,8 +97,11 @@ export function ScoreSlider({ label, value, onChange, required }: ScoreSliderPro
         step={1}
         value={displayValue}
         onChange={handleChange}
-        className="w-full"
+        className="w-full slider-gradient-track"
       />
+      <p className="text-xs text-stone-500 italic font-display mt-1">
+        {sliderPersonality(displayValue)}
+      </p>
     </div>
   );
 }
