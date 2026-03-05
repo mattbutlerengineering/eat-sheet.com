@@ -93,7 +93,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
         <div className="px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate("/")}
-            className="text-stone-400 hover:text-stone-200 transition-colors text-sm"
+            className="text-stone-400 hover:text-stone-200 transition-colors text-base"
           >
             ← Back
           </button>
@@ -116,10 +116,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           <h2 className="font-display font-black text-3xl text-stone-50">{restaurant.name}</h2>
           <div className="flex items-center gap-3 mt-2">
             {restaurant.cuisine && (
-              <span className="text-sm text-orange-500 font-medium">{restaurant.cuisine}</span>
+              <span className="text-base text-orange-500 font-medium">{restaurant.cuisine}</span>
             )}
             {restaurant.address && (
-              <span className="text-sm text-stone-500">{restaurant.address}</span>
+              <span className="text-base text-stone-500">{restaurant.address}</span>
             )}
           </div>
 
@@ -129,7 +129,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
               <span className={`font-display font-black text-5xl ${scoreColor(restaurant.avg_score)}`}>
                 {restaurant.avg_score.toFixed(1)}
               </span>
-              <span className="text-stone-500 text-sm">
+              <span className="text-stone-500 text-base">
                 / 10 from {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
               </span>
             </div>
@@ -157,7 +157,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             ) : (
               <button
                 onClick={() => setConfirmDelete("restaurant")}
-                className="text-xs text-stone-500 hover:text-red-400 transition-colors"
+                className="text-sm text-stone-500 hover:text-red-400 transition-colors py-2"
               >
                 Delete Restaurant
               </button>
@@ -194,7 +194,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           </h3>
 
           {restaurant.reviews.length === 0 && (
-            <p className="text-stone-500 text-sm py-4 text-center">
+            <p className="text-stone-500 text-base py-4 text-center">
               No reviews yet. Be the first!
             </p>
           )}
@@ -203,14 +203,14 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             {restaurant.reviews.map((review: Review, i: number) => (
               <div
                 key={review.id}
-                className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 animate-fade-up"
+                className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 animate-fade-up"
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <span className="font-medium text-stone-200">{review.member_name}</span>
                     {review.visited_at && (
-                      <span className="text-stone-500 text-xs ml-2">
+                      <span className="text-stone-500 text-sm ml-2">
                         {formatDate(review.visited_at)}
                       </span>
                     )}
@@ -224,22 +224,22 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 {(review.food_score || review.service_score || review.ambiance_score || review.value_score) && (
                   <div className="flex gap-3 mt-2 flex-wrap">
                     {review.food_score && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-sm text-stone-400">
                         Food: <span className={scoreColor(review.food_score)}>{review.food_score}</span>
                       </span>
                     )}
                     {review.service_score && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-sm text-stone-400">
                         Service: <span className={scoreColor(review.service_score)}>{review.service_score}</span>
                       </span>
                     )}
                     {review.ambiance_score && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-sm text-stone-400">
                         Ambiance: <span className={scoreColor(review.ambiance_score)}>{review.ambiance_score}</span>
                       </span>
                     )}
                     {review.value_score && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-sm text-stone-400">
                         Value: <span className={scoreColor(review.value_score)}>{review.value_score}</span>
                       </span>
                     )}
@@ -248,7 +248,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
 
                 {/* Notes */}
                 {review.notes && (
-                  <p className="mt-3 text-sm text-stone-300 leading-relaxed">{review.notes}</p>
+                  <p className="mt-3 text-base text-stone-300 leading-relaxed">{review.notes}</p>
                 )}
 
                 {review.photo_url && (
@@ -266,13 +266,13 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDeleteReview(review.id)}
-                          className="text-xs text-red-400 font-medium"
+                          className="text-sm text-red-400 font-medium py-1"
                         >
                           Confirm
                         </button>
                         <button
                           onClick={() => setConfirmDelete(null)}
-                          className="text-xs text-stone-500"
+                          className="text-sm text-stone-500 py-1"
                         >
                           Cancel
                         </button>
@@ -280,7 +280,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                     ) : (
                       <button
                         onClick={() => setConfirmDelete(review.id)}
-                        className="text-xs text-stone-500 hover:text-red-400 transition-colors"
+                        className="text-sm text-stone-500 hover:text-red-400 transition-colors py-1"
                       >
                         Delete
                       </button>
