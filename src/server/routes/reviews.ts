@@ -2,12 +2,35 @@ import { Hono } from "hono";
 import type { Env } from "../types";
 import { authMiddleware } from "../middleware/auth";
 
+const MAX_PHOTOS = 5;
+
 const reviews = new Hono<{
   Bindings: Env;
   Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
 }>();
 
 reviews.use("*", authMiddleware);
+
+async function saveReviewPhotos(
+  db: D1Database,
+  reviewId: string,
+  photoUrls: readonly string[]
+): Promise<void> {
+  // Delete existing photos for this review
+  await db.prepare("DELETE FROM review_photos WHERE review_id = ?").bind(reviewId).run();
+
+  // Insert new photos (up to MAX_PHOTOS)
+  const urls = photoUrls.slice(0, MAX_PHOTOS);
+  if (urls.length === 0) return;
+
+  const stmts = urls.map((url, i) =>
+    db
+      .prepare("INSERT INTO review_photos (review_id, photo_url, sort_order) VALUES (?, ?, ?)")
+      .bind(reviewId, url, i)
+  );
+
+  await db.batch(stmts);
+}
 
 reviews.post("/:restaurantId", async (c) => {
   const payload = c.get("jwtPayload");
@@ -20,6 +43,7 @@ reviews.post("/:restaurantId", async (c) => {
     value_score?: number;
     notes?: string;
     photo_url?: string;
+    photo_urls?: string[];
     visited_at?: string;
   }>();
 
@@ -47,6 +71,10 @@ reviews.post("/:restaurantId", async (c) => {
     return c.json({ error: "You already have a review for this restaurant. Use PUT to update." }, 409);
   }
 
+  // Use first photo_url from array, or fall back to single photo_url
+  const photoUrls = body.photo_urls ?? (body.photo_url ? [body.photo_url] : []);
+  const primaryPhoto = photoUrls[0]?.trim() || null;
+
   const review = await db
     .prepare(
       `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, photo_url, visited_at)
@@ -62,10 +90,16 @@ reviews.post("/:restaurantId", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
-      body.photo_url?.trim() || null,
+      primaryPhoto,
       body.visited_at || null
     )
     .first();
+
+  // Save multi-photo records
+  if (review && photoUrls.length > 0) {
+    const validUrls = photoUrls.map((u) => u.trim()).filter(Boolean);
+    await saveReviewPhotos(db, review.id as string, validUrls);
+  }
 
   return c.json({ data: review }, 201);
 });
@@ -81,6 +115,7 @@ reviews.put("/:id", async (c) => {
     value_score?: number | null;
     notes?: string | null;
     photo_url?: string | null;
+    photo_urls?: string[];
     visited_at?: string | null;
   }>();
 
@@ -99,6 +134,10 @@ reviews.put("/:id", async (c) => {
     return c.json({ error: "Review not found or not yours" }, 404);
   }
 
+  // Use first photo_url from array, or fall back to single photo_url
+  const photoUrls = body.photo_urls ?? (body.photo_url != null ? [body.photo_url] : []);
+  const primaryPhoto = photoUrls[0]?.trim() || null;
+
   const review = await db
     .prepare(
       `UPDATE reviews
@@ -113,12 +152,18 @@ reviews.put("/:id", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
-      body.photo_url?.trim() || null,
+      primaryPhoto,
       body.visited_at || null,
       id,
       payload.member_id
     )
     .first();
+
+  // Update multi-photo records
+  if (review) {
+    const validUrls = photoUrls.map((u) => u.trim()).filter(Boolean);
+    await saveReviewPhotos(db, id, validUrls);
+  }
 
   return c.json({ data: review });
 });

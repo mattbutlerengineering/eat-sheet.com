@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScoreSlider } from "./ScoreSlider";
-import { PhotoUpload } from "./PhotoUpload";
+import { MultiPhotoUpload } from "./MultiPhotoUpload";
 import type { Review } from "../types";
 
 interface ReviewFormProps {
@@ -18,6 +18,7 @@ export interface ReviewData {
   readonly value_score: number | null;
   readonly notes: string;
   readonly photo_url: string | null;
+  readonly photo_urls: readonly string[];
   readonly visited_at: string;
 }
 
@@ -39,6 +40,13 @@ function quickDates(): readonly { readonly label: string; readonly value: string
   ];
 }
 
+function getExistingPhotoUrls(review?: Review): readonly string[] {
+  if (!review) return [];
+  if (review.photo_urls && review.photo_urls.length > 0) return review.photo_urls;
+  if (review.photo_url) return [review.photo_url];
+  return [];
+}
+
 export function ReviewForm({ token, existingReview, onSubmit, onCancel }: ReviewFormProps) {
   const [overall, setOverall] = useState<number | null>(existingReview?.overall_score ?? 5);
   const [food, setFood] = useState<number | null>(existingReview?.food_score ?? null);
@@ -49,7 +57,9 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
   const [visitedAt, setVisitedAt] = useState(
     existingReview?.visited_at ?? toDateString(new Date())
   );
-  const [photoUrl, setPhotoUrl] = useState<string | null>(existingReview?.photo_url ?? null);
+  const [photoUrls, setPhotoUrls] = useState<readonly string[]>(
+    getExistingPhotoUrls(existingReview)
+  );
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,7 +77,8 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         ambiance_score: ambiance,
         value_score: value,
         notes: notes.trim(),
-        photo_url: photoUrl,
+        photo_url: photoUrls[0] ?? null,
+        photo_urls: photoUrls,
         visited_at: visitedAt,
       });
     } catch (err) {
@@ -138,7 +149,12 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         />
       </div>
 
-      <PhotoUpload token={token} onUploaded={setPhotoUrl} existingUrl={existingReview?.photo_url} />
+      <MultiPhotoUpload
+        token={token}
+        photoUrls={photoUrls}
+        onPhotosChanged={setPhotoUrls}
+        maxPhotos={5}
+      />
 
       {error && (
         <p className="text-red-500 text-sm text-center">{error}</p>

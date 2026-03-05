@@ -55,4 +55,14 @@ CREATE INDEX IF NOT EXISTS idx_members_family ON members(family_id);
 CREATE INDEX IF NOT EXISTS idx_restaurants_family ON restaurants(family_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_member ON reviews(member_id);
+CREATE TABLE IF NOT EXISTS review_photos (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+  review_id TEXT NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+  photo_url TEXT NOT NULL,
+  caption TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_reactions_review ON reactions(review_id);
+CREATE INDEX IF NOT EXISTS idx_review_photos_review ON review_photos(review_id);

@@ -31,6 +31,7 @@ export interface Review {
   readonly value_score: number | null;
   readonly notes: string | null;
   readonly photo_url: string | null;
+  readonly photo_urls?: readonly string[];
   readonly visited_at: string | null;
   readonly created_at: string;
   readonly updated_at: string;

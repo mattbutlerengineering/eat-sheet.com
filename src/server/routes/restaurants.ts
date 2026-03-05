@@ -81,6 +81,17 @@ restaurants.get("/:id", async (c) => {
     .bind(id)
     .all<{ review_id: string; emoji: string; member_id: string; member_name: string }>();
 
+  // Fetch photos for all reviews
+  const { results: allPhotos } = await db
+    .prepare(
+      `SELECT review_id, photo_url, sort_order
+       FROM review_photos
+       WHERE review_id IN (SELECT id FROM reviews WHERE restaurant_id = ?)
+       ORDER BY sort_order ASC`
+    )
+    .bind(id)
+    .all<{ review_id: string; photo_url: string; sort_order: number }>();
+
   // Group reactions by review_id
   const reactionsByReview = new Map<string, Array<{ emoji: string; member_id: string; member_name: string }>>();
   for (const rc of allReactions) {
@@ -89,9 +100,18 @@ restaurants.get("/:id", async (c) => {
     reactionsByReview.set(rc.review_id, list);
   }
 
+  // Group photos by review_id
+  const photosByReview = new Map<string, string[]>();
+  for (const p of allPhotos) {
+    const list = photosByReview.get(p.review_id) ?? [];
+    list.push(p.photo_url);
+    photosByReview.set(p.review_id, list);
+  }
+
   const reviewsWithReactions = (reviews as Array<Record<string, unknown>>).map((rv) => ({
     ...rv,
     reactions: reactionsByReview.get(rv.id as string) ?? [],
+    photo_urls: photosByReview.get(rv.id as string) ?? [],
   }));
 
   return c.json({ data: { ...restaurant, reviews: reviewsWithReactions } });

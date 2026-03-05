@@ -6,6 +6,7 @@ import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { ReactionBar } from "./ReactionBar";
+import { PhotoGallery } from "./PhotoGallery";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
 
@@ -359,13 +360,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                   </div>
                 )}
 
-                {review.photo_url && (
-                  <img
-                    src={review.photo_url}
-                    alt="Review photo"
-                    className="mt-3 w-full h-40 object-cover rounded-lg border border-stone-800/50"
-                  />
-                )}
+                <PhotoGallery
+                  photoUrls={review.photo_urls ?? (review.photo_url ? [review.photo_url] : [])}
+                  alt={`${review.member_name}'s photo`}
+                />
 
                 {/* Reactions */}
                 <ReactionBar
