@@ -19,14 +19,15 @@ jobs:
 
       - run: npm run build
 
-      - name: Deploy Worker API
-        run: npx wrangler deploy
+      - name: Deploy Pages Frontend
+        run: npx wrangler pages deploy dist --project-name=eat-sheet
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Deploy Pages Frontend
-        run: npx wrangler pages deploy dist --project-name=eat-sheet
+      - name: Deploy Worker API
+        run: npx wrangler deploy
+        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
