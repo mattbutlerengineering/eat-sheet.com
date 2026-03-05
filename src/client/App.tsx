@@ -5,6 +5,7 @@ import { RestaurantList } from "./components/RestaurantList";
 import { RestaurantDetail } from "./components/RestaurantDetail";
 import { AddRestaurant } from "./components/AddRestaurant";
 import { OfflineBanner } from "./components/OfflineBanner";
+import { InstallPrompt } from "./components/InstallPrompt";
 import { BottomNav } from "./components/BottomNav";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { FamilyStats } from "./components/FamilyStats";
@@ -33,6 +34,7 @@ export function App() {
   return (
     <BrowserRouter>
       <OfflineBanner />
+      <InstallPrompt />
       <Routes>
         <Route
           path="/"
