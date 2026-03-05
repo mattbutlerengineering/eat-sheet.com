@@ -125,6 +125,8 @@ restaurants.post("/", async (c) => {
     cuisine?: string;
     address?: string;
     photo_url?: string;
+    latitude?: number;
+    longitude?: number;
   }>();
 
   if (!body.name?.trim()) {
@@ -134,8 +136,8 @@ restaurants.post("/", async (c) => {
   const db = c.env.DB;
   const restaurant = await db
     .prepare(
-      `INSERT INTO restaurants (family_id, name, cuisine, address, photo_url, created_by)
-       VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO restaurants (family_id, name, cuisine, address, photo_url, latitude, longitude, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -144,6 +146,8 @@ restaurants.post("/", async (c) => {
       body.cuisine?.trim() || null,
       body.address?.trim() || null,
       body.photo_url?.trim() || null,
+      body.latitude ?? null,
+      body.longitude ?? null,
       payload.member_id
     )
     .first();
@@ -159,6 +163,8 @@ restaurants.put("/:id", async (c) => {
     cuisine?: string;
     address?: string;
     photo_url?: string;
+    latitude?: number | null;
+    longitude?: number | null;
   }>();
 
   if (!body.name?.trim()) {
@@ -178,7 +184,7 @@ restaurants.put("/:id", async (c) => {
   const restaurant = await db
     .prepare(
       `UPDATE restaurants
-       SET name = ?, cuisine = ?, address = ?, photo_url = ?
+       SET name = ?, cuisine = ?, address = ?, photo_url = ?, latitude = ?, longitude = ?
        WHERE id = ? AND family_id = ?
        RETURNING *`
     )
@@ -187,6 +193,8 @@ restaurants.put("/:id", async (c) => {
       body.cuisine?.trim() || null,
       body.address?.trim() || null,
       body.photo_url?.trim() || null,
+      body.latitude ?? null,
+      body.longitude ?? null,
       id,
       payload.family_id
     )

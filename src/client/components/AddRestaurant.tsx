@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
 import { PhotoUpload } from "./PhotoUpload";
+import { geocodeAddress } from "../utils/geocode";
 import type { Restaurant } from "../types";
 
 interface AddRestaurantProps {
@@ -25,11 +26,25 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
     setError("");
     setSubmitting(true);
     try {
+      // Try to geocode the address
+      let latitude: number | undefined;
+      let longitude: number | undefined;
+
+      if (address.trim()) {
+        const geo = await geocodeAddress(address.trim());
+        if (geo) {
+          latitude = geo.lat;
+          longitude = geo.lon;
+        }
+      }
+
       const restaurant = await post<Restaurant>("/api/restaurants", {
         name: name.trim(),
         cuisine: cuisine.trim() || undefined,
         address: address.trim() || undefined,
         photo_url: photoUrl ?? undefined,
+        latitude,
+        longitude,
       });
       navigate(`/restaurant/${restaurant.id}`);
     } catch (err) {
@@ -45,6 +60,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
           <button
             onClick={() => navigate(-1)}
             className="text-stone-400 hover:text-stone-200 transition-colors text-base"
+            aria-label="Go back"
           >
             ← Back
           </button>
@@ -91,7 +107,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Where is it?"
+            placeholder="Where is it? (enables map pin)"
             className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
           />
         </div>
@@ -99,7 +115,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         <PhotoUpload token={token} onUploaded={setPhotoUrl} />
 
         {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
+          <p className="text-red-500 text-sm text-center" role="alert">{error}</p>
         )}
 
         <button

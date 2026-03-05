@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
@@ -8,6 +8,10 @@ import { Slurms } from "./Slurms";
 import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
 import { relativeTime } from "../utils/time";
 
+const MapView = lazy(() =>
+  import("./MapView").then((m) => ({ default: m.MapView }))
+);
+
 interface RestaurantListProps {
   readonly token: string;
   readonly member: Member;
@@ -15,6 +19,7 @@ interface RestaurantListProps {
 }
 
 type SortMode = "recent" | "score";
+type ViewMode = "list" | "map";
 
 function scoreDisplay(score: number | null): string {
   if (score === null) return "—";
@@ -36,6 +41,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
   const [search, setSearch] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
   const [showWantToTry, setShowWantToTry] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const fabRef = useRef<HTMLAnchorElement>(null);
@@ -193,13 +199,13 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           </div>
         )}
 
-        {/* Sort & Pick */}
+        {/* Sort, View & Pick */}
         <div className="flex items-center justify-between py-2">
           <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5">
             <button
               onClick={() => setSort("recent")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                sort === "recent"
+                sort === "recent" && viewMode === "list"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
               }`}
@@ -209,12 +215,40 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             <button
               onClick={() => setSort("score")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                sort === "score"
+                sort === "score" && viewMode === "list"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
               }`}
             >
               Top Rated
+            </button>
+            <button
+              onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
+              aria-label={viewMode === "list" ? "Show map view" : "Show list view"}
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                viewMode === "map"
+                  ? "bg-stone-700 text-stone-50"
+                  : "text-stone-400 hover:text-stone-200"
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {viewMode === "list" ? (
+                  <>
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                    <line x1="8" y1="2" x2="8" y2="18" />
+                    <line x1="16" y1="6" x2="16" y2="22" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </>
+                )}
+              </svg>
             </button>
           </div>
           {filtered.length > 1 && (
@@ -290,7 +324,17 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           </div>
         )}
 
+        {/* Map View */}
+        {viewMode === "map" && !loading && filtered.length > 0 && (
+          <div className="mt-2">
+            <Suspense fallback={<div className="shimmer h-[60vh] rounded-xl" />}>
+              <MapView restaurants={filtered} />
+            </Suspense>
+          </div>
+        )}
+
         {/* Restaurant Cards */}
+        {viewMode === "list" && (
         <div className="space-y-3 mt-2">
           {filtered.map((restaurant, i) => (
             <Link
@@ -356,6 +400,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             </Link>
           ))}
         </div>
+        )}
       </div>
 
       {/* FAB */}

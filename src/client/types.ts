@@ -11,6 +11,8 @@ export interface Restaurant {
   readonly cuisine: string | null;
   readonly address: string | null;
   readonly photo_url: string | null;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
   readonly created_by: string;
   readonly created_at: string;
   readonly avg_score: number | null;

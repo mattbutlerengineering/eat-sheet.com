@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS restaurants (
   cuisine TEXT,
   address TEXT,
   photo_url TEXT,
+  latitude REAL,
+  longitude REAL,
   created_by TEXT NOT NULL REFERENCES members(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
