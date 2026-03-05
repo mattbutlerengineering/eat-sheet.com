@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
 import { PhotoUpload } from "./PhotoUpload";
 import { geocodeAddress } from "../utils/geocode";
+import { CUISINES } from "../utils/cuisines";
 import type { Restaurant } from "../types";
 
 interface AddRestaurantProps {
@@ -88,14 +89,18 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
           <label htmlFor="r-cuisine" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
             Cuisine
           </label>
-          <input
+          <select
             id="r-cuisine"
-            type="text"
             value={cuisine}
             onChange={(e) => setCuisine(e.target.value)}
-            placeholder="Italian, Japanese, Mexican..."
-            className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
-          />
+            className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors appearance-none"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 1rem center" }}
+          >
+            <option value="" className="bg-stone-800 text-stone-500">Select cuisine...</option>
+            {CUISINES.map((c) => (
+              <option key={c} value={c} className="bg-stone-800 text-stone-50">{c}</option>
+            ))}
+          </select>
         </div>
 
         <div>
