@@ -43,6 +43,16 @@ export interface AuthState {
   readonly member: Member;
 }
 
+export interface ActivityEvent {
+  readonly id: string;
+  readonly type: "restaurant_added" | "review_added" | "review_updated";
+  readonly member_name: string;
+  readonly restaurant_id: string;
+  readonly restaurant_name: string;
+  readonly score: number | null;
+  readonly timestamp: string;
+}
+
 export interface ApiResponse<T> {
   readonly data?: T;
   readonly error?: string;

@@ -5,6 +5,7 @@ import { authRoutes } from "./routes/auth";
 import { restaurantRoutes } from "./routes/restaurants";
 import { reviewRoutes } from "./routes/reviews";
 import { photoRoutes } from "./routes/photos";
+import { activityRoutes } from "./routes/activity";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -14,6 +15,7 @@ app.route("/api/auth", authRoutes);
 app.route("/api/restaurants", restaurantRoutes);
 app.route("/api/reviews", reviewRoutes);
 app.route("/api/photos", photoRoutes);
+app.route("/api/activity", activityRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 
