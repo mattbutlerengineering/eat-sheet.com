@@ -241,6 +241,12 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
               {SLURMS_QUOTES.emptyList}
             </p>
             <p className="text-stone-500 text-sm mt-2">Add a restaurant to get this party started</p>
+            <Link
+              to="/add"
+              className="inline-block mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+            >
+              Add Your First Restaurant
+            </Link>
           </div>
         )}
 

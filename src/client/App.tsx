@@ -10,6 +10,7 @@ import { BottomNav } from "./components/BottomNav";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { FamilyStats } from "./components/FamilyStats";
 import { SettingsPage } from "./components/SettingsPage";
+import { OnboardingFlow, isOnboarded } from "./components/OnboardingFlow";
 import { Slurms } from "./components/Slurms";
 import { randomLoadingMessage } from "./utils/personality";
 
@@ -40,9 +41,12 @@ export function App() {
         <Route
           path="/"
           element={
-            <RestaurantList token={auth.token} member={auth.member} onLogout={logout} />
+            !isOnboarded()
+              ? <Navigate to="/onboarding" replace />
+              : <RestaurantList token={auth.token} member={auth.member} onLogout={logout} />
           }
         />
+        <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route
           path="/restaurant/:id"
           element={<RestaurantDetail token={auth.token} member={auth.member} />}

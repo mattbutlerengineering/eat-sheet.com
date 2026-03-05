@@ -60,7 +60,10 @@ export function ActivityFeed({ token }: ActivityFeedProps) {
             <p className="text-stone-300 font-display font-bold text-lg mt-4 text-center">
               No activity yet
             </p>
-            <p className="text-stone-500 text-sm mt-1 italic text-center">
+            <p className="text-stone-500 text-sm mt-2 text-center max-w-xs">
+              When your family adds restaurants and leaves reviews, their activity will show up here in real time.
+            </p>
+            <p className="text-stone-600 text-xs mt-3 italic text-center">
               {SLURMS_QUOTES.empty}
             </p>
           </div>

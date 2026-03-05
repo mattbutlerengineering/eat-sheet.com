@@ -106,6 +106,37 @@ export function FamilyStats({ token }: FamilyStatsProps) {
     );
   }
 
+  if (stats.total_restaurants === 0 && stats.total_reviews === 0) {
+    return (
+      <div className="min-h-dvh bg-stone-950 pb-20">
+        <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
+          <div className="px-4 py-4">
+            <h1 className="font-display text-xl font-black text-orange-500 italic">Stats</h1>
+          </div>
+        </header>
+        <div className="flex flex-col items-center py-16 px-6 animate-fade-up">
+          <Slurms variant="sleeping" size={56} />
+          <p className="text-stone-300 font-display font-bold text-lg mt-4 text-center">
+            No stats yet
+          </p>
+          <p className="text-stone-500 text-sm mt-2 text-center max-w-xs">
+            Once your family starts adding restaurants and reviews, you'll see leaderboards, cuisine breakdowns, and category averages here.
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-3 w-full max-w-xs opacity-30">
+            <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 text-center">
+              <p className="font-display font-black text-3xl text-orange-500">0</p>
+              <p className="text-stone-500 text-xs uppercase">Restaurants</p>
+            </div>
+            <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 text-center">
+              <p className="font-display font-black text-3xl text-orange-500">0</p>
+              <p className="text-stone-500 text-xs uppercase">Reviews</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const biggestFan = findCallout(stats.members, "fan");
   const harshestCritic = findCallout(stats.members, "critic");
   const maxCuisineCount = stats.cuisine_breakdown.length > 0
