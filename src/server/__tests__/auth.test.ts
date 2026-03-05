@@ -187,3 +187,140 @@ describe("POST /api/auth/regenerate-code", () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe("PUT /api/auth/me", () => {
+  it("returns 400 when name is empty", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/auth/me",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({ name: "   " }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when name is missing", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/auth/me",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({}),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when name exceeds 50 characters", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/auth/me",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({ name: "A".repeat(51) }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+    const body: any = await res.json();
+    expect(body.error).toContain("50 characters");
+  });
+
+  it("updates name successfully", async () => {
+    const updatedMember = { ...TEST_MEMBER, name: "Matthew" };
+    const { db } = createMockDb({
+      first: { "UPDATE members SET name": updatedMember },
+    });
+    const token = await makeToken();
+    const res = await app.request(
+      "/api/auth/me",
+      {
+        method: "PUT",
+        headers: authHeader(token),
+        body: JSON.stringify({ name: "Matthew" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.name).toBe("Matthew");
+  });
+
+  it("returns 401 without token", async () => {
+    const { db } = createMockDb();
+    const res = await app.request(
+      "/api/auth/me",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Matt" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("DELETE /api/auth/members/:id", () => {
+  it("returns 403 for non-admin", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken({ is_admin: false });
+    const res = await app.request(
+      "/api/auth/members/member-2",
+      { method: "DELETE", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 400 when admin tries to remove self", async () => {
+    const { db } = createMockDb();
+    const token = await makeToken({ member_id: "member-1", is_admin: true });
+    const res = await app.request(
+      "/api/auth/members/member-1",
+      { method: "DELETE", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+    const body: any = await res.json();
+    expect(body.error).toContain("yourself");
+  });
+
+  it("returns 404 when member not found", async () => {
+    const { db } = createMockDb({
+      first: { "SELECT id FROM members": null },
+    });
+    const token = await makeToken({ is_admin: true });
+    const res = await app.request(
+      "/api/auth/members/nonexistent",
+      { method: "DELETE", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it("removes member successfully", async () => {
+    const { db } = createMockDb({
+      first: { "SELECT id FROM members": { id: "member-2" } },
+    });
+    const token = await makeToken({ is_admin: true });
+    const res = await app.request(
+      "/api/auth/members/member-2",
+      { method: "DELETE", headers: authHeader(token) },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.success).toBe(true);
+  });
+});

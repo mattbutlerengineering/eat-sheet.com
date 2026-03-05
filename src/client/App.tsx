@@ -9,11 +9,12 @@ import { InstallPrompt } from "./components/InstallPrompt";
 import { BottomNav } from "./components/BottomNav";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { FamilyStats } from "./components/FamilyStats";
+import { SettingsPage } from "./components/SettingsPage";
 import { Slurms } from "./components/Slurms";
 import { randomLoadingMessage } from "./utils/personality";
 
 export function App() {
-  const { auth, loading, join, logout } = useAuth();
+  const { auth, loading, join, logout, updateName } = useAuth();
 
   if (loading) {
     return (
@@ -57,6 +58,17 @@ export function App() {
         <Route
           path="/stats"
           element={<FamilyStats token={auth.token} />}
+        />
+        <Route
+          path="/settings"
+          element={
+            <SettingsPage
+              token={auth.token}
+              member={auth.member}
+              onLogout={logout}
+              onNameChange={updateName}
+            />
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

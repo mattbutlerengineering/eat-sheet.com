@@ -77,5 +77,14 @@ export function useAuth() {
     setAuth(null);
   }, []);
 
-  return { auth, loading, join, logout };
+  const updateName = useCallback((name: string) => {
+    setAuth((prev) => {
+      if (!prev) return prev;
+      const updated: AuthState = { ...prev, member: { ...prev.member, name } };
+      saveAuth(updated);
+      return updated;
+    });
+  }, []);
+
+  return { auth, loading, join, logout, updateName };
 }

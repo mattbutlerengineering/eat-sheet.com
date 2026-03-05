@@ -92,12 +92,51 @@ auth.get("/me", authMiddleware, async (c) => {
     return c.json({ error: "Member not found" }, 404);
   }
 
+  const family = await db
+    .prepare("SELECT name FROM families WHERE id = ?")
+    .bind(member.family_id)
+    .first<{ name: string }>();
+
   return c.json({
     data: {
       id: member.id,
       family_id: member.family_id,
       name: member.name,
       is_admin: member.is_admin === 1,
+      family_name: family?.name ?? null,
+    },
+  });
+});
+
+auth.put("/me", authMiddleware, async (c) => {
+  const payload = c.get("jwtPayload");
+  const body = await c.req.json<{ name?: string }>();
+
+  if (!body.name?.trim()) {
+    return c.json({ error: "Name is required" }, 400);
+  }
+
+  const name = body.name.trim();
+  if (name.length > 50) {
+    return c.json({ error: "Name must be 50 characters or less" }, 400);
+  }
+
+  const db = c.env.DB;
+  const updated = await db
+    .prepare("UPDATE members SET name = ? WHERE id = ? RETURNING id, family_id, name, is_admin")
+    .bind(name, payload.member_id)
+    .first<Member>();
+
+  if (!updated) {
+    return c.json({ error: "Member not found" }, 404);
+  }
+
+  return c.json({
+    data: {
+      id: updated.id,
+      family_id: updated.family_id,
+      name: updated.name,
+      is_admin: updated.is_admin === 1,
     },
   });
 });
@@ -153,6 +192,35 @@ auth.post("/regenerate-code", authMiddleware, async (c) => {
   }
 
   return c.json({ data: { invite_code: family.invite_code } });
+});
+
+auth.delete("/members/:id", authMiddleware, async (c) => {
+  const payload = c.get("jwtPayload");
+  if (!payload.is_admin) {
+    return c.json({ error: "Admin access required" }, 403);
+  }
+
+  const memberId = c.req.param("id");
+  if (memberId === payload.member_id) {
+    return c.json({ error: "Cannot remove yourself" }, 400);
+  }
+
+  const db = c.env.DB;
+  const member = await db
+    .prepare("SELECT id FROM members WHERE id = ? AND family_id = ?")
+    .bind(memberId, payload.family_id)
+    .first<{ id: string }>();
+
+  if (!member) {
+    return c.json({ error: "Member not found" }, 404);
+  }
+
+  await db
+    .prepare("DELETE FROM members WHERE id = ? AND family_id = ?")
+    .bind(memberId, payload.family_id)
+    .run();
+
+  return c.json({ data: { success: true } });
 });
 
 export { auth as authRoutes };
