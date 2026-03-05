@@ -60,38 +60,31 @@ restaurants.get("/:id", async (c) => {
     return c.json({ error: "Restaurant not found" }, 404);
   }
 
-  const { results: reviews } = await db
-    .prepare(
+  const [reviewsResult, reactionsResult, photosResult] = await db.batch([
+    db.prepare(
       `SELECT rv.*, m.name as member_name
        FROM reviews rv
        JOIN members m ON m.id = rv.member_id
        WHERE rv.restaurant_id = ?
        ORDER BY rv.created_at DESC`
-    )
-    .bind(id)
-    .all();
-
-  // Fetch reactions for all reviews
-  const { results: allReactions } = await db
-    .prepare(
+    ).bind(id),
+    db.prepare(
       `SELECT rc.review_id, rc.emoji, rc.member_id, m.name as member_name
        FROM reactions rc
        JOIN members m ON m.id = rc.member_id
        WHERE rc.review_id IN (SELECT id FROM reviews WHERE restaurant_id = ?)`
-    )
-    .bind(id)
-    .all<{ review_id: string; emoji: string; member_id: string; member_name: string }>();
-
-  // Fetch photos for all reviews
-  const { results: allPhotos } = await db
-    .prepare(
+    ).bind(id),
+    db.prepare(
       `SELECT review_id, photo_url, sort_order
        FROM review_photos
        WHERE review_id IN (SELECT id FROM reviews WHERE restaurant_id = ?)
        ORDER BY sort_order ASC`
-    )
-    .bind(id)
-    .all<{ review_id: string; photo_url: string; sort_order: number }>();
+    ).bind(id),
+  ]);
+
+  const reviews = reviewsResult?.results ?? [];
+  const allReactions = (reactionsResult?.results ?? []) as { review_id: string; emoji: string; member_id: string; member_name: string }[];
+  const allPhotos = (photosResult?.results ?? []) as { review_id: string; photo_url: string; sort_order: number }[];
 
   // Group reactions by review_id
   const reactionsByReview = new Map<string, Array<{ emoji: string; member_id: string; member_name: string }>>();

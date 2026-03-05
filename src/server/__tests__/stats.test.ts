@@ -26,12 +26,8 @@ describe("GET /api/stats", () => {
 
   it("returns aggregated family stats", async () => {
     const { db } = createMockDb({
-      first: {
-        "COUNT(*) as count FROM restaurants": { count: 5 },
-        "COUNT(*) as count FROM reviews": { count: 12 },
-        "AVG(rv.food_score)": { food: 7.5, service: 8.0, ambiance: 6.5, value: 7.0 },
-      },
       all: {
+        "total_restaurants": [{ total_restaurants: 5, total_reviews: 12 }],
         "FROM members m": [
           { name: "Matt", review_count: 7, avg_score: 7.8 },
           { name: "Sarah", review_count: 5, avg_score: 8.2 },
@@ -40,6 +36,7 @@ describe("GET /api/stats", () => {
           { cuisine: "Italian", count: 3 },
           { cuisine: "Mexican", count: 2 },
         ],
+        "AVG(rv.food_score)": [{ food: 7.5, service: 8.0, ambiance: 6.5, value: 7.0 }],
       },
     });
     const { fetch } = createApp(db);
@@ -63,14 +60,11 @@ describe("GET /api/stats", () => {
 
   it("handles empty data gracefully", async () => {
     const { db } = createMockDb({
-      first: {
-        "COUNT(*) as count FROM restaurants": { count: 0 },
-        "COUNT(*) as count FROM reviews": { count: 0 },
-        "AVG(rv.food_score)": { food: null, service: null, ambiance: null, value: null },
-      },
       all: {
+        "total_restaurants": [{ total_restaurants: 0, total_reviews: 0 }],
         "FROM members m": [],
         "GROUP BY cuisine": [],
+        "AVG(rv.food_score)": [{ food: null, service: null, ambiance: null, value: null }],
       },
     });
     const { fetch } = createApp(db);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useApi } from "../hooks/useApi";
 import type { Reaction } from "../types";
 
@@ -32,13 +32,18 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
   const { post } = useApi(token);
   const [animating, setAnimating] = useState<string | null>(null);
 
-  const myReaction = reactions.find((r) => r.member_id === memberId)?.emoji ?? null;
+  const myReaction = useMemo(
+    () => reactions.find((r) => r.member_id === memberId)?.emoji ?? null,
+    [reactions, memberId]
+  );
 
-  // Count reactions by emoji
-  const counts = new Map<string, number>();
-  for (const r of reactions) {
-    counts.set(r.emoji, (counts.get(r.emoji) ?? 0) + 1);
-  }
+  const counts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of reactions) {
+      map.set(r.emoji, (map.get(r.emoji) ?? 0) + 1);
+    }
+    return map;
+  }, [reactions]);
 
   const [pending, setPending] = useState(false);
 

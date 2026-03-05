@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -30,9 +30,12 @@ export function MapView({ restaurants }: MapViewProps) {
   const mapInstance = useRef<L.Map | null>(null);
   const navigate = useNavigate();
 
-  const mappable = restaurants.filter(
-    (r): r is Restaurant & { latitude: number; longitude: number } =>
-      r.latitude !== null && r.longitude !== null
+  const mappable = useMemo(
+    () => restaurants.filter(
+      (r): r is Restaurant & { latitude: number; longitude: number } =>
+        r.latitude !== null && r.longitude !== null
+    ),
+    [restaurants]
   );
 
   useEffect(() => {
@@ -118,7 +121,7 @@ export function MapView({ restaurants }: MapViewProps) {
             link.addEventListener("click", (e) => {
               e.preventDefault();
               navigate(`/restaurant/${r.id}`);
-            });
+            }, { once: true });
           }
         }
       });

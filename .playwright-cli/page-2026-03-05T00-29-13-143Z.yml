@@ -1,0 +1,57 @@
+- generic [ref=e29]:
+  - banner [ref=e30]:
+    - button "← Back" [ref=e32]
+  - generic [ref=e33]:
+    - generic [ref=e34]:
+      - heading "Olive Garden" [level=2] [ref=e35]
+      - generic [ref=e36]:
+        - generic [ref=e37]: Italian
+        - generic [ref=e38]: 123 Main St
+      - generic [ref=e39]:
+        - generic [ref=e40]: "5.0"
+        - generic [ref=e41]: / 10 from 1 review
+    - button "Delete Restaurant" [ref=e43]
+    - generic [ref=e56]:
+      - heading "Edit Your Review" [level=3] [ref=e57]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - generic [ref=e61]: Overall
+          - generic [ref=e62]:
+            - generic [ref=e63]: 🙂
+            - generic [ref=e64]: "5"
+            - generic [ref=e65]: /10
+        - slider [ref=e66] [cursor=pointer]: "5"
+      - generic [ref=e67]:
+        - paragraph [ref=e68]: Breakdown (optional)
+        - button "+ Food" [ref=e69]:
+          - generic [ref=e70]: +
+          - text: Food
+        - button "+ Service" [ref=e71]:
+          - generic [ref=e72]: +
+          - text: Service
+        - button "+ Ambiance" [ref=e73]:
+          - generic [ref=e74]: +
+          - text: Ambiance
+        - button "+ Value" [ref=e75]:
+          - generic [ref=e76]: +
+          - text: Value
+      - generic [ref=e77]:
+        - generic [ref=e78]: Visited
+        - textbox "Visited" [ref=e79]: 2026-03-04
+      - generic [ref=e80]:
+        - generic [ref=e81]: Bits & Bobs
+        - textbox "Bits & Bobs" [ref=e82]:
+          - /placeholder: What stood out? Any dishes to remember?
+          - text: Great breadsticks, decent pasta
+      - button "Add Photo" [ref=e84]
+      - generic [ref=e85]:
+        - button "Cancel" [ref=e86]
+        - button "Save Review" [ref=e87]
+    - generic [ref=e45]:
+      - heading "Reviews (1)" [level=3] [ref=e46]
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]: MattMar 3, 2026
+          - generic [ref=e51]: "5"
+        - paragraph [ref=e52]: Great breadsticks, decent pasta
+        - button "Delete" [ref=e54]

@@ -35,7 +35,7 @@ function scoreBadgeColor(score: number | null): string {
 }
 
 export function RestaurantList({ token, member, onLogout }: RestaurantListProps) {
-  const { data: restaurants, loading, error } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
+  const { data: restaurants, loading, error, refresh } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
   const { data: bookmarkedList } = useFetch<readonly Restaurant[]>(token, "/api/bookmarks");
   const [sort, setSort] = useState<SortMode>("recent");
   const [search, setSearch] = useState("");
@@ -205,7 +205,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             <button
               onClick={() => setSort("recent")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                sort === "recent" && viewMode === "list"
+                sort === "recent"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
               }`}
@@ -215,7 +215,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             <button
               onClick={() => setSort("score")}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                sort === "score" && viewMode === "list"
+                sort === "score"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
               }`}
@@ -298,7 +298,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             <p className="text-stone-300 font-display font-bold mt-4">Something went wrong</p>
             <p className="text-stone-500 text-sm mt-2">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={refresh}
               className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
             >
               Try Again

@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFetch, useApi } from "../hooks/useApi";
+import { useCountUp } from "../hooks/useCountUp";
 import { ReviewForm } from "./ReviewForm";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
@@ -37,43 +38,6 @@ function formatDate(dateStr: string | null): string {
   }
 }
 
-function useCountUp(target: number | null, duration = 600): number | null {
-  const [value, setValue] = useState<number | null>(null);
-  const prevTarget = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (target === null) {
-      setValue(null);
-      return;
-    }
-
-    // Only animate on first render or target change
-    if (prevTarget.current === target) return;
-    prevTarget.current = target;
-
-    let startTime: number | null = null;
-    let rafId: number;
-
-    const animate = (timestamp: number) => {
-      if (startTime === null) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease-out curve
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * target * 10) / 10);
-
-      if (progress < 1) {
-        rafId = requestAnimationFrame(animate);
-      }
-    };
-
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [target, duration]);
-
-  return value;
-}
-
 export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -89,7 +53,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const isBookmarked = bookmarkList?.some((b: any) => b.id === id) ?? false;
+  const isBookmarked = bookmarkList?.some((b) => b.id === id) ?? false;
 
   const animatedScore = useCountUp(restaurant?.avg_score ?? null);
 
@@ -97,15 +61,25 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const isCreator = restaurant?.created_by === member.id;
   const isPerfect = restaurant?.avg_score === 10;
 
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const handleDeleteRestaurant = async () => {
-    await del(`/api/restaurants/${id}`);
-    navigate("/");
+    try {
+      await del(`/api/restaurants/${id}`);
+      navigate("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
-    await del(`/api/reviews/${reviewId}`);
-    setConfirmDelete(null);
-    refresh();
+    try {
+      await del(`/api/reviews/${reviewId}`);
+      setConfirmDelete(null);
+      refresh();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   const handleSubmitReview = async (data: ReviewData) => {
@@ -259,6 +233,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 </div>
               ))}
           </div>
+        )}
+
+        {deleteError && (
+          <p className="text-red-500 text-sm text-center mb-4">{deleteError}</p>
         )}
 
         {/* Delete Restaurant (creator only) */}

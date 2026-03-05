@@ -14,25 +14,13 @@ stats.get("/", async (c) => {
   const db = c.env.DB;
   const familyId = payload.family_id;
 
-  // Total restaurants
-  const totalRestaurants = await db
-    .prepare("SELECT COUNT(*) as count FROM restaurants WHERE family_id = ?")
-    .bind(familyId)
-    .first<{ count: number }>();
-
-  // Total reviews
-  const totalReviews = await db
-    .prepare(
-      `SELECT COUNT(*) as count FROM reviews rv
-       JOIN restaurants r ON r.id = rv.restaurant_id
-       WHERE r.family_id = ?`
-    )
-    .bind(familyId)
-    .first<{ count: number }>();
-
-  // Member stats
-  const { results: members } = await db
-    .prepare(
+  const [totalsResult, membersResult, cuisinesResult, categoryResult] = await db.batch([
+    db.prepare(
+      `SELECT
+        (SELECT COUNT(*) FROM restaurants WHERE family_id = ?) as total_restaurants,
+        (SELECT COUNT(*) FROM reviews rv JOIN restaurants r ON r.id = rv.restaurant_id WHERE r.family_id = ?) as total_reviews`
+    ).bind(familyId, familyId),
+    db.prepare(
       `SELECT m.name,
               COUNT(rv.id) as review_count,
               ROUND(AVG(rv.overall_score), 1) as avg_score
@@ -41,25 +29,15 @@ stats.get("/", async (c) => {
        WHERE m.family_id = ?
        GROUP BY m.id
        ORDER BY review_count DESC`
-    )
-    .bind(familyId)
-    .all();
-
-  // Cuisine breakdown
-  const { results: cuisines } = await db
-    .prepare(
+    ).bind(familyId),
+    db.prepare(
       `SELECT cuisine, COUNT(*) as count
        FROM restaurants
        WHERE family_id = ? AND cuisine IS NOT NULL AND cuisine != ''
        GROUP BY cuisine
        ORDER BY count DESC`
-    )
-    .bind(familyId)
-    .all();
-
-  // Category averages
-  const categoryAvgs = await db
-    .prepare(
+    ).bind(familyId),
+    db.prepare(
       `SELECT
         ROUND(AVG(rv.food_score), 1) as food,
         ROUND(AVG(rv.service_score), 1) as service,
@@ -68,16 +46,18 @@ stats.get("/", async (c) => {
        FROM reviews rv
        JOIN restaurants r ON r.id = rv.restaurant_id
        WHERE r.family_id = ?`
-    )
-    .bind(familyId)
-    .first();
+    ).bind(familyId),
+  ]);
+
+  const totals = totalsResult?.results[0] as { total_restaurants: number; total_reviews: number } | undefined;
+  const categoryAvgs = categoryResult?.results[0] as { food: number | null; service: number | null; ambiance: number | null; value: number | null } | undefined;
 
   return c.json({
     data: {
-      total_restaurants: totalRestaurants?.count ?? 0,
-      total_reviews: totalReviews?.count ?? 0,
-      members,
-      cuisine_breakdown: cuisines,
+      total_restaurants: totals?.total_restaurants ?? 0,
+      total_reviews: totals?.total_reviews ?? 0,
+      members: membersResult?.results ?? [],
+      cuisine_breakdown: cuisinesResult?.results ?? [],
       category_averages: categoryAvgs ?? { food: null, service: null, ambiance: null, value: null },
     },
   });

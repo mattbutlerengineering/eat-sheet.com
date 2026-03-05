@@ -1,0 +1,46 @@
+- generic [ref=e2]:
+  - generic [ref=e36]:
+    - banner [ref=e37]:
+      - generic [ref=e38]:
+        - heading "eat sheet" [level=1] [ref=e39]
+        - generic [ref=e40]:
+          - generic [ref=e41]: Matt
+          - button "Invite" [ref=e42]
+          - button "Leave" [ref=e43]
+    - generic [ref=e44]:
+      - generic [ref=e46]:
+        - img [ref=e47]
+        - textbox "Search restaurants..." [ref=e50]
+      - generic [ref=e51]:
+        - button "All" [ref=e52]
+        - button "Italian" [ref=e53]
+      - generic [ref=e55]:
+        - button "Recent" [ref=e56]
+        - button "Top Rated" [ref=e57]
+      - link "Olive Garden Italian 1 review Added by You · Visited Yesterday 5.0" [ref=e59] [cursor=pointer]:
+        - /url: /restaurant/0ffa5017bc999335
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - heading "Olive Garden" [level=3] [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e65]: Italian
+              - generic [ref=e66]: 1 review
+            - generic [ref=e67]:
+              - generic [ref=e68]: Added by You
+              - generic [ref=e69]: ·
+              - generic [ref=e70]: Visited Yesterday
+          - generic [ref=e71]: "5.0"
+    - link "+" [ref=e72] [cursor=pointer]:
+      - /url: /add
+      - generic [ref=e73]: +
+  - navigation [ref=e74]:
+    - generic [ref=e75]:
+      - button "Eats" [ref=e76]:
+        - img [ref=e77]
+        - generic [ref=e80]: Eats
+      - button "Activity" [ref=e81]:
+        - img [ref=e82]
+        - generic [ref=e84]: Activity
+      - button "Stats" [ref=e85]:
+        - img [ref=e86]
+        - generic [ref=e87]: Stats

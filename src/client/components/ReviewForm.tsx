@@ -40,6 +40,8 @@ function quickDates(): readonly { readonly label: string; readonly value: string
   ];
 }
 
+const QUICK_DATES = quickDates();
+
 function getExistingPhotoUrls(review?: Review): readonly string[] {
   if (!review) return [];
   if (review.photo_urls && review.photo_urls.length > 0) return review.photo_urls;
@@ -87,7 +89,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
     }
   };
 
-  const dates = quickDates();
+  const dates = QUICK_DATES;
   const isReady = overall !== null && !submitting;
 
   return (

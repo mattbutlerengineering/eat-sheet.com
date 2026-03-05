@@ -96,9 +96,9 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors appearance-none"
             style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 1rem center" }}
           >
-            <option value="" className="bg-stone-800 text-stone-500">Select cuisine...</option>
+            <option value="">Select cuisine...</option>
             {CUISINES.map((c) => (
-              <option key={c} value={c} className="bg-stone-800 text-stone-50">{c}</option>
+              <option key={c} value={c}>{c}</option>
             ))}
           </select>
         </div>

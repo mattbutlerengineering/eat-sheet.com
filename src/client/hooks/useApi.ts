@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { ApiResponse } from "../types";
 
 export function useApi(token: string | undefined) {
@@ -70,8 +70,6 @@ export function useFetch<T>(token: string | undefined, url: string | null) {
   const [loading, setLoading] = useState(!!url);
   const [error, setError] = useState<string | null>(null);
   const { get } = useApi(token);
-  const refreshRef = useRef(0);
-
   const load = useCallback(async () => {
     if (!url) return;
     setLoading(true);
@@ -91,7 +89,6 @@ export function useFetch<T>(token: string | undefined, url: string | null) {
   }, [load]);
 
   const refresh = useCallback(() => {
-    refreshRef.current += 1;
     load();
   }, [load]);
 

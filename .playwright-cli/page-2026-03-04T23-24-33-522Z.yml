@@ -1,0 +1,18 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "eat sheet" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Family Restaurant Ratings
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: Invite Code
+      - textbox "Invite Code" [ref=e11]:
+        - /placeholder: Enter your family code
+        - text: EATSHEET2024
+    - generic [ref=e12]:
+      - generic [ref=e13]: Your Name
+      - textbox "Your Name" [ref=e14]:
+        - /placeholder: What should we call you?
+        - text: Matt
+    - paragraph [ref=e18]: Invalid invite code
+    - button "Join the Sheet" [ref=e15]
+  - paragraph [ref=e16]: Ask your family for the invite code

@@ -33,7 +33,7 @@ function activityEmoji(event: ActivityEvent): string {
 }
 
 export function ActivityFeed({ token }: ActivityFeedProps) {
-  const { data: events, loading } = useFetch<readonly ActivityEvent[]>(token, "/api/activity");
+  const { data: events, loading, error } = useFetch<readonly ActivityEvent[]>(token, "/api/activity");
   const navigate = useNavigate();
 
   return (
@@ -54,7 +54,15 @@ export function ActivityFeed({ token }: ActivityFeedProps) {
         )}
 
         {/* Empty State */}
-        {!loading && (!events || events.length === 0) && (
+        {!loading && error && (
+          <div className="flex flex-col items-center py-16 animate-fade-up">
+            <Slurms variant="snarky" size={56} />
+            <p className="text-stone-300 font-display font-bold mt-4">Something went wrong</p>
+            <p className="text-stone-500 text-sm mt-2">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && (!events || events.length === 0) && (
           <div className="flex flex-col items-center py-16 animate-fade-up">
             <Slurms variant="bored" size={56} />
             <p className="text-stone-300 font-display font-bold text-lg mt-4 text-center">

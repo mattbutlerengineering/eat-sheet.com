@@ -1,0 +1,14 @@
+- generic [ref=e88]:
+  - banner [ref=e89]:
+    - generic [ref=e90]:
+      - heading "eat sheet" [level=1] [ref=e92]
+      - generic [ref=e93]:
+        - generic [ref=e94]: Matt
+        - button "Invite" [ref=e95]
+        - button "Leave" [ref=e96]
+  - generic [ref=e99]:
+    - button "Recent" [ref=e100]
+    - button "Top Rated" [ref=e101]
+  - link "+" [ref=e106] [cursor=pointer]:
+    - /url: /add
+    - generic [ref=e107]: +

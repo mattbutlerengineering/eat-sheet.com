@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { useFetch } from "../hooks/useApi";
+import { useCountUp } from "../hooks/useCountUp";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { randomLoadingMessage, SLURMS_QUOTES } from "../utils/personality";
@@ -9,34 +9,8 @@ interface FamilyStatsProps {
   readonly token: string;
 }
 
-function useCountUp(target: number, duration = 600): number {
-  const [value, setValue] = useState(0);
-  const prevTarget = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (prevTarget.current === target) return;
-    prevTarget.current = target;
-
-    let startTime: number | null = null;
-    let rafId: number;
-
-    const animate = (timestamp: number) => {
-      if (startTime === null) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * target));
-      if (progress < 1) rafId = requestAnimationFrame(animate);
-    };
-
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [target, duration]);
-
-  return value;
-}
-
 function StatCard({ label, value }: { readonly label: string; readonly value: number }) {
-  const animated = useCountUp(value);
+  const animated = useCountUp(value) ?? 0;
   return (
     <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 text-center animate-fade-up">
       <p className="font-display font-black text-4xl text-orange-500">{animated}</p>
@@ -72,7 +46,7 @@ function findCallout(members: readonly MemberStats[], type: "fan" | "critic"): M
 }
 
 export function FamilyStats({ token }: FamilyStatsProps) {
-  const { data: stats, loading } = useFetch<FamilyStatsData>(token, "/api/stats");
+  const { data: stats, loading, error } = useFetch<FamilyStatsData>(token, "/api/stats");
 
   if (loading) {
     return (
@@ -100,7 +74,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
         </header>
         <div className="flex flex-col items-center py-16">
           <Slurms variant="snarky" size={56} />
-          <p className="text-stone-400 font-medium mt-4">{SLURMS_QUOTES.error}</p>
+          <p className="text-stone-400 font-medium mt-4">{error ?? SLURMS_QUOTES.error}</p>
         </div>
       </div>
     );

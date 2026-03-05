@@ -39,7 +39,14 @@ export function createMockDb(config: MockDbConfig = {}) {
   const db = {
     prepare: (sql: string) => createStatement(sql),
     batch: async (stmts: MockStatement[]) => {
-      return stmts.map(() => ({ success: true }));
+      const results = [];
+      for (const stmt of stmts) {
+        // Each batched statement needs to return { results: [...], success: true }
+        // Try all() which returns { results: T[] }, then wrap it
+        const allResult = await stmt.all();
+        results.push({ ...allResult, success: true });
+      }
+      return results;
     },
   };
 
