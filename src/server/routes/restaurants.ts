@@ -120,6 +120,7 @@ restaurants.post("/", async (c) => {
     photo_url?: string;
     latitude?: number;
     longitude?: number;
+    google_place_id?: string;
   }>();
 
   if (!body.name?.trim()) {
@@ -127,10 +128,27 @@ restaurants.post("/", async (c) => {
   }
 
   const db = c.env.DB;
+  const googlePlaceId = body.google_place_id?.trim() || null;
+
+  // Duplicate detection: same google_place_id in same family
+  if (googlePlaceId) {
+    const duplicate = await db
+      .prepare("SELECT id, name FROM restaurants WHERE google_place_id = ? AND family_id = ?")
+      .bind(googlePlaceId, payload.family_id)
+      .first<{ id: string; name: string }>();
+
+    if (duplicate) {
+      return c.json({
+        error: `"${duplicate.name}" is already in your list`,
+        duplicate_id: duplicate.id,
+      }, 409);
+    }
+  }
+
   const restaurant = await db
     .prepare(
-      `INSERT INTO restaurants (family_id, name, cuisine, address, photo_url, latitude, longitude, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO restaurants (family_id, name, cuisine, address, photo_url, latitude, longitude, google_place_id, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -141,6 +159,7 @@ restaurants.post("/", async (c) => {
       body.photo_url?.trim() || null,
       body.latitude ?? null,
       body.longitude ?? null,
+      googlePlaceId,
       payload.member_id
     )
     .first();
@@ -158,6 +177,7 @@ restaurants.put("/:id", async (c) => {
     photo_url?: string;
     latitude?: number | null;
     longitude?: number | null;
+    google_place_id?: string | null;
   }>();
 
   if (!body.name?.trim()) {
@@ -174,10 +194,12 @@ restaurants.put("/:id", async (c) => {
     return c.json({ error: "Restaurant not found" }, 404);
   }
 
+  const googlePlaceId = body.google_place_id?.trim() || null;
+
   const restaurant = await db
     .prepare(
       `UPDATE restaurants
-       SET name = ?, cuisine = ?, address = ?, photo_url = ?, latitude = ?, longitude = ?
+       SET name = ?, cuisine = ?, address = ?, photo_url = ?, latitude = ?, longitude = ?, google_place_id = ?
        WHERE id = ? AND family_id = ?
        RETURNING *`
     )
@@ -188,6 +210,7 @@ restaurants.put("/:id", async (c) => {
       body.photo_url?.trim() || null,
       body.latitude ?? null,
       body.longitude ?? null,
+      googlePlaceId,
       id,
       payload.family_id
     )

@@ -173,6 +173,26 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             )}
           </div>
 
+          {/* Get Directions */}
+          {(restaurant.latitude != null && restaurant.longitude != null) && (
+            <a
+              href={
+                restaurant.google_place_id
+                  ? `https://www.google.com/maps/dir/?api=1&destination_place_id=${restaurant.google_place_id}`
+                  : `https://www.google.com/maps/dir/?api=1&destination=${restaurant.latitude},${restaurant.longitude}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+              Get Directions
+            </a>
+          )}
+
           {/* Average Score with count-up + personality */}
           {animatedScore !== null && (
             <div className="mt-4">

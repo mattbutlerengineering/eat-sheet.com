@@ -52,4 +52,5 @@ export interface Env {
   DB: D1Database;
   JWT_SECRET: string;
   PHOTOS: R2Bucket;
+  GOOGLE_PLACES_API_KEY: string;
 }

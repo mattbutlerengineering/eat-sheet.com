@@ -10,6 +10,7 @@ import { statsRoutes } from "./routes/stats";
 import { reactionRoutes } from "./routes/reactions";
 import { bookmarkRoutes } from "./routes/bookmarks";
 import { shareRoutes } from "./routes/share";
+import { placesRoutes } from "./routes/places";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -24,6 +25,7 @@ app.route("/api/stats", statsRoutes);
 app.route("/api/reactions", reactionRoutes);
 app.route("/api/bookmarks", bookmarkRoutes);
 app.route("/api/share", shareRoutes);
+app.route("/api/places", placesRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 

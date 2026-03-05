@@ -13,6 +13,7 @@ export interface Restaurant {
   readonly photo_url: string | null;
   readonly latitude: number | null;
   readonly longitude: number | null;
+  readonly google_place_id: string | null;
   readonly created_by: string;
   readonly created_at: string;
   readonly avg_score: number | null;
