@@ -33,7 +33,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
           <h1 className="font-display text-5xl font-black text-orange-500 tracking-tight">
             eat sheet
           </h1>
-          <p className="mt-2 text-stone-400 font-body text-sm tracking-widest uppercase">
+          <p className="mt-2 text-stone-400 font-body text-base tracking-widest uppercase">
             Family Restaurant Ratings
           </p>
         </div>
@@ -45,7 +45,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
           style={{ animationDelay: "0.1s" }}
         >
           <div>
-            <label htmlFor="invite-code" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+            <label htmlFor="invite-code" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
               Invite Code
             </label>
             <input
@@ -60,7 +60,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
               Your Name
             </label>
             <input
@@ -88,7 +88,7 @@ export function JoinScreen({ onJoin }: JoinScreenProps) {
         </form>
 
         <p
-          className="text-center text-stone-600 text-xs mt-8 animate-fade-up"
+          className="text-center text-stone-600 text-sm mt-8 animate-fade-up"
           style={{ animationDelay: "0.2s" }}
         >
           Ask your family for the invite code

@@ -44,7 +44,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         <div className="px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="text-stone-400 hover:text-stone-200 transition-colors text-sm"
+            className="text-stone-400 hover:text-stone-200 transition-colors text-base"
           >
             ← Back
           </button>
@@ -54,7 +54,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
 
       <form onSubmit={handleSubmit} className="px-4 py-6 space-y-5 max-w-lg mx-auto">
         <div>
-          <label htmlFor="r-name" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+          <label htmlFor="r-name" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
             Name *
           </label>
           <input
@@ -69,7 +69,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         </div>
 
         <div>
-          <label htmlFor="r-cuisine" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+          <label htmlFor="r-cuisine" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
             Cuisine
           </label>
           <input
@@ -83,7 +83,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         </div>
 
         <div>
-          <label htmlFor="r-address" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+          <label htmlFor="r-address" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
             Address
           </label>
           <input
