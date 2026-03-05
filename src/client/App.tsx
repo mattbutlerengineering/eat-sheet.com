@@ -6,6 +6,7 @@ import { OfflineBanner } from "./components/OfflineBanner";
 import { InstallPrompt } from "./components/InstallPrompt";
 import { BottomNav } from "./components/BottomNav";
 import { OnboardingFlow, isOnboarded } from "./components/OnboardingFlow";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Slurms } from "./components/Slurms";
 import { randomLoadingMessage } from "./utils/personality";
 
@@ -61,6 +62,7 @@ export function App() {
   }
 
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <OfflineBanner />
       <InstallPrompt />
@@ -110,5 +112,6 @@ export function App() {
       </main>
       <BottomNav />
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

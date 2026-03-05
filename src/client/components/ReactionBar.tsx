@@ -40,7 +40,11 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
     counts.set(r.emoji, (counts.get(r.emoji) ?? 0) + 1);
   }
 
+  const [pending, setPending] = useState(false);
+
   const handleReact = async (emoji: string) => {
+    if (pending) return; // Debounce rapid-fire
+    setPending(true);
     setAnimating(emoji);
     try {
       await post(`/api/reactions/${reviewId}`, { emoji });
@@ -48,7 +52,7 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
     } catch {
       // silently fail — not critical
     } finally {
-      setTimeout(() => setAnimating(null), 300);
+      setTimeout(() => { setAnimating(null); setPending(false); }, 300);
     }
   };
 
