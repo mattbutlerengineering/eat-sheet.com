@@ -35,7 +35,7 @@ function scoreBadgeColor(score: number | null): string {
 }
 
 export function RestaurantList({ token, member, onLogout }: RestaurantListProps) {
-  const { data: restaurants, loading } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
+  const { data: restaurants, loading, error } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
   const { data: bookmarkedList } = useFetch<readonly Restaurant[]>(token, "/api/bookmarks");
   const [sort, setSort] = useState<SortMode>("recent");
   const [search, setSearch] = useState("");
@@ -288,6 +288,21 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             {[1, 2, 3].map((i) => (
               <div key={i} className="shimmer h-20 rounded-xl" />
             ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <div className="text-center py-16 animate-fade-up">
+            <Slurms variant="snarky" size={48} className="mx-auto" />
+            <p className="text-stone-300 font-display font-bold mt-4">Something went wrong</p>
+            <p className="text-stone-500 text-sm mt-2">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+            >
+              Try Again
+            </button>
           </div>
         )}
 
