@@ -42,8 +42,35 @@ function PageLoader() {
   );
 }
 
+// Share pages are public — accessible without auth
+function PublicRoutes() {
+  // Check if current path is a share link
+  if (window.location.pathname.startsWith("/share/")) {
+    return (
+      <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/share/:type/:token" element={<SharePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    );
+  }
+  return null;
+}
+
 export function App() {
   const { auth, loading, join, logout, updateName } = useAuth();
+
+  // Public share pages don't need auth
+  if (!auth && window.location.pathname.startsWith("/share/")) {
+    return (
+      <ErrorBoundary>
+        <PublicRoutes />
+      </ErrorBoundary>
+    );
+  }
 
   if (loading) {
     return (
