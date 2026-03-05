@@ -247,7 +247,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
         {/* Empty State — filters returned nothing */}
         {!loading && restaurants && restaurants.length > 0 && filtered.length === 0 && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="bored" size={48} className="mx-auto" />
+            <Slurms variant="snarky" size={48} className="mx-auto" />
             <p className="text-stone-300 font-display font-bold mt-4">
               {SLURMS_QUOTES.noResults}
             </p>

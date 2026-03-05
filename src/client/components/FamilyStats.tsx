@@ -99,7 +99,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
           </div>
         </header>
         <div className="flex flex-col items-center py-16">
-          <Slurms variant="bored" size={56} />
+          <Slurms variant="snarky" size={56} />
           <p className="text-stone-400 font-medium mt-4">{SLURMS_QUOTES.error}</p>
         </div>
       </div>

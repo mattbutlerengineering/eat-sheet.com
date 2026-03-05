@@ -2,7 +2,7 @@
 // Simple inline SVG art: sunglasses-wearing worm with party hat
 
 interface SlurmsProps {
-  readonly variant: "welcome" | "celebrate" | "bored" | "party" | "sleeping";
+  readonly variant: "welcome" | "celebrate" | "bored" | "party" | "sleeping" | "snarky";
   readonly size?: number;
   readonly className?: string;
 }
@@ -50,6 +50,14 @@ export function Slurms({ variant, size = 48, className = "" }: SlurmsProps) {
         <rect x="36" y="31" width="3" height="2" rx="1" fill="#44403c" opacity="0.6" />
       </g>
       {/* Mouth */}
+      {variant === "snarky" && (
+        <>
+          {/* Raised eyebrow above right lens */}
+          <path d="M35 28 Q39 25 44 27" stroke="#1c1917" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          {/* Smirk */}
+          <path d="M28 42 Q33 46 37 41" stroke="#1c1917" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        </>
+      )}
       {variant === "bored" && (
         <line x1="28" y1="42" x2="36" y2="42" stroke="#1c1917" strokeWidth="1.5" strokeLinecap="round" />
       )}
@@ -78,7 +86,7 @@ export function Slurms({ variant, size = 48, className = "" }: SlurmsProps) {
           <line x1="46" y1="36" x2="50" y2="30" stroke="#a3e635" strokeWidth="4" strokeLinecap="round" />
         </>
       )}
-      {variant === "bored" && (
+      {(variant === "bored" || variant === "snarky") && (
         <>
           <line x1="18" y1="38" x2="14" y2="42" stroke="#a3e635" strokeWidth="4" strokeLinecap="round" />
           <line x1="46" y1="38" x2="50" y2="42" stroke="#a3e635" strokeWidth="4" strokeLinecap="round" />

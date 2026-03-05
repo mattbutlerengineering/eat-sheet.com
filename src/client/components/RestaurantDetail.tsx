@@ -128,7 +128,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   if (!restaurant) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3">
-        <Slurms variant="sleeping" size={56} />
+        <Slurms variant="snarky" size={56} />
         <p className="text-stone-400 font-display font-bold">{SLURMS_QUOTES.error}</p>
       </div>
     );
