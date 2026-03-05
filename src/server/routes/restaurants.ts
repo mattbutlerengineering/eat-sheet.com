@@ -19,7 +19,8 @@ restaurants.get("/", async (c) => {
               ROUND(AVG(rv.overall_score), 1) as avg_score,
               COUNT(rv.id) as review_count,
               m.name as creator_name,
-              MAX(rv.visited_at) as last_visited_at
+              MAX(rv.visited_at) as last_visited_at,
+              (SELECT COUNT(*) FROM bookmarks b WHERE b.restaurant_id = r.id) as bookmark_count
        FROM restaurants r
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
        LEFT JOIN members m ON m.id = r.created_by

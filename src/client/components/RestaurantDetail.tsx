@@ -7,6 +7,7 @@ import { Slurms } from "./Slurms";
 import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { ReactionBar } from "./ReactionBar";
 import { PhotoGallery } from "./PhotoGallery";
+import { BookmarkButton } from "./BookmarkButton";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
 
@@ -80,8 +81,14 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
     token,
     id ? `/api/restaurants/${id}` : null
   );
+  const { data: bookmarkList, refresh: refreshBookmarks } = useFetch<readonly { id: string }[]>(
+    token,
+    "/api/bookmarks"
+  );
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const isBookmarked = bookmarkList?.some((b: any) => b.id === id) ?? false;
 
   const animatedScore = useCountUp(restaurant?.avg_score ?? null);
 
@@ -149,6 +156,16 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           >
             ← Back
           </button>
+          <div className="ml-auto">
+            {id && (
+              <BookmarkButton
+                token={token}
+                restaurantId={id}
+                isBookmarked={isBookmarked}
+                onToggled={refreshBookmarks}
+              />
+            )}
+          </div>
         </div>
       </header>
 

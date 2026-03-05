@@ -17,6 +17,7 @@ export interface Restaurant {
   readonly review_count: number;
   readonly creator_name?: string;
   readonly last_visited_at?: string | null;
+  readonly bookmark_count?: number;
 }
 
 export interface Review {

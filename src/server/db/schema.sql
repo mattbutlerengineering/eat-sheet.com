@@ -64,5 +64,15 @@ CREATE TABLE IF NOT EXISTS review_photos (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  restaurant_id TEXT NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(member_id, restaurant_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_reactions_review ON reactions(review_id);
 CREATE INDEX IF NOT EXISTS idx_review_photos_review ON review_photos(review_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_member ON bookmarks(member_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_restaurant ON bookmarks(restaurant_id);

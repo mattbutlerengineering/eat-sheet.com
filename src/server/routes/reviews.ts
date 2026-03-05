@@ -101,6 +101,12 @@ reviews.post("/:restaurantId", async (c) => {
     await saveReviewPhotos(db, review.id as string, validUrls);
   }
 
+  // Auto-remove bookmark when review is added
+  await db
+    .prepare("DELETE FROM bookmarks WHERE member_id = ? AND restaurant_id = ?")
+    .bind(payload.member_id, restaurantId)
+    .run();
+
   return c.json({ data: review }, 201);
 });
 

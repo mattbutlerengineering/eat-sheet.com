@@ -31,12 +31,19 @@ function scoreBadgeColor(score: number | null): string {
 
 export function RestaurantList({ token, member, onLogout }: RestaurantListProps) {
   const { data: restaurants, loading } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
+  const { data: bookmarkedList } = useFetch<readonly Restaurant[]>(token, "/api/bookmarks");
   const [sort, setSort] = useState<SortMode>("recent");
   const [search, setSearch] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
+  const [showWantToTry, setShowWantToTry] = useState(false);
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const fabRef = useRef<HTMLAnchorElement>(null);
+
+  const bookmarkedIds = useMemo(() => {
+    if (!bookmarkedList) return new Set<string>();
+    return new Set(bookmarkedList.map((b) => b.id));
+  }, [bookmarkedList]);
 
   // Wiggle the FAB every 30s as a hint
   useEffect(() => {
@@ -65,6 +72,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
 
     return [...restaurants]
       .filter((r) => {
+        if (showWantToTry && !bookmarkedIds.has(r.id)) return false;
         if (q && !r.name.toLowerCase().includes(q) && !(r.cuisine?.toLowerCase().includes(q))) {
           return false;
         }
@@ -79,13 +87,14 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
         }
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
-  }, [restaurants, search, cuisineFilter, sort]);
+  }, [restaurants, search, cuisineFilter, sort, showWantToTry, bookmarkedIds]);
 
-  const hasFilters = search.trim() !== "" || cuisineFilter !== null;
+  const hasFilters = search.trim() !== "" || cuisineFilter !== null || showWantToTry;
 
   const clearFilters = () => {
     setSearch("");
     setCuisineFilter(null);
+    setShowWantToTry(false);
   };
 
   return (
@@ -140,19 +149,34 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           </div>
         </div>
 
-        {/* Cuisine Chips */}
-        {cuisines.length > 0 && (
+        {/* Cuisine Chips + Want to Try */}
+        {(cuisines.length > 0 || bookmarkedIds.size > 0) && (
           <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-none">
             <button
-              onClick={() => setCuisineFilter(null)}
+              onClick={() => { setCuisineFilter(null); setShowWantToTry(false); }}
               className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                cuisineFilter === null
+                cuisineFilter === null && !showWantToTry
                   ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                   : "bg-stone-800 text-stone-400 border border-stone-700"
               }`}
             >
               All
             </button>
+            {bookmarkedIds.size > 0 && (
+              <button
+                onClick={() => setShowWantToTry(!showWantToTry)}
+                className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
+                  showWantToTry
+                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    : "bg-stone-800 text-stone-400 border border-stone-700"
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill={showWantToTry ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                </svg>
+                Want to Try ({bookmarkedIds.size})
+              </button>
+            )}
             {cuisines.map((c) => (
               <button
                 key={c}
@@ -306,6 +330,14 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
                         <>
                           <span>·</span>
                           <span>Visited {relativeTime(restaurant.last_visited_at)}</span>
+                        </>
+                      )}
+                      {(restaurant.bookmark_count ?? 0) > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="text-orange-500/70">
+                            🔖 {restaurant.bookmark_count} {restaurant.bookmark_count === 1 ? "wants" : "want"} to try
+                          </span>
                         </>
                       )}
                     </div>

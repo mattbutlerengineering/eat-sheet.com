@@ -8,6 +8,7 @@ import { photoRoutes } from "./routes/photos";
 import { activityRoutes } from "./routes/activity";
 import { statsRoutes } from "./routes/stats";
 import { reactionRoutes } from "./routes/reactions";
+import { bookmarkRoutes } from "./routes/bookmarks";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -20,6 +21,7 @@ app.route("/api/photos", photoRoutes);
 app.route("/api/activity", activityRoutes);
 app.route("/api/stats", statsRoutes);
 app.route("/api/reactions", reactionRoutes);
+app.route("/api/bookmarks", bookmarkRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 
