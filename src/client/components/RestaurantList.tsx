@@ -43,23 +43,23 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
     <div className="min-h-dvh bg-stone-950">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
-        <div className="px-4 py-3 flex items-center justify-between">
+        <div className="px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl font-black text-orange-500">eat sheet</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-stone-400">{member.name}</span>
+            <span className="text-base text-stone-400">{member.name}</span>
             {member.is_admin && (
               <button
                 onClick={() => setShowInviteCode(true)}
-                className="text-xs text-orange-500/70 hover:text-orange-400 transition-colors"
+                className="text-sm text-orange-500/70 hover:text-orange-400 transition-colors"
               >
                 Invite
               </button>
             )}
             <button
               onClick={onLogout}
-              className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
+              className="text-sm text-stone-500 hover:text-stone-300 transition-colors"
             >
               Leave
             </button>
@@ -73,7 +73,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5">
             <button
               onClick={() => setSort("recent")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 sort === "recent"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
@@ -83,7 +83,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             </button>
             <button
               onClick={() => setSort("score")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 sort === "score"
                   ? "bg-stone-700 text-stone-50"
                   : "text-stone-400 hover:text-stone-200"
@@ -113,7 +113,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
         )}
 
         {/* Restaurant Cards */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           {sorted.map((restaurant, i) => (
             <Link
               key={restaurant.id}
@@ -121,7 +121,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
               className="block animate-fade-up"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 active:scale-[0.98] transition-transform">
+              <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 active:scale-[0.98] transition-transform">
                 <div className="flex items-start justify-between gap-3">
                   {restaurant.photo_url && (
                     <img
@@ -136,11 +136,11 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       {restaurant.cuisine && (
-                        <span className="text-xs text-orange-500/80 font-medium">
+                        <span className="text-sm text-orange-500/80 font-medium">
                           {restaurant.cuisine}
                         </span>
                       )}
-                      <span className="text-xs text-stone-500">
+                      <span className="text-sm text-stone-500">
                         {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
                       </span>
                     </div>
