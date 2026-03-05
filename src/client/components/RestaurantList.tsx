@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
 import { InviteCodePanel } from "./InviteCodePanel";
+import { RandomPicker } from "./RandomPicker";
+import { Slurms } from "./Slurms";
+import { SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
 
 interface RestaurantListProps {
   readonly token: string;
@@ -29,6 +32,17 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
   const { data: restaurants, loading } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
   const [sort, setSort] = useState<SortMode>("recent");
   const [showInviteCode, setShowInviteCode] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const fabRef = useRef<HTMLAnchorElement>(null);
+
+  // Wiggle the FAB every 30s as a hint
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fabRef.current?.classList.add("animate-wiggle");
+      setTimeout(() => fabRef.current?.classList.remove("animate-wiggle"), 600);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const sorted = restaurants
     ? [...restaurants].sort((a, b) => {
@@ -44,9 +58,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
       {/* Header */}
       <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
         <div className="px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-xl font-black text-orange-500">eat sheet</h1>
-          </div>
+          <h1 className="font-display text-xl font-black text-orange-500 italic">eat sheet</h1>
           <div className="flex items-center gap-3">
             <span className="text-base text-stone-400">{member.name}</span>
             {member.is_admin && (
@@ -67,8 +79,9 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
         </div>
       </header>
 
-      <div className="px-4 pb-24">
-        {/* Sort & Add */}
+      {/* pb-24 → pb-28 to account for bottom nav */}
+      <div className="px-4 pb-28">
+        {/* Sort & Pick */}
         <div className="flex items-center justify-between py-4">
           <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5">
             <button
@@ -92,11 +105,40 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
               Top Rated
             </button>
           </div>
+          {sorted.length > 1 && (
+            <button
+              onClick={() => setShowPicker(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="2" y="2" width="20" height="20" rx="3" />
+                <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                <circle cx="16" cy="8" r="1.5" fill="currentColor" />
+                <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+                <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              </svg>
+              Pick
+            </button>
+          )}
         </div>
 
         {/* Loading */}
         {loading && (
           <div className="space-y-3">
+            <div className="flex flex-col items-center py-8">
+              <Slurms variant="party" size={48} />
+              <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
+            </div>
             {[1, 2, 3].map((i) => (
               <div key={i} className="shimmer h-20 rounded-xl" />
             ))}
@@ -105,10 +147,12 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
 
         {/* Empty State */}
         {!loading && sorted.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-4xl mb-3">🍽️</p>
-            <p className="text-stone-400 font-medium">No restaurants yet</p>
-            <p className="text-stone-500 text-sm mt-1">Add one to get started</p>
+          <div className="text-center py-16 animate-fade-up">
+            <Slurms variant="bored" size={56} className="mx-auto" />
+            <p className="text-stone-300 font-display font-bold text-lg mt-4">
+              {SLURMS_QUOTES.emptyList}
+            </p>
+            <p className="text-stone-500 text-sm mt-2">Add a restaurant to get this party started</p>
           </div>
         )}
 
@@ -121,7 +165,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
               className="block animate-fade-up"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 active:scale-[0.98] transition-transform">
+              <div className="card-warm bg-stone-900 border border-stone-800/50 rounded-xl p-5">
                 <div className="flex items-start justify-between gap-3">
                   {restaurant.photo_url && (
                     <img
@@ -145,7 +189,13 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
                       </span>
                     </div>
                   </div>
-                  <div className={`px-2.5 py-1 rounded-lg font-display font-black text-lg ${scoreBadgeColor(restaurant.avg_score)}`}>
+                  <div
+                    className={`px-2.5 py-1 rounded-lg font-display font-black text-lg ${scoreBadgeColor(restaurant.avg_score)} ${
+                      restaurant.avg_score !== null && restaurant.avg_score >= 8
+                        ? "animate-glow-pulse"
+                        : ""
+                    }`}
+                  >
                     {scoreDisplay(restaurant.avg_score)}
                   </div>
                 </div>
@@ -157,14 +207,22 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
 
       {/* FAB */}
       <Link
+        ref={fabRef}
         to="/add"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition-all"
+        className="fixed bottom-20 right-6 w-14 h-14 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition-all z-30"
       >
         <span className="text-2xl text-white leading-none">+</span>
       </Link>
 
       {showInviteCode && (
         <InviteCodePanel token={token} onClose={() => setShowInviteCode(false)} />
+      )}
+
+      {showPicker && sorted.length > 0 && (
+        <RandomPicker
+          restaurants={sorted}
+          onClose={() => setShowPicker(false)}
+        />
       )}
     </div>
   );

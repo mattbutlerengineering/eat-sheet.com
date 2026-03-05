@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useFetch, useApi } from "../hooks/useApi";
 import { ReviewForm } from "./ReviewForm";
+import { MemberAvatar } from "./MemberAvatar";
+import { Slurms } from "./Slurms";
+import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
 
@@ -30,6 +33,43 @@ function formatDate(dateStr: string | null): string {
   }
 }
 
+function useCountUp(target: number | null, duration = 600): number | null {
+  const [value, setValue] = useState<number | null>(null);
+  const prevTarget = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (target === null) {
+      setValue(null);
+      return;
+    }
+
+    // Only animate on first render or target change
+    if (prevTarget.current === target) return;
+    prevTarget.current = target;
+
+    let startTime: number | null = null;
+    let rafId: number;
+
+    const animate = (timestamp: number) => {
+      if (startTime === null) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out curve
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(eased * target * 10) / 10);
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(animate);
+      }
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [target, duration]);
+
+  return value;
+}
+
 export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -39,11 +79,13 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
     id ? `/api/restaurants/${id}` : null
   );
   const [showForm, setShowForm] = useState(false);
-
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const animatedScore = useCountUp(restaurant?.avg_score ?? null);
 
   const myReview = restaurant?.reviews.find((r) => r.member_id === member.id);
   const isCreator = restaurant?.created_by === member.id;
+  const isPerfect = restaurant?.avg_score === 10;
 
   const handleDeleteRestaurant = async () => {
     await del(`/api/restaurants/${id}`);
@@ -70,6 +112,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
     return (
       <div className="min-h-dvh bg-stone-950">
         <div className="px-4 py-6 space-y-4">
+          <div className="flex flex-col items-center py-8">
+            <Slurms variant="party" size={48} />
+            <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
+          </div>
           <div className="shimmer h-8 w-48 rounded-lg" />
           <div className="shimmer h-4 w-32 rounded" />
           <div className="shimmer h-32 rounded-xl mt-6" />
@@ -80,11 +126,14 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
 
   if (!restaurant) {
     return (
-      <div className="min-h-dvh bg-stone-950 flex items-center justify-center">
-        <p className="text-stone-400">Restaurant not found</p>
+      <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3">
+        <Slurms variant="sleeping" size={56} />
+        <p className="text-stone-400 font-display font-bold">{SLURMS_QUOTES.error}</p>
       </div>
     );
   }
+
+  const personality = restaurant.avg_score !== null ? scorePersonality(restaurant.avg_score) : null;
 
   return (
     <div className="min-h-dvh bg-stone-950 pb-8">
@@ -100,8 +149,9 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
         </div>
       </header>
 
+      {/* Hero photo with gradient overlay */}
       {restaurant.photo_url && (
-        <div className="w-full max-h-64 overflow-hidden">
+        <div className="w-full max-h-64 overflow-hidden relative hero-gradient">
           <img
             src={restaurant.photo_url}
             alt={restaurant.name}
@@ -123,15 +173,31 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             )}
           </div>
 
-          {/* Average Score */}
-          {restaurant.avg_score !== null && (
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className={`font-display font-black text-5xl ${scoreColor(restaurant.avg_score)}`}>
-                {restaurant.avg_score.toFixed(1)}
-              </span>
-              <span className="text-stone-500 text-base">
-                / 10 from {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
-              </span>
+          {/* Average Score with count-up + personality */}
+          {animatedScore !== null && (
+            <div className="mt-4">
+              <div className="flex items-baseline gap-2">
+                <span className={`font-display font-black text-5xl ${scoreColor(restaurant.avg_score!)}`}>
+                  {animatedScore.toFixed(1)}
+                </span>
+                <span className="text-stone-500 text-base">
+                  / 10 from {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
+                </span>
+              </div>
+              {personality && (
+                <p className="font-display italic text-sm text-stone-400 mt-1">
+                  {personality.emoji} {personality.label}
+                </p>
+              )}
+              {/* Slurms celebrates perfect 10 */}
+              {isPerfect && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Slurms variant="celebrate" size={36} />
+                  <span className="text-gold-400 font-display font-bold text-sm italic">
+                    {SLURMS_QUOTES.perfect10}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -194,9 +260,12 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           </h3>
 
           {restaurant.reviews.length === 0 && (
-            <p className="text-stone-500 text-base py-4 text-center">
-              No reviews yet. Be the first!
-            </p>
+            <div className="text-center py-8 animate-fade-up">
+              <Slurms variant="bored" size={44} className="mx-auto" />
+              <p className="text-stone-500 text-base mt-3">
+                No reviews yet. Be the first!
+              </p>
+            </div>
           )}
 
           <div className="space-y-3">
@@ -207,13 +276,16 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
                 <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-medium text-stone-200">{review.member_name}</span>
-                    {review.visited_at && (
-                      <span className="text-stone-500 text-sm ml-2">
-                        {formatDate(review.visited_at)}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-3">
+                    <MemberAvatar name={review.member_name} size="sm" />
+                    <div>
+                      <span className="font-medium text-stone-200">{review.member_name}</span>
+                      {review.visited_at && (
+                        <span className="text-stone-500 text-sm ml-2">
+                          {formatDate(review.visited_at)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span className={`font-display font-black text-xl ${scoreColor(review.overall_score)}`}>
                     {review.overall_score}
@@ -246,9 +318,11 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                   </div>
                 )}
 
-                {/* Notes */}
+                {/* Notes — styled as handwritten note */}
                 {review.notes && (
-                  <p className="mt-3 text-base text-stone-300 leading-relaxed">{review.notes}</p>
+                  <div className="mt-3 bg-stone-800/40 rounded-lg p-3 border-l-2 border-orange-500/30">
+                    <p className="text-base text-stone-300 leading-relaxed italic">{review.notes}</p>
+                  </div>
                 )}
 
                 {review.photo_url && (
