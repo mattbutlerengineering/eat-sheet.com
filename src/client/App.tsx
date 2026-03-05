@@ -28,6 +28,9 @@ const FamilyStats = lazy(() =>
 const SettingsPage = lazy(() =>
   import("./components/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
+const SharePage = lazy(() =>
+  import("./components/SharePage").then((m) => ({ default: m.SharePage }))
+);
 
 function PageLoader() {
   return (
@@ -100,6 +103,7 @@ export function App() {
                 />
               }
             />
+            <Route path="/share/:type/:token" element={<SharePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

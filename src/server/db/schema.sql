@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
   photo_url TEXT,
   latitude REAL,
   longitude REAL,
+  share_token TEXT UNIQUE,
   created_by TEXT NOT NULL REFERENCES members(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   photo_url TEXT,
   visited_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  share_token TEXT UNIQUE,
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(restaurant_id, member_id)
 );

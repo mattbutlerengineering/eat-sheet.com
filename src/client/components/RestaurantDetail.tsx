@@ -8,6 +8,7 @@ import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/
 import { ReactionBar } from "./ReactionBar";
 import { PhotoGallery } from "./PhotoGallery";
 import { BookmarkButton } from "./BookmarkButton";
+import { ShareButton } from "./ShareButton";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
 
@@ -156,7 +157,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           >
             ← Back
           </button>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            {id && restaurant && (
+              <ShareButton token={token} type="restaurant" id={id} name={restaurant.name} />
+            )}
             {id && (
               <BookmarkButton
                 token={token}
