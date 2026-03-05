@@ -23,4 +23,9 @@ app.route("/api/reactions", reactionRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 
+app.onError((err, c) => {
+  console.error(`[${c.req.method}] ${c.req.path}:`, err.message);
+  return c.json({ error: err.message }, 500);
+});
+
 export default app;

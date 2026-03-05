@@ -42,7 +42,17 @@ CREATE TABLE IF NOT EXISTS reviews (
   UNIQUE(restaurant_id, member_id)
 );
 
+CREATE TABLE IF NOT EXISTS reactions (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+  review_id TEXT NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+  member_id TEXT NOT NULL REFERENCES members(id),
+  emoji TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(review_id, member_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_members_family ON members(family_id);
 CREATE INDEX IF NOT EXISTS idx_restaurants_family ON restaurants(family_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_member ON reviews(member_id);
+CREATE INDEX IF NOT EXISTS idx_reactions_review ON reactions(review_id);
