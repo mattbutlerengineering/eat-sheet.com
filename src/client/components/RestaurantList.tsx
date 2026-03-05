@@ -7,6 +7,7 @@ import { RandomPicker } from "./RandomPicker";
 import { Slurms } from "./Slurms";
 import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
 import { relativeTime } from "../utils/time";
+import { RecommendationCards } from "./RecommendationCards";
 
 const MapView = lazy(() =>
   import("./MapView").then((m) => ({ default: m.MapView }))
@@ -198,6 +199,9 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             ))}
           </div>
         )}
+
+        {/* Recommendations — only in list view */}
+        {viewMode === "list" && <RecommendationCards token={token} />}
 
         {/* Sort, View & Pick */}
         <div className="flex items-center justify-between py-2">
