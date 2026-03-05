@@ -55,9 +55,9 @@ export function ScoreSlider({ label, value, onChange, required }: ScoreSliderPro
       <button
         type="button"
         onClick={handleToggle}
-        className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-300 py-2 transition-colors"
+        className="flex items-center gap-2 text-base text-stone-500 hover:text-stone-300 py-2.5 transition-colors"
       >
-        <span className="w-5 h-5 rounded-full border border-stone-600 flex items-center justify-center text-xs">+</span>
+        <span className="w-6 h-6 rounded-full border border-stone-600 flex items-center justify-center text-xs">+</span>
         {label}
       </button>
     );
@@ -76,7 +76,7 @@ export function ScoreSlider({ label, value, onChange, required }: ScoreSliderPro
               ×
             </button>
           )}
-          <span className="text-sm font-medium text-stone-300">{label}</span>
+          <span className="text-base font-medium text-stone-300">{label}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-lg">{scoreEmoji(displayValue)}</span>

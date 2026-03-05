@@ -59,7 +59,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <h3 className="font-display font-bold text-lg text-stone-50">
         {existingReview ? "Edit Your Review" : "Add Your Review"}
       </h3>
@@ -67,7 +67,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
       <ScoreSlider label="Overall" value={overall} onChange={setOverall} required />
 
       <div className="border-t border-stone-800 pt-3">
-        <p className="text-xs text-stone-500 uppercase tracking-wider mb-2">Breakdown (optional)</p>
+        <p className="text-sm text-stone-500 uppercase tracking-wider mb-2">Breakdown (optional)</p>
         <ScoreSlider label="Food" value={food} onChange={setFood} />
         <ScoreSlider label="Service" value={service} onChange={setService} />
         <ScoreSlider label="Ambiance" value={ambiance} onChange={setAmbiance} />
@@ -75,7 +75,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
       </div>
 
       <div>
-        <label htmlFor="visit-date" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+        <label htmlFor="visit-date" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
           Visited
         </label>
         <input
@@ -88,7 +88,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-xs font-medium text-stone-400 uppercase tracking-wider mb-2">
+        <label htmlFor="notes" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
           Bits & Bobs
         </label>
         <textarea
