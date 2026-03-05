@@ -26,9 +26,8 @@ share.post("/restaurant/:id", authMiddleware, async (c) => {
 
   if (!restaurant) return c.json({ error: "Restaurant not found" }, 404);
 
-  let token = restaurant.share_token;
-  if (!token) {
-    token = generateToken();
+  const token = restaurant.share_token ?? generateToken();
+  if (!restaurant.share_token) {
     await db.prepare("UPDATE restaurants SET share_token = ? WHERE id = ?").bind(token, id).run();
   }
 
@@ -52,9 +51,8 @@ share.post("/review/:id", authMiddleware, async (c) => {
 
   if (!review) return c.json({ error: "Review not found" }, 404);
 
-  let token = review.share_token;
-  if (!token) {
-    token = generateToken();
+  const token = review.share_token ?? generateToken();
+  if (!review.share_token) {
     await db.prepare("UPDATE reviews SET share_token = ? WHERE id = ?").bind(token, id).run();
   }
 

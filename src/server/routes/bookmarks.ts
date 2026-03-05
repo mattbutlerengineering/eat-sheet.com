@@ -15,21 +15,20 @@ bookmarks.post("/:restaurantId", async (c) => {
   const restaurantId = c.req.param("restaurantId");
   const db = c.env.DB;
 
-  // Verify restaurant belongs to family
-  const restaurant = await db
-    .prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
-    .bind(restaurantId, payload.family_id)
-    .first();
+  // Batch: verify restaurant + check existing bookmark
+  const [restaurantResult, existingResult] = await db.batch([
+    db.prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
+      .bind(restaurantId, payload.family_id),
+    db.prepare("SELECT id FROM bookmarks WHERE member_id = ? AND restaurant_id = ?")
+      .bind(payload.member_id, restaurantId),
+  ]);
 
+  const restaurant = restaurantResult?.results[0];
   if (!restaurant) {
     return c.json({ error: "Restaurant not found" }, 404);
   }
 
-  // Check if already bookmarked
-  const existing = await db
-    .prepare("SELECT id FROM bookmarks WHERE member_id = ? AND restaurant_id = ?")
-    .bind(payload.member_id, restaurantId)
-    .first();
+  const existing = existingResult?.results[0] as { id: string } | undefined;
 
   if (existing) {
     // Remove bookmark

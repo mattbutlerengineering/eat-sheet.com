@@ -84,18 +84,18 @@ auth.get("/me", authMiddleware, async (c) => {
   const db = c.env.DB;
 
   const member = await db
-    .prepare("SELECT id, family_id, name, is_admin FROM members WHERE id = ?")
+    .prepare(
+      `SELECT m.id, m.family_id, m.name, m.is_admin, f.name as family_name
+       FROM members m
+       JOIN families f ON f.id = m.family_id
+       WHERE m.id = ?`
+    )
     .bind(payload.member_id)
-    .first<Member>();
+    .first<Member & { family_name: string }>();
 
   if (!member) {
     return c.json({ error: "Member not found" }, 404);
   }
-
-  const family = await db
-    .prepare("SELECT name FROM families WHERE id = ?")
-    .bind(member.family_id)
-    .first<{ name: string }>();
 
   return c.json({
     data: {
@@ -103,7 +103,7 @@ auth.get("/me", authMiddleware, async (c) => {
       family_id: member.family_id,
       name: member.name,
       is_admin: member.is_admin === 1,
-      family_name: family?.name ?? null,
+      family_name: member.family_name,
     },
   });
 });

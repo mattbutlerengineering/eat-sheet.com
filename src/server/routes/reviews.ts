@@ -51,6 +51,11 @@ reviews.post("/:restaurantId", async (c) => {
     return c.json({ error: "Overall score must be between 1 and 10" }, 400);
   }
 
+  const subScores = [body.food_score, body.service_score, body.ambiance_score, body.value_score];
+  if (subScores.some((s) => s != null && (s < 1 || s > 10))) {
+    return c.json({ error: "Sub-scores must be between 1 and 10" }, 400);
+  }
+
   const db = c.env.DB;
 
   const restaurant = await db
@@ -127,6 +132,11 @@ reviews.put("/:id", async (c) => {
 
   if (!body.overall_score || body.overall_score < 1 || body.overall_score > 10) {
     return c.json({ error: "Overall score must be between 1 and 10" }, 400);
+  }
+
+  const subScores = [body.food_score, body.service_score, body.ambiance_score, body.value_score];
+  if (subScores.some((s) => s != null && (s < 1 || s > 10))) {
+    return c.json({ error: "Sub-scores must be between 1 and 10" }, 400);
   }
 
   const db = c.env.DB;

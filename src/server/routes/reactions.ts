@@ -21,25 +21,23 @@ reactions.post("/:reviewId", async (c) => {
     return c.json({ error: "Invalid emoji. Must be one of: fire, heart, laughing, 100, thumbsup" }, 400);
   }
 
-  // Verify review exists and belongs to same family
-  const review = await db
-    .prepare(
+  // Batch: verify review exists + check existing reaction
+  const [reviewResult, existingResult] = await db.batch([
+    db.prepare(
       `SELECT rv.id FROM reviews rv
        JOIN restaurants r ON r.id = rv.restaurant_id
        WHERE rv.id = ? AND r.family_id = ?`
-    )
-    .bind(reviewId, payload.family_id)
-    .first();
+    ).bind(reviewId, payload.family_id),
+    db.prepare("SELECT id, emoji FROM reactions WHERE review_id = ? AND member_id = ?")
+      .bind(reviewId, payload.member_id),
+  ]);
 
+  const review = reviewResult?.results[0];
   if (!review) {
     return c.json({ error: "Review not found" }, 404);
   }
 
-  // Check existing reaction
-  const existing = await db
-    .prepare("SELECT id, emoji FROM reactions WHERE review_id = ? AND member_id = ?")
-    .bind(reviewId, payload.member_id)
-    .first<{ id: string; emoji: string }>();
+  const existing = existingResult?.results[0] as { id: string; emoji: string } | undefined;
 
   if (existing) {
     if (existing.emoji === body.emoji) {

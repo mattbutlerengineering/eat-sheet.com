@@ -41,10 +41,14 @@ export function createMockDb(config: MockDbConfig = {}) {
     batch: async (stmts: MockStatement[]) => {
       const results = [];
       for (const stmt of stmts) {
-        // Each batched statement needs to return { results: [...], success: true }
-        // Try all() which returns { results: T[] }, then wrap it
+        // Try all() first (multi-row config), then fall back to first() (single-row config)
         const allResult = await stmt.all();
-        results.push({ ...allResult, success: true });
+        if (allResult.results.length > 0) {
+          results.push({ ...allResult, success: true });
+        } else {
+          const firstResult = await stmt.first();
+          results.push({ results: firstResult != null ? [firstResult] : [], success: true });
+        }
       }
       return results;
     },

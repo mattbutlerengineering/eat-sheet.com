@@ -99,7 +99,7 @@ describe("GET /api/auth/me", () => {
 
   it("returns member data with valid token", async () => {
     const { db } = createMockDb({
-      first: { "SELECT id, family_id, name, is_admin FROM members": TEST_MEMBER },
+      first: { "FROM members m": { ...TEST_MEMBER, family_name: "The Butlers" } },
     });
     const token = await makeToken();
     const res = await app.request(

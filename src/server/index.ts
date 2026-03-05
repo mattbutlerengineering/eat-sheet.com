@@ -28,7 +28,7 @@ app.route("/api/share", shareRoutes);
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 
 app.onError((err, c) => {
-  console.error(`[${c.req.method}] ${c.req.path}:`, err.message);
+  console.error(`[${c.req.method}] ${c.req.path}:`, err.stack ?? err.message);
   return c.json({ error: err.message }, 500);
 });
 
