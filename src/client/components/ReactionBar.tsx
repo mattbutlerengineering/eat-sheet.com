@@ -18,6 +18,14 @@ const EMOJI_MAP: Record<string, string> = {
   thumbsup: "👍",
 };
 
+const EMOJI_LABELS: Record<string, string> = {
+  fire: "Fire reaction",
+  heart: "Love reaction",
+  laughing: "Funny reaction",
+  "100": "Perfect reaction",
+  thumbsup: "Thumbs up reaction",
+};
+
 const EMOJI_KEYS = ["fire", "heart", "laughing", "100", "thumbsup"] as const;
 
 export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }: ReactionBarProps) {
@@ -56,6 +64,8 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
             key={key}
             type="button"
             onClick={() => handleReact(key)}
+            aria-label={`${EMOJI_LABELS[key]}${count > 0 ? `, ${count}` : ""}${isActive ? " (your reaction)" : ""}`}
+            aria-pressed={isActive}
             className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all ${
               isActive
                 ? "bg-orange-500/20 border border-orange-500/40"

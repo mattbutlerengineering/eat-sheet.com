@@ -57,13 +57,16 @@ export function BottomNav() {
   )?.key ?? "restaurants";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-stone-950/95 backdrop-blur-md border-t border-stone-800/50">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-stone-950/95 backdrop-blur-md border-t border-stone-800/50" aria-label="Main navigation">
+      <div className="flex items-center justify-around h-16 max-w-lg mx-auto" role="tablist">
         {tabs.map((tab) => {
           const active = tab.key === currentTab;
           return (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={active}
+              aria-label={tab.label}
               onClick={() => navigate(tab.path)}
               className={`flex flex-col items-center gap-0.5 px-4 py-1 transition-colors ${
                 active ? "text-orange-500" : "text-stone-500 hover:text-stone-300"

@@ -98,6 +98,10 @@ export function ScoreSlider({ label, value, onChange, required }: ScoreSliderPro
         value={displayValue}
         onChange={handleChange}
         className="w-full slider-gradient-track"
+        aria-label={`${label} score`}
+        aria-valuemin={1}
+        aria-valuemax={10}
+        aria-valuenow={displayValue}
       />
       <p className="text-xs text-stone-500 italic font-display mt-1">
         {sliderPersonality(displayValue)}

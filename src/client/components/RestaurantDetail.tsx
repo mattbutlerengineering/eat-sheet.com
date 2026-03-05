@@ -145,6 +145,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           <button
             onClick={() => navigate("/")}
             className="text-stone-400 hover:text-stone-200 transition-colors text-base"
+            aria-label="Back to restaurant list"
           >
             ← Back
           </button>
