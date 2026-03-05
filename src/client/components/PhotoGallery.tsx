@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Lightbox } from "./Lightbox";
+import { OptimizedImage } from "./OptimizedImage";
 
 interface PhotoGalleryProps {
   readonly photoUrls: readonly string[];
@@ -15,17 +16,12 @@ export function PhotoGallery({ photoUrls, alt = "Review photo" }: PhotoGalleryPr
   if (photoUrls.length === 1) {
     return (
       <>
-        <button
-          type="button"
+        <OptimizedImage
+          src={photoUrls[0]!}
+          alt={alt}
+          className="mt-3 w-full h-40 rounded-lg border border-stone-800/50"
           onClick={() => setLightboxIndex(0)}
-          className="mt-3 w-full block"
-        >
-          <img
-            src={photoUrls[0]}
-            alt={alt}
-            className="w-full h-40 object-cover rounded-lg border border-stone-800/50 hover:opacity-90 transition-opacity"
-          />
-        </button>
+        />
         {lightboxIndex !== null && (
           <Lightbox
             photoUrls={photoUrls}
@@ -43,18 +39,13 @@ export function PhotoGallery({ photoUrls, alt = "Review photo" }: PhotoGalleryPr
       <div className="mt-3">
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory">
           {photoUrls.map((url, i) => (
-            <button
+            <OptimizedImage
               key={url}
-              type="button"
+              src={url}
+              alt={`${alt} ${i + 1}`}
+              className="flex-shrink-0 snap-start w-28 h-28 rounded-lg border border-stone-800/50"
               onClick={() => setLightboxIndex(i)}
-              className="flex-shrink-0 snap-start"
-            >
-              <img
-                src={url}
-                alt={`${alt} ${i + 1}`}
-                className="w-28 h-28 object-cover rounded-lg border border-stone-800/50 hover:opacity-90 transition-opacity"
-              />
-            </button>
+            />
           ))}
         </div>
         <p className="text-stone-500 text-xs mt-1">{photoUrls.length} photos</p>

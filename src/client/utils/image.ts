@@ -1,6 +1,6 @@
-const MAX_DIMENSION = 800;
+const MAX_DIMENSION = 1200;
 const JPEG_QUALITY = 0.8;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (compression will reduce)
 
 export class ImageTooLargeError extends Error {
   constructor() {

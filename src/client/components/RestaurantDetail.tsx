@@ -158,6 +158,8 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
             src={restaurant.photo_url}
             alt={restaurant.name}
             className="w-full h-64 object-cover"
+            loading="eager"
+            decoding="async"
           />
         </div>
       )}
