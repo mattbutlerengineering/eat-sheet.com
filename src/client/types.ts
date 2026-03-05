@@ -32,6 +32,13 @@ export interface Review {
   readonly visited_at: string | null;
   readonly created_at: string;
   readonly updated_at: string;
+  readonly reactions?: readonly Reaction[];
+}
+
+export interface Reaction {
+  readonly emoji: string;
+  readonly member_id: string;
+  readonly member_name: string;
 }
 
 export interface RestaurantDetail extends Restaurant {

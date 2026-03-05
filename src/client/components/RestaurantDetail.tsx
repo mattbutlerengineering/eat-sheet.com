@@ -5,6 +5,7 @@ import { ReviewForm } from "./ReviewForm";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
+import { ReactionBar } from "./ReactionBar";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
 
@@ -365,6 +366,15 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                     className="mt-3 w-full h-40 object-cover rounded-lg border border-stone-800/50"
                   />
                 )}
+
+                {/* Reactions */}
+                <ReactionBar
+                  token={token}
+                  reviewId={review.id}
+                  memberId={member.id}
+                  reactions={review.reactions ?? []}
+                  onReacted={refresh}
+                />
 
                 {/* Delete own review */}
                 {review.member_id === member.id && (
