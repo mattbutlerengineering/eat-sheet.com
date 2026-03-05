@@ -32,13 +32,13 @@ export function PhotoUpload({ token, onUploaded, existingUrl }: PhotoUploadProps
         body: formData,
       });
 
-      const json = await res.json();
+      const json = (await res.json()) as { data?: { photoUrl: string }; error?: string };
       if (!res.ok || json.error) {
         throw new Error(json.error || "Upload failed");
       }
 
-      setPreview(json.data.photoUrl);
-      onUploaded(json.data.photoUrl);
+      setPreview(json.data!.photoUrl);
+      onUploaded(json.data!.photoUrl);
     } catch (err) {
       if (err instanceof ImageTooLargeError) {
         setError(err.message);

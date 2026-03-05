@@ -7,7 +7,7 @@ export function createMockR2() {
     put: vi.fn(
       async (
         key: string,
-        body: ReadableStream | ArrayBuffer | null,
+        _body: ReadableStream | ArrayBuffer | null,
         options?: { httpMetadata?: { contentType?: string } },
       ) => {
         const contentType =
