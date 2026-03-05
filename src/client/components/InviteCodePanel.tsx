@@ -42,7 +42,7 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-bold text-lg text-stone-50">Invite Code</h2>
-          <button onClick={onClose} className="text-stone-500 hover:text-stone-300 text-sm">
+          <button onClick={onClose} className="text-stone-500 hover:text-stone-300 text-base">
             Close
           </button>
         </div>
@@ -63,7 +63,7 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
               </button>
             </div>
 
-            <p className="text-xs text-stone-500 mb-4">
+            <p className="text-sm text-stone-500 mb-4">
               Share this code with family members so they can join.
             </p>
 
@@ -85,7 +85,7 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
             ) : (
               <button
                 onClick={() => setConfirmRegen(true)}
-                className="w-full text-xs text-stone-500 hover:text-red-400 transition-colors py-2"
+                className="w-full text-sm text-stone-500 hover:text-red-400 transition-colors py-2"
               >
                 Regenerate code (invalidates current code)
               </button>
