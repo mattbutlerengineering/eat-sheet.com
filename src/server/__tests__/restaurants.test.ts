@@ -36,10 +36,18 @@ describe("GET /api/restaurants", () => {
 });
 
 describe("GET /api/restaurants/:id", () => {
-  it("returns restaurant detail with reviews", async () => {
+  it("returns restaurant detail with reviews and category averages", async () => {
     const { db } = createMockDb({
       first: {
-        "FROM restaurants": { ...TEST_RESTAURANT, avg_score: 8.0, review_count: 1 },
+        "FROM restaurants": {
+          ...TEST_RESTAURANT,
+          avg_score: 8.0,
+          review_count: 1,
+          avg_food: 9.0,
+          avg_service: 7.0,
+          avg_ambiance: 8.0,
+          avg_value: 7.0,
+        },
       },
       all: {
         "FROM reviews": [{ ...TEST_REVIEW, member_name: "Matt" }],
@@ -55,6 +63,10 @@ describe("GET /api/restaurants/:id", () => {
     const body: any = await res.json();
     expect(body.data.name).toBe("Pizza Place");
     expect(body.data.reviews).toHaveLength(1);
+    expect(body.data.avg_food).toBe(9.0);
+    expect(body.data.avg_service).toBe(7.0);
+    expect(body.data.avg_ambiance).toBe(8.0);
+    expect(body.data.avg_value).toBe(7.0);
   });
 
   it("returns 404 for nonexistent restaurant", async () => {

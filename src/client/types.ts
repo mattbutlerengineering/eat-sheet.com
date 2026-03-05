@@ -35,6 +35,10 @@ export interface Review {
 }
 
 export interface RestaurantDetail extends Restaurant {
+  readonly avg_food: number | null;
+  readonly avg_service: number | null;
+  readonly avg_ambiance: number | null;
+  readonly avg_value: number | null;
   readonly reviews: readonly Review[];
 }
 

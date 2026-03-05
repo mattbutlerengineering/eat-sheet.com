@@ -202,6 +202,39 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           )}
         </div>
 
+        {/* Score Breakdown Bars */}
+        {(restaurant.avg_food !== null || restaurant.avg_service !== null || restaurant.avg_ambiance !== null || restaurant.avg_value !== null) && (
+          <div className="mb-6 space-y-3">
+            <h3 className="font-display font-bold text-sm text-stone-400 uppercase tracking-wider">
+              Breakdown
+            </h3>
+            {[
+              { label: "Food", icon: "🍔", value: restaurant.avg_food },
+              { label: "Service", icon: "🤝", value: restaurant.avg_service },
+              { label: "Ambiance", icon: "🕯️", value: restaurant.avg_ambiance },
+              { label: "Value", icon: "💰", value: restaurant.avg_value },
+            ]
+              .filter((cat) => cat.value !== null)
+              .map((cat, i) => (
+                <div key={cat.label} className="flex items-center gap-3">
+                  <span className="text-sm">{cat.icon}</span>
+                  <span className="text-stone-400 text-sm w-16">{cat.label}</span>
+                  <div className="flex-1 h-3 bg-stone-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full animate-bar-fill ${
+                        cat.value! >= 8 ? "bg-green-500" : cat.value! >= 6 ? "bg-amber-400" : cat.value! >= 4 ? "bg-amber-500" : "bg-red-500"
+                      }`}
+                      style={{ width: `${(cat.value! / 10) * 100}%`, animationDelay: `${i * 0.1}s` }}
+                    />
+                  </div>
+                  <span className={`font-display font-black text-sm w-8 text-right ${scoreColor(cat.value!)}`}>
+                    {cat.value!.toFixed(1)}
+                  </span>
+                </div>
+              ))}
+          </div>
+        )}
+
         {/* Delete Restaurant (creator only) */}
         {isCreator && (
           <div className="mb-4">

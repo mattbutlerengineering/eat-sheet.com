@@ -39,7 +39,11 @@ restaurants.get("/:id", async (c) => {
     .prepare(
       `SELECT r.*,
               ROUND(AVG(rv.overall_score), 1) as avg_score,
-              COUNT(rv.id) as review_count
+              COUNT(rv.id) as review_count,
+              ROUND(AVG(rv.food_score), 1) as avg_food,
+              ROUND(AVG(rv.service_score), 1) as avg_service,
+              ROUND(AVG(rv.ambiance_score), 1) as avg_ambiance,
+              ROUND(AVG(rv.value_score), 1) as avg_value
        FROM restaurants r
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
        WHERE r.id = ? AND r.family_id = ?
