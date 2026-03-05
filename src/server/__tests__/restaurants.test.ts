@@ -14,11 +14,11 @@ function env(db: D1Database) {
 }
 
 describe("GET /api/restaurants", () => {
-  it("returns restaurants for the family", async () => {
+  it("returns restaurants with creator_name and last_visited_at", async () => {
     const { db } = createMockDb({
       all: {
         "FROM restaurants": [
-          { ...TEST_RESTAURANT, avg_score: 8.0, review_count: 1 },
+          { ...TEST_RESTAURANT, avg_score: 8.0, review_count: 1, creator_name: "Matt", last_visited_at: "2026-01-10" },
         ],
       },
     });
@@ -32,6 +32,8 @@ describe("GET /api/restaurants", () => {
     const body: any = await res.json();
     expect(body.data).toHaveLength(1);
     expect(body.data[0].name).toBe("Pizza Place");
+    expect(body.data[0].creator_name).toBe("Matt");
+    expect(body.data[0].last_visited_at).toBe("2026-01-10");
   });
 });
 

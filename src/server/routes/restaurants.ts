@@ -17,9 +17,12 @@ restaurants.get("/", async (c) => {
     .prepare(
       `SELECT r.*,
               ROUND(AVG(rv.overall_score), 1) as avg_score,
-              COUNT(rv.id) as review_count
+              COUNT(rv.id) as review_count,
+              m.name as creator_name,
+              MAX(rv.visited_at) as last_visited_at
        FROM restaurants r
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
+       LEFT JOIN members m ON m.id = r.created_by
        WHERE r.family_id = ?
        GROUP BY r.id
        ORDER BY r.created_at DESC`

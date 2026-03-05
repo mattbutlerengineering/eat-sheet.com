@@ -5,7 +5,8 @@ import { useFetch } from "../hooks/useApi";
 import { InviteCodePanel } from "./InviteCodePanel";
 import { RandomPicker } from "./RandomPicker";
 import { Slurms } from "./Slurms";
-import { SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
+import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
+import { relativeTime } from "../utils/time";
 
 interface RestaurantListProps {
   readonly token: string;
@@ -281,15 +282,26 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
                     <h3 className="font-display font-bold text-lg text-stone-50 truncate">
                       {restaurant.name}
                     </h3>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       {restaurant.cuisine && (
-                        <span className="text-sm text-orange-500/80 font-medium">
+                        <span className={`text-xs px-2 py-0.5 rounded-md font-medium text-white/90 ${avatarColor(restaurant.cuisine)}`}>
                           {restaurant.cuisine}
                         </span>
                       )}
                       <span className="text-sm text-stone-500">
                         {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-stone-500">
+                      {restaurant.creator_name && (
+                        <span>Added by {restaurant.created_by === member.id ? "You" : restaurant.creator_name}</span>
+                      )}
+                      {restaurant.last_visited_at && (
+                        <>
+                          <span>·</span>
+                          <span>Visited {relativeTime(restaurant.last_visited_at)}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div
