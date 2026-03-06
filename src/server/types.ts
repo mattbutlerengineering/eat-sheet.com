@@ -59,4 +59,5 @@ export interface Env {
   GOOGLE_OAUTH_CLIENT_ID: string;
   GOOGLE_OAUTH_CLIENT_SECRET: string;
   OAUTH_REDIRECT_BASE: string;
+  SENTRY_DSN: string;
 }

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import * as Sentry from "@sentry/cloudflare";
 import type { Env } from "./types";
 import { authRoutes } from "./routes/auth";
 import { restaurantRoutes } from "./routes/restaurants";
@@ -33,7 +34,11 @@ app.get("/api/health", (c) => c.json({ status: "ok" }));
 
 app.onError((err, c) => {
   console.error(`[${c.req.method}] ${c.req.path}:`, err.stack ?? err.message);
+  Sentry.captureException(err);
   return c.json({ error: err.message }, 500);
 });
 
-export default app;
+export default Sentry.withSentry(
+  (env: Env) => ({ dsn: env.SENTRY_DSN }),
+  app
+);
