@@ -39,10 +39,10 @@ function useGeolocation() {
         (err) => {
           if (err.code === err.PERMISSION_DENIED) {
             setGeo({ status: "denied", message: "Location access denied. Enable it in your browser settings to discover nearby restaurants." });
-          } else if (err.code === err.TIMEOUT && !retrying) {
-            // Retry once with high accuracy on timeout
+          } else if (!retrying) {
+            // Retry once on timeout or position unavailable (transient on mobile)
             retriedRef.current = true;
-            attempt(true);
+            setTimeout(() => attempt(true), 1000);
           } else {
             setGeo({ status: "denied", message: "Could not determine your location. Please try again." });
           }
