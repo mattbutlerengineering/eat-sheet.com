@@ -1,5 +1,6 @@
 name = "eat-sheet-api"
 compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
 main = "src/server/index.ts"
 
 routes = [
