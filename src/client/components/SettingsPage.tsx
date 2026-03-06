@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
-import { InviteCodePanel } from "./InviteCodePanel";
 import { randomLoadingMessage } from "../utils/personality";
-import type { Member } from "../types";
+import type { Member, Group } from "../types";
 
 interface SettingsPageProps {
   readonly token: string;
@@ -15,29 +15,20 @@ interface SettingsPageProps {
 
 interface MemberInfo {
   readonly id: string;
-  readonly family_id: string;
   readonly name: string;
-  readonly is_admin: boolean;
   readonly email: string | null;
-  readonly family_name: string | null;
-}
-
-interface FamilyMember {
-  readonly id: string;
-  readonly name: string;
+  readonly groups: readonly Group[];
 }
 
 export function SettingsPage({ token, member, onLogout, onNameChange }: SettingsPageProps) {
-  const { put, del } = useApi(token);
-  const { data: me, loading: meLoading } = useFetch<MemberInfo>(token, "/api/auth/me");
-  const { data: members, loading: membersLoading, refresh: refreshMembers } = useFetch<readonly FamilyMember[]>(token, "/api/auth/members");
+  const { put } = useApi(token);
+  const { data: me, loading } = useFetch<MemberInfo>(token, "/api/auth/me");
+  const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState(member.name);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showInviteCode, setShowInviteCode] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
 
   useEffect(() => {
     if (me) setNameInput(me.name);
@@ -60,16 +51,6 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
     }
   }, [nameInput, put, onNameChange]);
 
-  const handleRemoveMember = useCallback(async (memberId: string) => {
-    try {
-      await del<{ success: boolean }>(`/api/auth/members/${memberId}`);
-      setConfirmRemove(null);
-      refreshMembers();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove member");
-    }
-  }, [del, refreshMembers]);
-
   const handleClearCache = useCallback(async () => {
     if ("caches" in window) {
       const names = await caches.keys();
@@ -82,8 +63,6 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
     window.location.reload();
   }, []);
 
-  const loading = meLoading || membersLoading;
-
   if (loading) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4 pb-20">
@@ -92,6 +71,8 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
       </div>
     );
   }
+
+  const groups = me?.groups ?? [];
 
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
@@ -139,11 +120,6 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-stone-50 font-bold">{me?.name ?? member.name}</span>
-                      {member.is_admin && (
-                        <span className="text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
-                          Admin
-                        </span>
-                      )}
                       <button
                         onClick={() => setEditing(true)}
                         className="ml-auto text-sm text-orange-400 hover:text-orange-300 transition-colors"
@@ -162,67 +138,38 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
           </div>
         </section>
 
-        {/* Family Section */}
+        {/* Groups Section */}
         <section>
-          <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3">Family</h2>
+          <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3">Groups</h2>
           <div className="bg-stone-900 rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-stone-50 font-bold">{me?.family_name ?? "Your Family"}</span>
-              <span className="text-stone-500 text-sm">{members?.length ?? 0} members</span>
-            </div>
-            <div className="space-y-2">
-              {members?.map((m) => (
-                <div key={m.id} className="flex items-center gap-3 py-1">
-                  <MemberAvatar name={m.name} size="sm" />
-                  <span className="text-stone-300 text-sm flex-1">{m.name}</span>
-                  {member.is_admin && m.id !== member.id && (
-                    confirmRemove === m.id ? (
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleRemoveMember(m.id)}
-                          className="text-xs bg-red-600 text-white px-2 py-1 rounded-lg hover:bg-red-700 transition-colors"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => setConfirmRemove(null)}
-                          className="text-xs text-stone-500 px-2 py-1 hover:text-stone-300 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmRemove(m.id)}
-                        className="text-xs text-stone-600 hover:text-red-400 transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )
-                  )}
+            {groups.length === 0 ? (
+              <p className="text-stone-500 text-sm">You're not in any groups yet</p>
+            ) : (
+              groups.map((g) => (
+                <div key={g.id} className="flex items-center justify-between">
+                  <div>
+                    <span className="text-stone-50 font-medium text-sm">{g.name}</span>
+                    {g.is_admin && (
+                      <span className="ml-2 text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-stone-500 text-xs">{g.member_count} members</span>
                 </div>
-              ))}
-            </div>
+              ))
+            )}
+            <button
+              onClick={() => navigate("/groups")}
+              className="w-full text-left flex items-center justify-between pt-2 border-t border-stone-800"
+            >
+              <span className="text-orange-400 text-sm font-medium">Manage Groups</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-stone-600" aria-hidden="true">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
         </section>
-
-        {/* Admin Section */}
-        {member.is_admin && (
-          <section>
-            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3">Admin</h2>
-            <div className="bg-stone-900 rounded-2xl p-4">
-              <button
-                onClick={() => setShowInviteCode(true)}
-                className="w-full text-left flex items-center justify-between py-1"
-              >
-                <span className="text-stone-300 text-sm">Manage Invite Code</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-stone-600" aria-hidden="true">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          </section>
-        )}
 
         {/* App Section */}
         <section>
@@ -250,13 +197,9 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
         {/* Footer */}
         <div className="text-center pt-4">
           <Slurms variant="bored" size={32} />
-          <p className="text-stone-600 text-xs mt-2">eat sheet — the family restaurant rater</p>
+          <p className="text-stone-600 text-xs mt-2">eat sheet — the restaurant rater</p>
         </div>
       </div>
-
-      {showInviteCode && (
-        <InviteCodePanel token={token} onClose={() => setShowInviteCode(false)} />
-      )}
     </div>
   );
 }

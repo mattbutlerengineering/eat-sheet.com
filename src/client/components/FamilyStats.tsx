@@ -94,7 +94,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
             No stats yet
           </p>
           <p className="text-stone-500 text-sm mt-2 text-center max-w-xs">
-            Once your family starts adding restaurants and reviews, you'll see leaderboards, cuisine breakdowns, and category averages here.
+            Once you start adding restaurants and reviews, you'll see leaderboards, cuisine breakdowns, and category averages here.
           </p>
           <div className="mt-6 grid grid-cols-2 gap-3 w-full max-w-xs opacity-30">
             <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 text-center">

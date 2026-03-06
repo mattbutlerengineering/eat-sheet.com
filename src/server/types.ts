@@ -1,8 +1,17 @@
-export interface Family {
+export interface Group {
   readonly id: string;
   readonly name: string;
   readonly invite_code: string;
+  readonly created_by: string;
   readonly created_at: string;
+}
+
+export interface GroupMember {
+  readonly id: string;
+  readonly group_id: string;
+  readonly member_id: string;
+  readonly is_admin: number;
+  readonly joined_at: string;
 }
 
 export interface Member {
@@ -45,10 +54,11 @@ export interface Review {
 
 export interface JwtPayload {
   readonly member_id: string;
-  readonly family_id: string;
   readonly name: string;
-  readonly is_admin: boolean;
   readonly exp: number;
+  // Legacy fields — present in old tokens, ignored in new ones
+  readonly family_id?: string;
+  readonly is_admin?: boolean;
 }
 
 export interface Env {

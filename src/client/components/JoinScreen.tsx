@@ -7,7 +7,7 @@ import type { OAuthUser } from "../types";
 interface JoinScreenProps {
   readonly pendingRegistration: OAuthUser | null;
   readonly registrationToken: string | null;
-  readonly onRegister: (inviteCode: string, registrationToken: string) => Promise<unknown>;
+  readonly onRegister: (inviteCode: string | undefined, registrationToken: string) => Promise<unknown>;
 }
 
 const FLOATING_FOOD = [
@@ -51,7 +51,7 @@ function Branding() {
           eat sheet
         </h1>
         <p className="mt-3 text-stone-400 font-body text-sm tracking-widest uppercase">
-          Your family's brutally honest restaurant guide
+          Your brutally honest restaurant guide
         </p>
       </div>
 
@@ -72,14 +72,29 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteCode.trim() || !registrationToken) return;
+    if (!registrationToken) return;
 
     setError("");
     setSubmitting(true);
     try {
-      await onRegister(inviteCode.trim(), registrationToken);
+      const code = inviteCode.trim() || undefined;
+      await onRegister(code, registrationToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleStartSolo = async () => {
+    if (!registrationToken) return;
+
+    setError("");
+    setSubmitting(true);
+    try {
+      await onRegister(undefined, registrationToken);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
       setSubmitting(false);
     }
@@ -99,7 +114,7 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
             <p className="text-center text-stone-600 text-sm mt-4">
-              Ask your family for the invite code
+              Have an invite code? Sign in first, then enter it
             </p>
           </div>
         )}
@@ -122,14 +137,14 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
 
             <div>
               <label htmlFor="invite-code" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
-                Invite Code
+                Invite Code <span className="text-stone-600 normal-case">(optional)</span>
               </label>
               <input
                 id="invite-code"
                 type="text"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                placeholder="Enter your family code"
+                placeholder="Enter a group invite code"
                 autoComplete="off"
                 className={INPUT_CLASS}
               />
@@ -142,8 +157,27 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
               disabled={submitting || !inviteCode.trim()}
               className="btn-shimmer w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
             >
-              {submitting ? "Joining..." : "Join the Sheet"}
+              {submitting ? "Joining..." : "Join Group"}
             </button>
+
+            <div className="relative flex items-center gap-3 py-1">
+              <div className="flex-1 h-px bg-stone-800" />
+              <span className="text-stone-600 text-xs uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-stone-800" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleStartSolo}
+              disabled={submitting}
+              className="w-full py-3 bg-stone-800 hover:bg-stone-700 text-stone-300 font-medium rounded-xl transition-all active:scale-[0.98] disabled:opacity-40"
+            >
+              {submitting ? "Setting up..." : "Start Solo"}
+            </button>
+
+            <p className="text-center text-stone-600 text-xs">
+              You can create or join groups later from Settings
+            </p>
 
             <a
               href="/"

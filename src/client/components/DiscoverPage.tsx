@@ -153,6 +153,40 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   const [addedIds, setAddedIds] = useState<ReadonlyMap<string, string>>(new Map());
   const [addingId, setAddingId] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  const [search, setSearch] = useState("");
+  const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
+
+  const hasFilters = search.trim() !== "" || cuisineFilter !== null;
+
+  const clearFilters = () => {
+    setSearch("");
+    setCuisineFilter(null);
+  };
+
+  // Unique cuisines from nearby places
+  const cuisines = useMemo(() => {
+    if (!places) return [];
+    const set = new Set<string>();
+    for (const p of places) {
+      if (p.cuisine) set.add(p.cuisine);
+    }
+    return [...set].sort();
+  }, [places]);
+
+  // Filtered places based on search + cuisine chip
+  const filteredPlaces = useMemo(() => {
+    if (!places) return [];
+    const q = search.toLowerCase().trim();
+    return places.filter((p) => {
+      if (q && !p.name.toLowerCase().includes(q) && !(p.cuisine?.toLowerCase().includes(q))) {
+        return false;
+      }
+      if (cuisineFilter && p.cuisine !== cuisineFilter) {
+        return false;
+      }
+      return true;
+    });
+  }, [places, search, cuisineFilter]);
 
   // Auto-request geolocation on mount
   useEffect(() => {
@@ -177,7 +211,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   }, [geo, post]);
 
   // Build map of google_place_id → restaurant_id for family restaurants
-  const familyPlaceIdMap = useMemo(
+  const visiblePlaceIdMap = useMemo(
     () => new Map(
       (myRestaurants ?? [])
         .filter((r): r is Restaurant & { google_place_id: string } => r.google_place_id != null)
@@ -240,6 +274,63 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
         )}
       </div>
 
+      {/* Search + Cuisine Chips — only show when we have results */}
+      {places && places.length > 0 && (
+        <>
+          <div className="pb-2">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search nearby..."
+                className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+              />
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 text-xs"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {cuisines.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-none">
+              <button
+                onClick={() => setCuisineFilter(null)}
+                className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                  cuisineFilter === null
+                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    : "bg-stone-800 text-stone-400 border border-stone-700"
+                }`}
+              >
+                All
+              </button>
+              {cuisines.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCuisineFilter(cuisineFilter === c ? null : c)}
+                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    cuisineFilter === c
+                      ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                      : "bg-stone-800 text-stone-400 border border-stone-700"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
       {/* Geolocation requesting */}
       {(geo.status === "idle" || geo.status === "requesting") && (
         <div className="flex flex-col items-center gap-3 py-16 text-stone-500">
@@ -292,19 +383,29 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
             <p className="text-center text-stone-500 text-sm py-16">
               No restaurants found nearby
             </p>
+          ) : filteredPlaces.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-stone-400 text-sm">No matches found</p>
+              <button
+                onClick={clearFilters}
+                className="text-orange-500 text-sm font-medium mt-3 hover:text-orange-400"
+              >
+                Clear filters
+              </button>
+            </div>
           ) : (
             <div className="space-y-3">
-              {places.map((place) => {
+              {filteredPlaces.map((place) => {
                 const restaurantId =
                   addedIds.get(place.google_place_id) ||
-                  familyPlaceIdMap.get(place.google_place_id) ||
+                  visiblePlaceIdMap.get(place.google_place_id) ||
                   null;
                 return (
                   <DiscoverCard
                     key={place.google_place_id}
                     place={place}
                     isAdded={
-                      familyPlaceIdMap.has(place.google_place_id) ||
+                      visiblePlaceIdMap.has(place.google_place_id) ||
                       addedIds.has(place.google_place_id)
                     }
                     onAdd={() => handleAdd(place)}

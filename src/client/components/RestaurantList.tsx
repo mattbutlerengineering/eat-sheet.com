@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
-import { InviteCodePanel } from "./InviteCodePanel";
+// InviteCodePanel moved to GroupsPage
 import { RandomPicker } from "./RandomPicker";
 import { Slurms } from "./Slurms";
 import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
@@ -43,7 +43,6 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
   const [showWantToTry, setShowWantToTry] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [showInviteCode, setShowInviteCode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const fabRef = useRef<HTMLAnchorElement>(null);
 
@@ -112,14 +111,6 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           <h1 className="font-display text-xl font-black text-orange-500 italic">eat sheet</h1>
           <div className="flex items-center gap-3">
             <span className="text-base text-stone-400">{member.name}</span>
-            {member.is_admin && (
-              <button
-                onClick={() => setShowInviteCode(true)}
-                className="text-sm text-orange-500/70 hover:text-orange-400 transition-colors"
-              >
-                Invite
-              </button>
-            )}
             <button
               onClick={onLogout}
               className="text-sm text-stone-500 hover:text-stone-300 transition-colors"
@@ -430,10 +421,6 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
       >
         <span className="text-2xl text-white leading-none">+</span>
       </Link>
-
-      {showInviteCode && (
-        <InviteCodePanel token={token} onClose={() => setShowInviteCode(false)} />
-      )}
 
       {showPicker && filtered.length > 0 && (
         <RandomPicker

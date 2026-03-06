@@ -1,10 +1,11 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const share = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 function generateToken(): string {
@@ -20,8 +21,11 @@ share.post("/restaurant/:id", authMiddleware, async (c) => {
   const db = c.env.DB;
 
   const restaurant = await db
-    .prepare("SELECT id, share_token FROM restaurants WHERE id = ? AND family_id = ?")
-    .bind(id, payload.family_id)
+    .prepare(
+      `${visiblePeersCte()}
+       SELECT id, share_token FROM restaurants WHERE id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+    )
+    .bind(payload.member_id, payload.member_id, id)
     .first<{ id: string; share_token: string | null }>();
 
   if (!restaurant) return c.json({ error: "Restaurant not found" }, 404);
@@ -42,11 +46,12 @@ share.post("/review/:id", authMiddleware, async (c) => {
 
   const review = await db
     .prepare(
-      `SELECT rv.id, rv.share_token FROM reviews rv
+      `${visiblePeersCte()}
+       SELECT rv.id, rv.share_token FROM reviews rv
        JOIN restaurants r ON r.id = rv.restaurant_id
-       WHERE rv.id = ? AND r.family_id = ?`
+       WHERE rv.id = ? AND r.created_by IN (SELECT member_id FROM visible_peers)`
     )
-    .bind(id, payload.family_id)
+    .bind(payload.member_id, payload.member_id, id)
     .first<{ id: string; share_token: string | null }>();
 
   if (!review) return c.json({ error: "Review not found" }, 404);

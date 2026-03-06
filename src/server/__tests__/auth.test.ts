@@ -3,9 +3,9 @@ import app from "../index";
 import { createMockDb } from "./helpers/mock-db";
 import {
   TEST_SECRET,
-  TEST_FAMILY,
   TEST_MEMBER,
   TEST_MEMBER_2,
+  TEST_GROUP,
   makeToken,
   makeRegistrationToken,
   authHeader,
@@ -94,9 +94,14 @@ describe("POST /api/auth/join", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 400 when invite code is missing", async () => {
+  it("creates solo user when no invite_code provided", async () => {
     const regToken = await makeRegistrationToken();
-    const { db } = createMockDb();
+    const { db } = createMockDb({
+      first: {
+        "WHERE oauth_provider": null,
+        "INSERT INTO members": TEST_MEMBER,
+      },
+    });
     const res = await app.request(
       "/api/auth/join",
       {
@@ -106,13 +111,20 @@ describe("POST /api/auth/join", () => {
       },
       env(db)
     );
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.token).toBeDefined();
+    expect(body.data.member.name).toBe("Matt");
   });
 
   it("returns 404 for invalid invite code", async () => {
     const regToken = await makeRegistrationToken();
     const { db } = createMockDb({
-      first: { "SELECT * FROM families": null, "WHERE oauth_provider": null },
+      first: {
+        "WHERE oauth_provider": null,
+        "INSERT INTO members": TEST_MEMBER,
+        "SELECT * FROM groups": null,
+      },
     });
     const res = await app.request(
       "/api/auth/join",
@@ -126,14 +138,12 @@ describe("POST /api/auth/join", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns token for valid invite code with existing member", async () => {
+  it("returns token for existing OAuth user", async () => {
     const regToken = await makeRegistrationToken();
     const existingMember = { ...TEST_MEMBER, oauth_provider: "google", oauth_id: "google-123" };
     const { db } = createMockDb({
       first: {
-        "SELECT * FROM families": TEST_FAMILY,
         "WHERE oauth_provider": existingMember,
-        "SELECT * FROM members": existingMember,
       },
     });
     const res = await app.request(
@@ -141,7 +151,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
+        body: JSON.stringify({ registration_token: regToken }),
       },
       env(db)
     );
@@ -149,80 +159,6 @@ describe("POST /api/auth/join", () => {
     const body: any = await res.json();
     expect(body.data.token).toBeDefined();
     expect(body.data.member.name).toBe("Matt");
-  });
-
-  it("creates new member when name is new", async () => {
-    const regToken = await makeRegistrationToken();
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE oauth_provider": null,
-        "SELECT * FROM members": null,
-        "SELECT COUNT": { count: 0 },
-        "INSERT INTO members": TEST_MEMBER,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.token).toBeDefined();
-  });
-
-  it("links OAuth identity to existing member without one", async () => {
-    const regToken = await makeRegistrationToken();
-    const memberWithoutOAuth = { ...TEST_MEMBER, oauth_provider: null, oauth_id: null };
-    const linkedMember = { ...TEST_MEMBER, oauth_provider: "google", oauth_id: "google-123" };
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE oauth_provider": null,
-        "SELECT * FROM members": memberWithoutOAuth,
-        "UPDATE members SET oauth_provider": linkedMember,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.token).toBeDefined();
-  });
-
-  it("returns 409 when OAuth identity is already linked to different member", async () => {
-    const regToken = await makeRegistrationToken();
-    const otherMember = { id: "member-other", family_id: "family-other", name: "Other" };
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE oauth_provider": otherMember,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(409);
-    const body: any = await res.json();
-    expect(body.error).toContain("already linked");
   });
 });
 
@@ -233,9 +169,14 @@ describe("GET /api/auth/me", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns member data with valid token", async () => {
+  it("returns member data with groups", async () => {
+    const memberData = { id: TEST_MEMBER.id, name: TEST_MEMBER.name, email: "matt@test.com" };
+    const groupData = { id: TEST_GROUP.id, name: TEST_GROUP.name, is_admin: 1, member_count: 2 };
     const { db } = createMockDb({
-      first: { "FROM members m": { ...TEST_MEMBER, family_name: "The Butlers" } },
+      all: {
+        "SELECT id, name, email FROM members": [memberData],
+        "FROM group_members": [groupData],
+      },
     });
     const token = await makeToken();
     const res = await app.request(
@@ -246,14 +187,18 @@ describe("GET /api/auth/me", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data.name).toBe("Matt");
+    expect(body.data.groups).toBeDefined();
   });
 });
 
 describe("GET /api/auth/members", () => {
-  it("returns family members", async () => {
+  it("returns visible peers", async () => {
     const { db } = createMockDb({
       all: {
-        "SELECT id, family_id, name FROM members": [TEST_MEMBER, TEST_MEMBER_2],
+        "FROM members m": [
+          { id: TEST_MEMBER.id, name: TEST_MEMBER.name },
+          { id: TEST_MEMBER_2.id, name: TEST_MEMBER_2.name },
+        ],
       },
     });
     const token = await makeToken();
@@ -265,62 +210,6 @@ describe("GET /api/auth/members", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data).toHaveLength(2);
-  });
-});
-
-describe("GET /api/auth/invite-code", () => {
-  it("returns invite code for admin", async () => {
-    const { db } = createMockDb({
-      first: { "SELECT invite_code FROM families": { invite_code: "TEST123" } },
-    });
-    const token = await makeToken({ is_admin: true });
-    const res = await app.request(
-      "/api/auth/invite-code",
-      { headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.invite_code).toBe("TEST123");
-  });
-
-  it("returns 403 for non-admin", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken({ is_admin: false });
-    const res = await app.request(
-      "/api/auth/invite-code",
-      { headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(403);
-  });
-});
-
-describe("POST /api/auth/regenerate-code", () => {
-  it("regenerates code for admin", async () => {
-    const { db } = createMockDb({
-      first: { "UPDATE families SET invite_code": { invite_code: "NEWCODE1" } },
-    });
-    const token = await makeToken({ is_admin: true });
-    const res = await app.request(
-      "/api/auth/regenerate-code",
-      { method: "POST", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.invite_code).toBeDefined();
-  });
-
-  it("returns 403 for non-admin", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken({ is_admin: false });
-    const res = await app.request(
-      "/api/auth/regenerate-code",
-      { method: "POST", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(403);
   });
 });
 
@@ -341,9 +230,8 @@ describe("PUT /api/auth/me", () => {
   });
 
   it("updates name successfully", async () => {
-    const updatedMember = { ...TEST_MEMBER, name: "Matthew" };
     const { db } = createMockDb({
-      first: { "UPDATE members SET name": updatedMember },
+      first: { "UPDATE members SET name": { id: TEST_MEMBER.id, name: "Matthew" } },
     });
     const token = await makeToken();
     const res = await app.request(
@@ -358,44 +246,5 @@ describe("PUT /api/auth/me", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data.name).toBe("Matthew");
-  });
-});
-
-describe("DELETE /api/auth/members/:id", () => {
-  it("returns 403 for non-admin", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken({ is_admin: false });
-    const res = await app.request(
-      "/api/auth/members/member-2",
-      { method: "DELETE", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(403);
-  });
-
-  it("returns 400 when admin tries to remove self", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken({ member_id: "member-1", is_admin: true });
-    const res = await app.request(
-      "/api/auth/members/member-1",
-      { method: "DELETE", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("removes member successfully", async () => {
-    const { db } = createMockDb({
-      first: { "SELECT id FROM members": { id: "member-2" } },
-    });
-    const token = await makeToken({ is_admin: true });
-    const res = await app.request(
-      "/api/auth/members/member-2",
-      { method: "DELETE", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.success).toBe(true);
   });
 });

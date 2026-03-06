@@ -3,10 +3,11 @@ import { useApi } from "../hooks/useApi";
 
 interface InviteCodePanelProps {
   readonly token: string;
+  readonly groupId: string;
   readonly onClose: () => void;
 }
 
-export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
+export function InviteCodePanel({ token, groupId, onClose }: InviteCodePanelProps) {
   const { get, post } = useApi(token);
   const [code, setCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -14,10 +15,10 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
   const [confirmRegen, setConfirmRegen] = useState(false);
 
   useEffect(() => {
-    get<{ invite_code: string }>("/api/auth/invite-code")
+    get<{ invite_code: string }>(`/api/groups/${groupId}/invite-code`)
       .then((data) => setCode(data.invite_code))
       .finally(() => setLoading(false));
-  }, [get]);
+  }, [get, groupId]);
 
   const handleCopy = async () => {
     if (!code) return;
@@ -29,7 +30,7 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
   const handleRegenerate = async () => {
     setConfirmRegen(false);
     setLoading(true);
-    const data = await post<{ invite_code: string }>("/api/auth/regenerate-code", {});
+    const data = await post<{ invite_code: string }>(`/api/groups/${groupId}/regenerate-code`, {});
     setCode(data.invite_code);
     setLoading(false);
   };
@@ -64,7 +65,7 @@ export function InviteCodePanel({ token, onClose }: InviteCodePanelProps) {
             </div>
 
             <p className="text-sm text-stone-500 mb-4">
-              Share this code with family members so they can join.
+              Share this code so others can join your group.
             </p>
 
             {confirmRegen ? (

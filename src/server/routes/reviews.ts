@@ -1,12 +1,13 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const MAX_PHOTOS = 5;
 
 const reviews = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 reviews.use("*", authMiddleware);
@@ -58,9 +59,13 @@ reviews.post("/:restaurantId", async (c) => {
 
   const db = c.env.DB;
 
+  // Verify restaurant is visible to this user
   const restaurant = await db
-    .prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
-    .bind(restaurantId, payload.family_id)
+    .prepare(
+      `${visiblePeersCte()}
+       SELECT id FROM restaurants WHERE id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+    )
+    .bind(payload.member_id, payload.member_id, restaurantId)
     .first();
 
   if (!restaurant) {

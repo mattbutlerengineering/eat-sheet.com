@@ -51,7 +51,7 @@ describe("Empty states", () => {
 
   it("ActivityFeed explains what will appear", () => {
     const src = readFileSync(resolve(ROOT, "src/client/components/ActivityFeed.tsx"), "utf-8");
-    expect(src).toContain("adds restaurants and leaves reviews");
+    expect(src).toContain("add restaurants and leave reviews");
   });
 
   it("FamilyStats has empty state with preview", () => {

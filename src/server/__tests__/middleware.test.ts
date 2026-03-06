@@ -76,6 +76,6 @@ describe("auth middleware", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data.member_id).toBe("member-1");
-    expect(body.data.family_id).toBe("family-1");
+    expect(body.data.name).toBe("Matt");
   });
 });

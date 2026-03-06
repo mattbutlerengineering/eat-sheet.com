@@ -2,6 +2,31 @@ import { sign } from "hono/jwt";
 
 export const TEST_SECRET = "test-jwt-secret-for-tests";
 
+export const TEST_GROUP = {
+  id: "group-1",
+  name: "The Butlers",
+  invite_code: "TEST123",
+  created_by: "member-1",
+  created_at: "2026-01-01T00:00:00Z",
+};
+
+export const TEST_GROUP_MEMBER = {
+  id: "gm-1",
+  group_id: "group-1",
+  member_id: "member-1",
+  is_admin: 1,
+  joined_at: "2026-01-01T00:00:00Z",
+};
+
+export const TEST_GROUP_MEMBER_2 = {
+  id: "gm-2",
+  group_id: "group-1",
+  member_id: "member-2",
+  is_admin: 0,
+  joined_at: "2026-01-02T00:00:00Z",
+};
+
+// Legacy family kept for backward-compat in DB (not queried)
 export const TEST_FAMILY = {
   id: "family-1",
   name: "The Butlers",
@@ -55,9 +80,7 @@ export const TEST_REVIEW = {
 export async function makeToken(
   overrides: Partial<{
     member_id: string;
-    family_id: string;
     name: string;
-    is_admin: boolean;
     oauth_provider: string;
     oauth_id: string;
     email: string;
@@ -66,9 +89,7 @@ export async function makeToken(
   return sign(
     {
       member_id: overrides.member_id ?? TEST_MEMBER.id,
-      family_id: overrides.family_id ?? TEST_MEMBER.family_id,
       name: overrides.name ?? TEST_MEMBER.name,
-      is_admin: overrides.is_admin ?? true,
       ...(overrides.oauth_provider && { oauth_provider: overrides.oauth_provider }),
       ...(overrides.oauth_id && { oauth_id: overrides.oauth_id }),
       ...(overrides.email && { email: overrides.email }),

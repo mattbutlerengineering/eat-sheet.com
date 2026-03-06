@@ -53,9 +53,7 @@ export function useAuth() {
           token,
           member: {
             id: payload.member_id as string,
-            family_id: payload.family_id as string,
             name: payload.name as string,
-            is_admin: payload.is_admin as boolean,
           },
         };
         saveAuth(state);
@@ -96,10 +94,13 @@ export function useAuth() {
     })
       .then((res) => {
         if (!res.ok) throw new Error("Invalid token");
-        return res.json() as Promise<{ data: Member }>;
+        return res.json() as Promise<{ data: Member & { groups?: unknown[] } }>;
       })
       .then((json) => {
-        const verified: AuthState = { token: auth.token, member: json.data };
+        const verified: AuthState = {
+          token: auth.token,
+          member: { id: json.data.id, name: json.data.name },
+        };
         saveAuth(verified);
         setAuth(verified);
       })
@@ -110,12 +111,12 @@ export function useAuth() {
       .finally(() => setLoading(false));
   }, []);
 
-  const register = useCallback(async (inviteCode: string, regToken: string) => {
+  const register = useCallback(async (inviteCode: string | undefined, regToken: string) => {
     const res = await fetch("/api/auth/join", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        invite_code: inviteCode,
+        invite_code: inviteCode || undefined,
         registration_token: regToken,
       }),
     });

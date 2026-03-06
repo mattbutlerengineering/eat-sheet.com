@@ -1,10 +1,11 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const bookmarks = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 bookmarks.use("*", authMiddleware);
@@ -15,10 +16,12 @@ bookmarks.post("/:restaurantId", async (c) => {
   const restaurantId = c.req.param("restaurantId");
   const db = c.env.DB;
 
-  // Batch: verify restaurant + check existing bookmark
+  // Batch: verify restaurant is visible + check existing bookmark
   const [restaurantResult, existingResult] = await db.batch([
-    db.prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
-      .bind(restaurantId, payload.family_id),
+    db.prepare(
+      `${visiblePeersCte()}
+       SELECT id FROM restaurants WHERE id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+    ).bind(payload.member_id, payload.member_id, restaurantId),
     db.prepare("SELECT id FROM bookmarks WHERE member_id = ? AND restaurant_id = ?")
       .bind(payload.member_id, restaurantId),
   ]);
@@ -55,7 +58,8 @@ bookmarks.get("/", async (c) => {
 
   const { results } = await db
     .prepare(
-      `SELECT r.*,
+      `${visiblePeersCte()}
+       SELECT r.*,
               ROUND(AVG(rv.overall_score), 1) as avg_score,
               COUNT(rv.id) as review_count,
               m.name as creator_name,
@@ -64,11 +68,11 @@ bookmarks.get("/", async (c) => {
        JOIN restaurants r ON r.id = b.restaurant_id
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
        LEFT JOIN members m ON m.id = r.created_by
-       WHERE b.member_id = ? AND r.family_id = ?
+       WHERE b.member_id = ? AND r.created_by IN (SELECT member_id FROM visible_peers)
        GROUP BY r.id
        ORDER BY b.created_at DESC`
     )
-    .bind(payload.member_id, payload.family_id)
+    .bind(payload.member_id, payload.member_id, payload.member_id)
     .all();
 
   return c.json({ data: results });

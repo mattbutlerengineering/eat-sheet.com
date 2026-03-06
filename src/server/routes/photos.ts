@@ -35,7 +35,7 @@ photos.post("/upload", authMiddleware, async (c) => {
   }
 
   const ext = EXT_MAP[file.type] ?? "jpeg";
-  const key = `${payload.family_id}/${crypto.randomUUID()}.${ext}`;
+  const key = `${payload.member_id}/${crypto.randomUUID()}.${ext}`;
 
   await c.env.PHOTOS.put(key, file.stream(), {
     httpMetadata: { contentType: file.type },
@@ -45,8 +45,9 @@ photos.post("/upload", authMiddleware, async (c) => {
 });
 
 // Serve — no auth (photos are semi-public, keys are unguessable UUIDs)
-photos.get("/:familyId/:filename", async (c) => {
-  const key = `${c.req.param("familyId")}/${c.req.param("filename")}`;
+// Supports both old family_id/ and new member_id/ prefixes
+photos.get("/:prefix/:filename", async (c) => {
+  const key = `${c.req.param("prefix")}/${c.req.param("filename")}`;
   const object = await c.env.PHOTOS.get(key);
 
   if (!object) {

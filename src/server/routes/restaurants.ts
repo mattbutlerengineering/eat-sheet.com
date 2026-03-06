@@ -1,10 +1,11 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const restaurants = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 restaurants.use("*", authMiddleware);
@@ -15,7 +16,8 @@ restaurants.get("/", async (c) => {
 
   const { results } = await db
     .prepare(
-      `SELECT r.*,
+      `${visiblePeersCte()}
+       SELECT r.*,
               ROUND(AVG(rv.overall_score), 1) as avg_score,
               COUNT(rv.id) as review_count,
               m.name as creator_name,
@@ -24,11 +26,11 @@ restaurants.get("/", async (c) => {
        FROM restaurants r
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
        LEFT JOIN members m ON m.id = r.created_by
-       WHERE r.family_id = ?
+       WHERE r.created_by IN (SELECT member_id FROM visible_peers)
        GROUP BY r.id
        ORDER BY r.created_at DESC`
     )
-    .bind(payload.family_id)
+    .bind(payload.member_id, payload.member_id)
     .all();
 
   return c.json({ data: results });
@@ -41,7 +43,8 @@ restaurants.get("/:id", async (c) => {
 
   const restaurant = await db
     .prepare(
-      `SELECT r.*,
+      `${visiblePeersCte()}
+       SELECT r.*,
               ROUND(AVG(rv.overall_score), 1) as avg_score,
               COUNT(rv.id) as review_count,
               ROUND(AVG(rv.food_score), 1) as avg_food,
@@ -50,10 +53,10 @@ restaurants.get("/:id", async (c) => {
               ROUND(AVG(rv.value_score), 1) as avg_value
        FROM restaurants r
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
-       WHERE r.id = ? AND r.family_id = ?
+       WHERE r.id = ? AND r.created_by IN (SELECT member_id FROM visible_peers)
        GROUP BY r.id`
     )
-    .bind(id, payload.family_id)
+    .bind(payload.member_id, payload.member_id, id)
     .first();
 
   if (!restaurant) {
@@ -130,11 +133,15 @@ restaurants.post("/", async (c) => {
   const db = c.env.DB;
   const googlePlaceId = body.google_place_id?.trim() || null;
 
-  // Duplicate detection: same google_place_id in same family
+  // Duplicate detection: same google_place_id among visible peers
   if (googlePlaceId) {
     const duplicate = await db
-      .prepare("SELECT id, name FROM restaurants WHERE google_place_id = ? AND family_id = ?")
-      .bind(googlePlaceId, payload.family_id)
+      .prepare(
+        `${visiblePeersCte()}
+         SELECT id, name FROM restaurants
+         WHERE google_place_id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+      )
+      .bind(payload.member_id, payload.member_id, googlePlaceId)
       .first<{ id: string; name: string }>();
 
     if (duplicate) {
@@ -145,6 +152,7 @@ restaurants.post("/", async (c) => {
     }
   }
 
+  // Use a placeholder family_id for the legacy column
   const restaurant = await db
     .prepare(
       `INSERT INTO restaurants (family_id, name, cuisine, address, photo_url, latitude, longitude, google_place_id, created_by)
@@ -152,7 +160,7 @@ restaurants.post("/", async (c) => {
        RETURNING *`
     )
     .bind(
-      payload.family_id,
+      "legacy",
       body.name.trim(),
       body.cuisine?.trim() || null,
       body.address?.trim() || null,
@@ -186,8 +194,11 @@ restaurants.put("/:id", async (c) => {
 
   const db = c.env.DB;
   const existing = await db
-    .prepare("SELECT id FROM restaurants WHERE id = ? AND family_id = ?")
-    .bind(id, payload.family_id)
+    .prepare(
+      `${visiblePeersCte()}
+       SELECT id FROM restaurants WHERE id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+    )
+    .bind(payload.member_id, payload.member_id, id)
     .first();
 
   if (!existing) {
@@ -200,7 +211,7 @@ restaurants.put("/:id", async (c) => {
     .prepare(
       `UPDATE restaurants
        SET name = ?, cuisine = ?, address = ?, photo_url = ?, latitude = ?, longitude = ?, google_place_id = ?
-       WHERE id = ? AND family_id = ?
+       WHERE id = ?
        RETURNING *`
     )
     .bind(
@@ -211,8 +222,7 @@ restaurants.put("/:id", async (c) => {
       body.latitude ?? null,
       body.longitude ?? null,
       googlePlaceId,
-      id,
-      payload.family_id
+      id
     )
     .first();
 
@@ -225,8 +235,11 @@ restaurants.delete("/:id", async (c) => {
   const db = c.env.DB;
 
   const restaurant = await db
-    .prepare("SELECT id, created_by FROM restaurants WHERE id = ? AND family_id = ?")
-    .bind(id, payload.family_id)
+    .prepare(
+      `${visiblePeersCte()}
+       SELECT id, created_by FROM restaurants WHERE id = ? AND created_by IN (SELECT member_id FROM visible_peers)`
+    )
+    .bind(payload.member_id, payload.member_id, id)
     .first();
 
   if (!restaurant) {

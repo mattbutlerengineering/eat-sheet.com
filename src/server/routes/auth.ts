@@ -2,17 +2,30 @@ import { Hono } from "hono";
 import { sign, verify } from "hono/jwt";
 import { getCookie, setCookie } from "hono/cookie";
 import * as arctic from "arctic";
-import type { Env, Member, Family } from "../types";
+import type { Env, Member, Group, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 import { getProvider, isValidProvider } from "../utils/oauth-providers";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const auth = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string; is_admin: boolean } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
+async function signSessionToken(memberId: string, name: string, secret: string): Promise<string> {
+  return sign(
+    {
+      member_id: memberId,
+      name,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+    },
+    secret
+  );
+}
+
+// Join/register — invite_code is optional (solo signup if omitted)
 auth.post("/join", async (c) => {
-  const body = await c.req.json<{ invite_code: string; registration_token: string }>();
+  const body = await c.req.json<{ invite_code?: string; registration_token: string }>();
 
   if (!body.registration_token) {
     return c.json({ error: "A registration token is required" }, 400);
@@ -25,122 +38,134 @@ auth.post("/join", async (c) => {
     return c.json({ error: "Invalid or expired registration token" }, 401);
   }
 
-  if (!body.invite_code) {
-    return c.json({ error: "Invite code is required" }, 400);
-  }
-
   const name = regPayload.name;
   const db = c.env.DB;
   const { oauth_provider, oauth_id, email } = regPayload;
 
-  const family = await db
-    .prepare("SELECT * FROM families WHERE invite_code = ?")
-    .bind(body.invite_code)
-    .first<Family>();
-
-  if (!family) {
-    return c.json({ error: "Invalid invite code" }, 404);
-  }
-
-  // Check oauth identity isn't already linked to a different member
+  // Check if this OAuth identity is already linked to a member
   const existing = await db
-    .prepare("SELECT id, family_id, name FROM members WHERE oauth_provider = ? AND oauth_id = ?")
+    .prepare("SELECT id, name FROM members WHERE oauth_provider = ? AND oauth_id = ?")
     .bind(oauth_provider, oauth_id)
     .first<Member>();
 
   if (existing) {
-    if (existing.family_id !== family.id || existing.name !== name) {
-      return c.json({ error: "This account is already linked to another member" }, 409);
+    // Already registered — if invite_code provided, join that group
+    if (body.invite_code?.trim()) {
+      const group = await db
+        .prepare("SELECT * FROM groups WHERE invite_code = ?")
+        .bind(body.invite_code.trim())
+        .first<Group>();
+
+      if (!group) {
+        return c.json({ error: "Invalid invite code" }, 404);
+      }
+
+      const alreadyInGroup = await db
+        .prepare("SELECT id FROM group_members WHERE group_id = ? AND member_id = ?")
+        .bind(group.id, existing.id)
+        .first();
+
+      if (!alreadyInGroup) {
+        await db
+          .prepare("INSERT INTO group_members (group_id, member_id, is_admin) VALUES (?, ?, 0)")
+          .bind(group.id, existing.id)
+          .run();
+      }
     }
+
+    const token = await signSessionToken(existing.id, existing.name, c.env.JWT_SECRET);
+    return c.json({
+      data: {
+        token,
+        member: { id: existing.id, name: existing.name },
+      },
+    });
   }
 
-  let member = await db
-    .prepare("SELECT * FROM members WHERE family_id = ? AND name = ?")
-    .bind(family.id, name)
+  // New user — create member (family_id uses a placeholder for legacy column)
+  const placeholderFamilyId = "solo_" + crypto.randomUUID().slice(0, 8);
+
+  const member = await db
+    .prepare(
+      `INSERT INTO members (family_id, name, is_admin, oauth_provider, oauth_id, email)
+       VALUES (?, ?, 0, ?, ?, ?)
+       RETURNING *`
+    )
+    .bind(placeholderFamilyId, name, oauth_provider, oauth_id, email ?? null)
     .first<Member>();
-
-  if (!member) {
-    const memberCount = await db
-      .prepare("SELECT COUNT(*) as count FROM members WHERE family_id = ?")
-      .bind(family.id)
-      .first<{ count: number }>();
-
-    const isFirst = (memberCount?.count ?? 0) === 0;
-
-    member = await db
-      .prepare("INSERT INTO members (family_id, name, is_admin, oauth_provider, oauth_id, email) VALUES (?, ?, ?, ?, ?, ?) RETURNING *")
-      .bind(family.id, name, isFirst ? 1 : 0, oauth_provider, oauth_id, email ?? null)
-      .first<Member>();
-  } else if (!member.oauth_id) {
-    // Link OAuth identity to existing member
-    member = await db
-      .prepare("UPDATE members SET oauth_provider = ?, oauth_id = ?, email = ? WHERE id = ? RETURNING *")
-      .bind(oauth_provider, oauth_id, email ?? null, member.id)
-      .first<Member>();
-  }
 
   if (!member) {
     return c.json({ error: "Failed to create member" }, 500);
   }
 
-  const secret = c.env.JWT_SECRET;
-  if (!secret) {
-    return c.json({ error: "Server configuration error" }, 500);
-  }
-  const token = await sign(
-    {
-      member_id: member.id,
-      family_id: member.family_id,
-      name: member.name,
-      is_admin: member.is_admin === 1,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
-    },
-    secret
-  );
+  // If invite_code provided, join that group
+  if (body.invite_code?.trim()) {
+    const group = await db
+      .prepare("SELECT * FROM groups WHERE invite_code = ?")
+      .bind(body.invite_code.trim())
+      .first<Group>();
 
+    if (group) {
+      await db
+        .prepare("INSERT INTO group_members (group_id, member_id, is_admin) VALUES (?, ?, 0)")
+        .bind(group.id, member.id)
+        .run();
+    } else {
+      return c.json({ error: "Invalid invite code" }, 404);
+    }
+  }
+
+  const token = await signSessionToken(member.id, member.name, c.env.JWT_SECRET);
   return c.json({
     data: {
       token,
-      member: {
-        id: member.id,
-        family_id: member.family_id,
-        name: member.name,
-        is_admin: member.is_admin === 1,
-      },
+      member: { id: member.id, name: member.name },
     },
   });
 });
 
+// Get current user info + groups
 auth.get("/me", authMiddleware, async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
-  const member = await db
-    .prepare(
-      `SELECT m.id, m.family_id, m.name, m.is_admin, m.email, f.name as family_name
-       FROM members m
-       JOIN families f ON f.id = m.family_id
-       WHERE m.id = ?`
-    )
-    .bind(payload.member_id)
-    .first<Member & { family_name: string }>();
+  const [memberResult, groupsResult] = await db.batch([
+    db.prepare("SELECT id, name, email FROM members WHERE id = ?").bind(payload.member_id),
+    db.prepare(
+      `SELECT g.id, g.name, gm.is_admin,
+              (SELECT COUNT(*) FROM group_members gm2 WHERE gm2.group_id = g.id) as member_count
+       FROM group_members gm
+       JOIN groups g ON g.id = gm.group_id
+       WHERE gm.member_id = ?
+       ORDER BY gm.joined_at ASC`
+    ).bind(payload.member_id),
+  ]);
 
+  const member = memberResult?.results[0] as { id: string; name: string; email: string | null } | undefined;
   if (!member) {
     return c.json({ error: "Member not found" }, 404);
   }
 
+  const memberGroups = (groupsResult?.results ?? []) as Array<{
+    id: string; name: string; is_admin: number; member_count: number;
+  }>;
+
   return c.json({
     data: {
       id: member.id,
-      family_id: member.family_id,
       name: member.name,
-      is_admin: member.is_admin === 1,
       email: member.email,
-      family_name: member.family_name,
+      groups: memberGroups.map((g) => ({
+        id: g.id,
+        name: g.name,
+        is_admin: g.is_admin === 1,
+        member_count: g.member_count,
+      })),
     },
   });
 });
 
+// Update display name
 auth.put("/me", authMiddleware, async (c) => {
   const payload = c.get("jwtPayload");
   const body = await c.req.json<{ name?: string }>();
@@ -156,104 +181,33 @@ auth.put("/me", authMiddleware, async (c) => {
 
   const db = c.env.DB;
   const updated = await db
-    .prepare("UPDATE members SET name = ? WHERE id = ? RETURNING id, family_id, name, is_admin")
+    .prepare("UPDATE members SET name = ? WHERE id = ? RETURNING id, name")
     .bind(name, payload.member_id)
-    .first<Member>();
+    .first<{ id: string; name: string }>();
 
   if (!updated) {
     return c.json({ error: "Member not found" }, 404);
   }
 
-  return c.json({
-    data: {
-      id: updated.id,
-      family_id: updated.family_id,
-      name: updated.name,
-      is_admin: updated.is_admin === 1,
-    },
-  });
+  return c.json({ data: { id: updated.id, name: updated.name } });
 });
 
+// List visible peers (anyone sharing a group with the current user)
 auth.get("/members", authMiddleware, async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
   const { results } = await db
-    .prepare("SELECT id, family_id, name FROM members WHERE family_id = ?")
-    .bind(payload.family_id)
-    .all<Member>();
+    .prepare(
+      `${visiblePeersCte()}
+       SELECT DISTINCT m.id, m.name
+       FROM members m
+       WHERE m.id IN (SELECT member_id FROM visible_peers)`
+    )
+    .bind(payload.member_id, payload.member_id)
+    .all<{ id: string; name: string }>();
 
   return c.json({ data: results });
-});
-
-auth.get("/invite-code", authMiddleware, async (c) => {
-  const payload = c.get("jwtPayload");
-  if (!payload.is_admin) {
-    return c.json({ error: "Admin access required" }, 403);
-  }
-
-  const db = c.env.DB;
-  const family = await db
-    .prepare("SELECT invite_code FROM families WHERE id = ?")
-    .bind(payload.family_id)
-    .first<{ invite_code: string }>();
-
-  if (!family) {
-    return c.json({ error: "Family not found" }, 404);
-  }
-
-  return c.json({ data: { invite_code: family.invite_code } });
-});
-
-auth.post("/regenerate-code", authMiddleware, async (c) => {
-  const payload = c.get("jwtPayload");
-  if (!payload.is_admin) {
-    return c.json({ error: "Admin access required" }, 403);
-  }
-
-  const db = c.env.DB;
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const code = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-
-  const family = await db
-    .prepare("UPDATE families SET invite_code = ? WHERE id = ? RETURNING invite_code")
-    .bind(code, payload.family_id)
-    .first<{ invite_code: string }>();
-
-  if (!family) {
-    return c.json({ error: "Family not found" }, 404);
-  }
-
-  return c.json({ data: { invite_code: family.invite_code } });
-});
-
-auth.delete("/members/:id", authMiddleware, async (c) => {
-  const payload = c.get("jwtPayload");
-  if (!payload.is_admin) {
-    return c.json({ error: "Admin access required" }, 403);
-  }
-
-  const memberId = c.req.param("id");
-  if (memberId === payload.member_id) {
-    return c.json({ error: "Cannot remove yourself" }, 400);
-  }
-
-  const db = c.env.DB;
-  const member = await db
-    .prepare("SELECT id FROM members WHERE id = ? AND family_id = ?")
-    .bind(memberId, payload.family_id)
-    .first<{ id: string }>();
-
-  if (!member) {
-    return c.json({ error: "Member not found" }, 404);
-  }
-
-  await db
-    .prepare("DELETE FROM members WHERE id = ? AND family_id = ?")
-    .bind(memberId, payload.family_id)
-    .run();
-
-  return c.json({ data: { success: true } });
 });
 
 // OAuth provider routes — MUST be after all specific routes to avoid /:provider matching "me", "members", etc.
@@ -289,22 +243,12 @@ auth.get("/:provider/callback", async (c) => {
 
   const db = c.env.DB;
   const member = await db
-    .prepare("SELECT id, family_id, name, is_admin, email FROM members WHERE oauth_provider = ? AND oauth_id = ?")
+    .prepare("SELECT id, name, email FROM members WHERE oauth_provider = ? AND oauth_id = ?")
     .bind(providerName, profile.id)
     .first<Member>();
 
   if (member) {
-    const token = await sign(
-      {
-        member_id: member.id,
-        family_id: member.family_id,
-        name: member.name,
-        is_admin: member.is_admin === 1,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
-      },
-      c.env.JWT_SECRET
-    );
-
+    const token = await signSessionToken(member.id, member.name, c.env.JWT_SECRET);
     const base = c.env.OAUTH_REDIRECT_BASE;
     return c.redirect(`${base}/?token=${encodeURIComponent(token)}`);
   }

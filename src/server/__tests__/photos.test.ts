@@ -29,7 +29,7 @@ describe("POST /api/photos/upload", () => {
 
     expect(res.status).toBe(201);
     const body: any = await res.json();
-    expect(body.data.photoUrl).toMatch(/^\/api\/photos\/family-1\/.+\.jpeg$/);
+    expect(body.data.photoUrl).toMatch(/^\/api\/photos\/member-1\/.+\.jpeg$/);
     expect(bucket.put).toHaveBeenCalledOnce();
   });
 

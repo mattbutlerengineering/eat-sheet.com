@@ -1,9 +1,14 @@
 export interface Member {
   readonly id: string;
-  readonly family_id: string;
+  readonly name: string;
+  readonly email?: string | null;
+}
+
+export interface Group {
+  readonly id: string;
   readonly name: string;
   readonly is_admin: boolean;
-  readonly email?: string | null;
+  readonly member_count?: number;
 }
 
 export interface OAuthUser {

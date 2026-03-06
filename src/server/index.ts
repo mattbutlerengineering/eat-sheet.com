@@ -13,6 +13,7 @@ import { bookmarkRoutes } from "./routes/bookmarks";
 import { shareRoutes } from "./routes/share";
 import { placesRoutes } from "./routes/places";
 import { recommendationRoutes } from "./routes/recommendations";
+import { groupRoutes } from "./routes/groups";
 
 const app = new Hono<{ Bindings: Env; Variables: { sentryReported: boolean } }>();
 
@@ -41,6 +42,7 @@ app.route("/api/bookmarks", bookmarkRoutes);
 app.route("/api/share", shareRoutes);
 app.route("/api/places", placesRoutes);
 app.route("/api/recommendations", recommendationRoutes);
+app.route("/api/groups", groupRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 

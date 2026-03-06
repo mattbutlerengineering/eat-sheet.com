@@ -35,6 +35,12 @@ const DiscoverPage = lazy(() =>
 const SharePage = lazy(() =>
   import("./components/SharePage").then((m) => ({ default: m.SharePage }))
 );
+const GroupsPage = lazy(() =>
+  import("./components/GroupsPage").then((m) => ({ default: m.GroupsPage }))
+);
+const InviteHandler = lazy(() =>
+  import("./components/InviteHandler").then((m) => ({ default: m.InviteHandler }))
+);
 
 function PageLoader() {
   return (
@@ -144,6 +150,14 @@ export function App() {
                   onNameChange={updateName}
                 />
               }
+            />
+            <Route
+              path="/groups"
+              element={<GroupsPage token={auth.token} />}
+            />
+            <Route
+              path="/invite/:code"
+              element={<InviteHandler token={auth.token} />}
             />
             <Route path="/share/:type/:token" element={<SharePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

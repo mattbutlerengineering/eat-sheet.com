@@ -1,10 +1,11 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const activity = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 activity.use("*", authMiddleware);
@@ -15,7 +16,8 @@ activity.get("/", async (c) => {
 
   const { results } = await db
     .prepare(
-      `SELECT * FROM (
+      `${visiblePeersCte()}
+       SELECT * FROM (
         SELECT
           r.id,
           'restaurant_added' as type,
@@ -26,7 +28,7 @@ activity.get("/", async (c) => {
           r.created_at as timestamp
         FROM restaurants r
         JOIN members m ON m.id = r.created_by
-        WHERE r.family_id = ?
+        WHERE r.created_by IN (SELECT member_id FROM visible_peers)
 
         UNION ALL
 
@@ -41,12 +43,12 @@ activity.get("/", async (c) => {
         FROM reviews rv
         JOIN members m ON m.id = rv.member_id
         JOIN restaurants rest ON rest.id = rv.restaurant_id
-        WHERE rest.family_id = ?
+        WHERE rest.created_by IN (SELECT member_id FROM visible_peers)
       )
       ORDER BY timestamp DESC
       LIMIT 30`
     )
-    .bind(payload.family_id, payload.family_id)
+    .bind(payload.member_id, payload.member_id)
     .all();
 
   return c.json({ data: results });

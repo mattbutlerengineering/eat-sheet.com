@@ -1,12 +1,13 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { visiblePeersCte } from "../utils/visible-peers";
 
 const VALID_EMOJIS = ["fire", "heart", "laughing", "100", "thumbsup"] as const;
 
 const reactions = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 reactions.use("*", authMiddleware);
@@ -21,13 +22,14 @@ reactions.post("/:reviewId", async (c) => {
     return c.json({ error: "Invalid emoji. Must be one of: fire, heart, laughing, 100, thumbsup" }, 400);
   }
 
-  // Batch: verify review exists + check existing reaction
+  // Batch: verify review is visible + check existing reaction
   const [reviewResult, existingResult] = await db.batch([
     db.prepare(
-      `SELECT rv.id FROM reviews rv
+      `${visiblePeersCte()}
+       SELECT rv.id FROM reviews rv
        JOIN restaurants r ON r.id = rv.restaurant_id
-       WHERE rv.id = ? AND r.family_id = ?`
-    ).bind(reviewId, payload.family_id),
+       WHERE rv.id = ? AND r.created_by IN (SELECT member_id FROM visible_peers)`
+    ).bind(payload.member_id, payload.member_id, reviewId),
     db.prepare("SELECT id, emoji FROM reactions WHERE review_id = ? AND member_id = ?")
       .bind(reviewId, payload.member_id),
   ]);
