@@ -5,12 +5,11 @@ import { SLURMS_QUOTES } from "../utils/personality";
 import type { GoogleUser, GoogleAuthResult } from "../types";
 
 interface JoinScreenProps {
-  readonly onJoin: (inviteCode: string, name: string) => Promise<unknown>;
   readonly onGoogleAuth: (idToken: string) => Promise<GoogleAuthResult>;
   readonly onGoogleRegister: (inviteCode: string, name: string, googleUser: GoogleUser) => Promise<unknown>;
 }
 
-type ScreenState = "sign_in" | "register" | "invite_only";
+type ScreenState = "sign_in" | "register";
 
 const FLOATING_FOOD = [
   { emoji: "🍕", top: "8%", left: "10%", delay: "0s", duration: "6s" },
@@ -67,7 +66,7 @@ function Branding() {
   );
 }
 
-export function JoinScreen({ onJoin, onGoogleAuth, onGoogleRegister }: JoinScreenProps) {
+export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) {
   const [screen, setScreen] = useState<ScreenState>("sign_in");
   const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
   const [inviteCode, setInviteCode] = useState("");
@@ -105,21 +104,6 @@ export function JoinScreen({ onJoin, onGoogleAuth, onGoogleRegister }: JoinScree
     }
   };
 
-  const handleInviteOnlySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteCode.trim() || !name.trim()) return;
-
-    setError("");
-    setSubmitting(true);
-    try {
-      await onJoin(inviteCode.trim(), name.trim());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center px-6 bg-stone-950 relative overflow-hidden">
       <FloatingFood />
@@ -132,19 +116,6 @@ export function JoinScreen({ onJoin, onGoogleAuth, onGoogleRegister }: JoinScree
             <GoogleSignInButton onToken={handleGoogleToken} />
 
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px bg-stone-800" />
-              <span className="text-stone-600 text-xs uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px bg-stone-800" />
-            </div>
-
-            <button
-              onClick={() => { setScreen("invite_only"); setError(""); }}
-              className="w-full py-3 text-stone-400 hover:text-stone-200 text-sm transition-colors"
-            >
-              Use invite code only
-            </button>
 
             <p className="text-center text-stone-600 text-sm mt-4">
               Ask your family for the invite code
@@ -218,61 +189,6 @@ export function JoinScreen({ onJoin, onGoogleAuth, onGoogleRegister }: JoinScree
           </form>
         )}
 
-        {screen === "invite_only" && (
-          <form
-            onSubmit={handleInviteOnlySubmit}
-            className="space-y-5 animate-fade-up"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <div>
-              <label htmlFor="invite-code" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
-                Invite Code
-              </label>
-              <input
-                id="invite-code"
-                type="text"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value)}
-                placeholder="Enter your family code"
-                autoComplete="off"
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
-                Your Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="What should we call you?"
-                autoComplete="name"
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={submitting || !inviteCode.trim() || !name.trim()}
-              className="btn-shimmer w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
-            >
-              {submitting ? "Joining..." : "Join the Sheet"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => { setScreen("sign_in"); setError(""); }}
-              className="w-full py-2 text-stone-500 hover:text-stone-300 text-sm transition-colors"
-            >
-              Back to sign in
-            </button>
-          </form>
-        )}
       </div>
     </div>
   );

@@ -53,7 +53,15 @@ export const TEST_REVIEW = {
 };
 
 export async function makeToken(
-  overrides: Partial<{ member_id: string; family_id: string; name: string; is_admin: boolean }> = {}
+  overrides: Partial<{
+    member_id: string;
+    family_id: string;
+    name: string;
+    is_admin: boolean;
+    oauth_provider: string;
+    oauth_id: string;
+    email: string;
+  }> = {}
 ): Promise<string> {
   return sign(
     {
@@ -61,7 +69,25 @@ export async function makeToken(
       family_id: overrides.family_id ?? TEST_MEMBER.family_id,
       name: overrides.name ?? TEST_MEMBER.name,
       is_admin: overrides.is_admin ?? true,
+      ...(overrides.oauth_provider && { oauth_provider: overrides.oauth_provider }),
+      ...(overrides.oauth_id && { oauth_id: overrides.oauth_id }),
+      ...(overrides.email && { email: overrides.email }),
       exp: Math.floor(Date.now() / 1000) + 3600,
+    },
+    TEST_SECRET
+  );
+}
+
+export async function makeRegistrationToken(
+  overrides: Partial<{ oauth_provider: string; oauth_id: string; email: string; name: string }> = {}
+): Promise<string> {
+  return sign(
+    {
+      oauth_provider: overrides.oauth_provider ?? "google",
+      oauth_id: overrides.oauth_id ?? "google-123",
+      email: overrides.email ?? "matt@gmail.com",
+      name: overrides.name ?? "Matt",
+      exp: Math.floor(Date.now() / 1000) + 600,
     },
     TEST_SECRET
   );

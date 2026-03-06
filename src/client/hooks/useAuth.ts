@@ -53,25 +53,6 @@ export function useAuth() {
       .finally(() => setLoading(false));
   }, []);
 
-  const join = useCallback(async (inviteCode: string, name: string) => {
-    const res = await fetch("/api/auth/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ invite_code: inviteCode, name }),
-    });
-
-    const json = (await res.json()) as { data?: { token: string; member: Member }; error?: string };
-
-    if (!res.ok || !json.data) {
-      throw new Error(json.error || "Failed to join");
-    }
-
-    const state: AuthState = { token: json.data.token, member: json.data.member };
-    saveAuth(state);
-    setAuth(state);
-    return state;
-  }, []);
-
   const logout = useCallback(() => {
     clearAuth();
     setAuth(null);
@@ -132,5 +113,5 @@ export function useAuth() {
     return state;
   }, []);
 
-  return { auth, loading, join, logout, updateName, googleAuth, googleRegister };
+  return { auth, loading, logout, updateName, googleAuth, googleRegister };
 }

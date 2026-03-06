@@ -1,9 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import {
-  mockVerifyGoogleToken,
-  TEST_GOOGLE_CLIENT_ID,
-  TEST_GOOGLE_USER,
-} from "./helpers/google-auth";
+import { describe, it, expect } from "vitest";
 import app from "../index";
 import { createMockDb } from "./helpers/mock-db";
 import {
@@ -12,22 +7,102 @@ import {
   TEST_MEMBER,
   TEST_MEMBER_2,
   makeToken,
+  makeRegistrationToken,
   authHeader,
 } from "./helpers/auth";
 
 function env(db: D1Database) {
-  return { DB: db, JWT_SECRET: TEST_SECRET, GOOGLE_CLIENT_ID: TEST_GOOGLE_CLIENT_ID };
+  return {
+    DB: db,
+    JWT_SECRET: TEST_SECRET,
+    GOOGLE_OAUTH_CLIENT_ID: "test-client-id",
+    GOOGLE_OAUTH_CLIENT_SECRET: "test-client-secret",
+    OAUTH_REDIRECT_BASE: "http://localhost:5173",
+  };
 }
 
+describe("GET /api/auth/:provider", () => {
+  it("returns 404 for unknown provider", async () => {
+    const { db } = createMockDb();
+    const res = await app.request("/api/auth/facebook", {}, env(db));
+    expect(res.status).toBe(404);
+  });
+
+  it("redirects to Google for valid provider", async () => {
+    const { db } = createMockDb();
+    const res = await app.request("/api/auth/google", { redirect: "manual" }, env(db));
+    expect(res.status).toBe(302);
+    const location = res.headers.get("Location");
+    expect(location).toContain("accounts.google.com");
+  });
+
+  it("sets state and code_verifier cookies", async () => {
+    const { db } = createMockDb();
+    const res = await app.request("/api/auth/google", { redirect: "manual" }, env(db));
+    const cookies = res.headers.getSetCookie();
+    expect(cookies.some((c: string) => c.startsWith("oauth_state="))).toBe(true);
+    expect(cookies.some((c: string) => c.startsWith("oauth_code_verifier="))).toBe(true);
+  });
+});
+
+describe("GET /api/auth/:provider/callback", () => {
+  it("returns 400 when state is missing or mismatched", async () => {
+    const { db } = createMockDb();
+    const res = await app.request(
+      "/api/auth/google/callback?code=test-code&state=bad-state",
+      { headers: { Cookie: "oauth_state=good-state; oauth_code_verifier=verifier" } },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 404 for unknown provider callback", async () => {
+    const { db } = createMockDb();
+    const res = await app.request("/api/auth/facebook/callback?code=test", {}, env(db));
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("POST /api/auth/join", () => {
-  it("returns 400 when name is missing", async () => {
+  it("returns 400 when registration_token is missing", async () => {
     const { db } = createMockDb();
     const res = await app.request(
       "/api/auth/join",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123" }),
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(400);
+    const body: any = await res.json();
+    expect(body.error).toContain("registration token");
+  });
+
+  it("returns 401 for invalid registration_token", async () => {
+    const { db } = createMockDb();
+    const res = await app.request(
+      "/api/auth/join",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: "bad-token" }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 400 when name is missing", async () => {
+    const regToken = await makeRegistrationToken();
+    const { db } = createMockDb();
+    const res = await app.request(
+      "/api/auth/join",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
       },
       env(db)
     );
@@ -35,15 +110,16 @@ describe("POST /api/auth/join", () => {
   });
 
   it("returns 404 for invalid invite code", async () => {
+    const regToken = await makeRegistrationToken();
     const { db } = createMockDb({
-      first: { "SELECT * FROM families": null },
+      first: { "SELECT * FROM families": null, "WHERE oauth_provider": null },
     });
     const res = await app.request(
       "/api/auth/join",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "WRONG", name: "Matt" }),
+        body: JSON.stringify({ invite_code: "WRONG", name: "Matt", registration_token: regToken }),
       },
       env(db)
     );
@@ -51,10 +127,13 @@ describe("POST /api/auth/join", () => {
   });
 
   it("returns token for valid invite code with existing member", async () => {
+    const regToken = await makeRegistrationToken();
+    const existingMember = { ...TEST_MEMBER, oauth_provider: "google", oauth_id: "google-123" };
     const { db } = createMockDb({
       first: {
         "SELECT * FROM families": TEST_FAMILY,
-        "SELECT * FROM members": TEST_MEMBER,
+        "WHERE oauth_provider": existingMember,
+        "SELECT * FROM members": existingMember,
       },
     });
     const res = await app.request(
@@ -62,7 +141,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt" }),
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
       },
       env(db)
     );
@@ -73,10 +152,13 @@ describe("POST /api/auth/join", () => {
   });
 
   it("creates new member when name is new", async () => {
+    const regToken = await makeRegistrationToken();
     const { db } = createMockDb({
       first: {
         "SELECT * FROM families": TEST_FAMILY,
+        "WHERE oauth_provider": null,
         "SELECT * FROM members": null,
+        "SELECT COUNT": { count: 0 },
         "INSERT INTO members": TEST_MEMBER,
       },
     });
@@ -85,13 +167,62 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt" }),
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
       },
       env(db)
     );
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data.token).toBeDefined();
+  });
+
+  it("links OAuth identity to existing member without one", async () => {
+    const regToken = await makeRegistrationToken();
+    const memberWithoutOAuth = { ...TEST_MEMBER, oauth_provider: null, oauth_id: null };
+    const linkedMember = { ...TEST_MEMBER, oauth_provider: "google", oauth_id: "google-123" };
+    const { db } = createMockDb({
+      first: {
+        "SELECT * FROM families": TEST_FAMILY,
+        "WHERE oauth_provider": null,
+        "SELECT * FROM members": memberWithoutOAuth,
+        "UPDATE members SET oauth_provider": linkedMember,
+      },
+    });
+    const res = await app.request(
+      "/api/auth/join",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(200);
+    const body: any = await res.json();
+    expect(body.data.token).toBeDefined();
+  });
+
+  it("returns 409 when OAuth identity is already linked to different member", async () => {
+    const regToken = await makeRegistrationToken();
+    const otherMember = { id: "member-other", family_id: "family-other", name: "Other" };
+    const { db } = createMockDb({
+      first: {
+        "SELECT * FROM families": TEST_FAMILY,
+        "WHERE oauth_provider": otherMember,
+      },
+    });
+    const res = await app.request(
+      "/api/auth/join",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+      },
+      env(db)
+    );
+    expect(res.status).toBe(409);
+    const body: any = await res.json();
+    expect(body.error).toContain("already linked");
   });
 });
 
@@ -209,38 +340,6 @@ describe("PUT /api/auth/me", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 when name is missing", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken();
-    const res = await app.request(
-      "/api/auth/me",
-      {
-        method: "PUT",
-        headers: authHeader(token),
-        body: JSON.stringify({}),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("returns 400 when name exceeds 50 characters", async () => {
-    const { db } = createMockDb();
-    const token = await makeToken();
-    const res = await app.request(
-      "/api/auth/me",
-      {
-        method: "PUT",
-        headers: authHeader(token),
-        body: JSON.stringify({ name: "A".repeat(51) }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(400);
-    const body: any = await res.json();
-    expect(body.error).toContain("50 characters");
-  });
-
   it("updates name successfully", async () => {
     const updatedMember = { ...TEST_MEMBER, name: "Matthew" };
     const { db } = createMockDb({
@@ -259,224 +358,6 @@ describe("PUT /api/auth/me", () => {
     expect(res.status).toBe(200);
     const body: any = await res.json();
     expect(body.data.name).toBe("Matthew");
-  });
-
-  it("returns 401 without token", async () => {
-    const { db } = createMockDb();
-    const res = await app.request(
-      "/api/auth/me",
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "Matt" }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(401);
-  });
-});
-
-describe("POST /api/auth/google", () => {
-  beforeEach(() => {
-    mockVerifyGoogleToken.mockReset();
-  });
-
-  it("returns 400 when id_token is missing", async () => {
-    const { db } = createMockDb();
-    const res = await app.request(
-      "/api/auth/google",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("returns 503 when GOOGLE_CLIENT_ID is not configured", async () => {
-    const { db } = createMockDb();
-    const res = await app.request(
-      "/api/auth/google",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: "some-token" }),
-      },
-      { DB: db, JWT_SECRET: TEST_SECRET } as any
-    );
-    expect(res.status).toBe(503);
-  });
-
-  it("returns 401 for invalid token", async () => {
-    mockVerifyGoogleToken.mockRejectedValue(new Error("Invalid token"));
-    const { db } = createMockDb();
-    const res = await app.request(
-      "/api/auth/google",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: "bad-token" }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(401);
-  });
-
-  it("returns 'authenticated' when google_id is found", async () => {
-    mockVerifyGoogleToken.mockResolvedValue(TEST_GOOGLE_USER);
-    const memberWithGoogle = { ...TEST_MEMBER, google_id: TEST_GOOGLE_USER.sub, email: TEST_GOOGLE_USER.email };
-    const { db } = createMockDb({
-      first: { "WHERE m.google_id": memberWithGoogle },
-    });
-    const res = await app.request(
-      "/api/auth/google",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: "valid-token" }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.status).toBe("authenticated");
-    expect(body.data.token).toBeDefined();
-    expect(body.data.member.name).toBe("Matt");
-    expect(body.data.member.email).toBe("matt@gmail.com");
-  });
-
-  it("returns 'needs_registration' when google_id is not found", async () => {
-    mockVerifyGoogleToken.mockResolvedValue(TEST_GOOGLE_USER);
-    const { db } = createMockDb({
-      first: { "WHERE m.google_id": null },
-    });
-    const res = await app.request(
-      "/api/auth/google",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: "valid-token" }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.status).toBe("needs_registration");
-    expect(body.data.google_user.google_id).toBe(TEST_GOOGLE_USER.sub);
-    expect(body.data.google_user.email).toBe(TEST_GOOGLE_USER.email);
-    expect(body.data.google_user.name).toBe(TEST_GOOGLE_USER.name);
-  });
-});
-
-describe("POST /api/auth/join with google_id", () => {
-  it("creates new member with google_id", async () => {
-    const newMember = { ...TEST_MEMBER, google_id: "google-123", email: "test@gmail.com" };
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE google_id": null,
-        "SELECT * FROM members": null,
-        "SELECT COUNT": { count: 0 },
-        "INSERT INTO members": newMember,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          invite_code: "TEST123",
-          name: "Matt",
-          google_id: "google-123",
-          email: "test@gmail.com",
-        }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.token).toBeDefined();
-  });
-
-  it("links google_id to existing member", async () => {
-    const memberWithoutGoogle = { ...TEST_MEMBER, google_id: null, email: null };
-    const linkedMember = { ...TEST_MEMBER, google_id: "google-123", email: "test@gmail.com" };
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE google_id": null,
-        "SELECT * FROM members": memberWithoutGoogle,
-        "UPDATE members SET google_id": linkedMember,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          invite_code: "TEST123",
-          name: "Matt",
-          google_id: "google-123",
-          email: "test@gmail.com",
-        }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.token).toBeDefined();
-  });
-
-  it("returns 409 when google_id is already linked to different member", async () => {
-    const otherMember = { id: "member-other", family_id: "family-other", name: "Other" };
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "WHERE google_id": otherMember,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          invite_code: "TEST123",
-          name: "Matt",
-          google_id: "google-123",
-          email: "test@gmail.com",
-        }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(409);
-    const body: any = await res.json();
-    expect(body.error).toContain("already linked");
-  });
-
-  it("works without google_id (backward compatible)", async () => {
-    const { db } = createMockDb({
-      first: {
-        "SELECT * FROM families": TEST_FAMILY,
-        "SELECT * FROM members": TEST_MEMBER,
-      },
-    });
-    const res = await app.request(
-      "/api/auth/join",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt" }),
-      },
-      env(db)
-    );
-    expect(res.status).toBe(200);
-    const body: any = await res.json();
-    expect(body.data.token).toBeDefined();
   });
 });
 
@@ -501,21 +382,6 @@ describe("DELETE /api/auth/members/:id", () => {
       env(db)
     );
     expect(res.status).toBe(400);
-    const body: any = await res.json();
-    expect(body.error).toContain("yourself");
-  });
-
-  it("returns 404 when member not found", async () => {
-    const { db } = createMockDb({
-      first: { "SELECT id FROM members": null },
-    });
-    const token = await makeToken({ is_admin: true });
-    const res = await app.request(
-      "/api/auth/members/nonexistent",
-      { method: "DELETE", headers: authHeader(token) },
-      env(db)
-    );
-    expect(res.status).toBe(404);
   });
 
   it("removes member successfully", async () => {

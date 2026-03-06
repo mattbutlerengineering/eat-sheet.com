@@ -1,86 +1,28 @@
 import { Hono } from "hono";
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
+import { getCookie, setCookie } from "hono/cookie";
+import * as arctic from "arctic";
 import type { Env, Member, Family } from "../types";
 import { authMiddleware } from "../middleware/auth";
-import { verifyGoogleToken } from "../utils/google-auth";
+import { getProvider, isValidProvider } from "../utils/oauth-providers";
 
 const auth = new Hono<{
   Bindings: Env;
   Variables: { jwtPayload: { member_id: string; family_id: string; name: string; is_admin: boolean } };
 }>();
 
-auth.post("/google", async (c) => {
-  const body = await c.req.json<{ id_token: string }>();
-  if (!body.id_token) {
-    return c.json({ error: "id_token is required" }, 400);
-  }
-
-  const clientId = c.env.GOOGLE_OAUTH_CLIENT_ID;
-  if (!clientId) {
-    return c.json({ error: "Google auth not configured" }, 503);
-  }
-
-  let payload;
-  try {
-    payload = await verifyGoogleToken(body.id_token, clientId);
-  } catch {
-    return c.json({ error: "Invalid Google token" }, 401);
-  }
-
-  const db = c.env.DB;
-  const member = await db
-    .prepare(
-      `SELECT m.id, m.family_id, m.name, m.is_admin, m.email
-       FROM members m
-       WHERE m.google_id = ?`
-    )
-    .bind(payload.sub)
-    .first<Member>();
-
-  if (member) {
-    const token = await sign(
-      {
-        member_id: member.id,
-        family_id: member.family_id,
-        name: member.name,
-        is_admin: member.is_admin === 1,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
-      },
-      c.env.JWT_SECRET
-    );
-
-    return c.json({
-      data: {
-        status: "authenticated",
-        token,
-        member: {
-          id: member.id,
-          family_id: member.family_id,
-          name: member.name,
-          is_admin: member.is_admin === 1,
-          email: member.email,
-        },
-      },
-    });
-  }
-
-  return c.json({
-    data: {
-      status: "needs_registration",
-      google_user: {
-        google_id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-      },
-    },
-  });
-});
-
 auth.post("/join", async (c) => {
-  const body = await c.req.json<{ invite_code: string; name: string; google_id: string; email?: string }>();
+  const body = await c.req.json<{ invite_code: string; name: string; registration_token: string }>();
 
-  if (!body.google_id) {
-    return c.json({ error: "Google sign-in is required" }, 400);
+  if (!body.registration_token) {
+    return c.json({ error: "A registration token is required" }, 400);
+  }
+
+  let regPayload: { oauth_provider: string; oauth_id: string; email: string; name: string };
+  try {
+    regPayload = (await verify(body.registration_token, c.env.JWT_SECRET, "HS256")) as typeof regPayload;
+  } catch {
+    return c.json({ error: "Invalid or expired registration token" }, 401);
   }
 
   if (!body.invite_code || !body.name?.trim()) {
@@ -89,6 +31,7 @@ auth.post("/join", async (c) => {
 
   const name = body.name.trim();
   const db = c.env.DB;
+  const { oauth_provider, oauth_id, email } = regPayload;
 
   const family = await db
     .prepare("SELECT * FROM families WHERE invite_code = ?")
@@ -99,18 +42,15 @@ auth.post("/join", async (c) => {
     return c.json({ error: "Invalid invite code" }, 404);
   }
 
-  // If google_id provided, check it's not already linked to another member
-  if (body.google_id) {
-    const existing = await db
-      .prepare("SELECT id, family_id, name FROM members WHERE google_id = ?")
-      .bind(body.google_id)
-      .first<Member>();
+  // Check oauth identity isn't already linked to a different member
+  const existing = await db
+    .prepare("SELECT id, family_id, name FROM members WHERE oauth_provider = ? AND oauth_id = ?")
+    .bind(oauth_provider, oauth_id)
+    .first<Member>();
 
-    if (existing) {
-      // Check if it's the same person (same family + name) — allow re-linking
-      if (existing.family_id !== family.id || existing.name !== name) {
-        return c.json({ error: "This Google account is already linked to another member" }, 409);
-      }
+  if (existing) {
+    if (existing.family_id !== family.id || existing.name !== name) {
+      return c.json({ error: "This account is already linked to another member" }, 409);
     }
   }
 
@@ -127,16 +67,15 @@ auth.post("/join", async (c) => {
 
     const isFirst = (memberCount?.count ?? 0) === 0;
 
-    const result = await db
-      .prepare("INSERT INTO members (family_id, name, is_admin, google_id, email) VALUES (?, ?, ?, ?, ?) RETURNING *")
-      .bind(family.id, name, isFirst ? 1 : 0, body.google_id, body.email ?? null)
-      .first<Member>();
-    member = result;
-  } else if (body.google_id && !member.oauth_id) {
-    // Link oauth_id to existing member
     member = await db
-      .prepare("UPDATE members SET oauth_provider = 'google', oauth_id = ?, email = ? WHERE id = ? RETURNING *")
-      .bind(body.google_id, body.email ?? null, member.id)
+      .prepare("INSERT INTO members (family_id, name, is_admin, oauth_provider, oauth_id, email) VALUES (?, ?, ?, ?, ?, ?) RETURNING *")
+      .bind(family.id, name, isFirst ? 1 : 0, oauth_provider, oauth_id, email ?? null)
+      .first<Member>();
+  } else if (!member.oauth_id) {
+    // Link OAuth identity to existing member
+    member = await db
+      .prepare("UPDATE members SET oauth_provider = ?, oauth_id = ?, email = ? WHERE id = ? RETURNING *")
+      .bind(oauth_provider, oauth_id, email ?? null, member.id)
       .first<Member>();
   }
 
@@ -315,6 +254,106 @@ auth.delete("/members/:id", authMiddleware, async (c) => {
     .run();
 
   return c.json({ data: { success: true } });
+});
+
+// OAuth provider routes — MUST be after all specific routes to avoid /:provider matching "me", "members", etc.
+auth.get("/:provider/callback", async (c) => {
+  const providerName = c.req.param("provider");
+
+  if (!isValidProvider(providerName)) {
+    return c.json({ error: "Unknown auth provider" }, 404);
+  }
+
+  const code = c.req.query("code");
+  const state = c.req.query("state");
+  const storedState = getCookie(c, "oauth_state");
+  const storedCodeVerifier = getCookie(c, "oauth_code_verifier");
+
+  if (!code || !state || !storedState || state !== storedState || !storedCodeVerifier) {
+    return c.json({ error: "Invalid OAuth callback" }, 400);
+  }
+
+  setCookie(c, "oauth_state", "", { maxAge: 0, path: "/" });
+  setCookie(c, "oauth_code_verifier", "", { maxAge: 0, path: "/" });
+
+  const provider = getProvider(providerName)!;
+  const client = provider.createClient(c.env);
+
+  let profile;
+  try {
+    const tokens = await client.validateAuthorizationCode(code, storedCodeVerifier);
+    profile = provider.getProfile(tokens);
+  } catch {
+    return c.json({ error: "OAuth token exchange failed" }, 401);
+  }
+
+  const db = c.env.DB;
+  const member = await db
+    .prepare("SELECT id, family_id, name, is_admin, email FROM members WHERE oauth_provider = ? AND oauth_id = ?")
+    .bind(providerName, profile.id)
+    .first<Member>();
+
+  if (member) {
+    const token = await sign(
+      {
+        member_id: member.id,
+        family_id: member.family_id,
+        name: member.name,
+        is_admin: member.is_admin === 1,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+      },
+      c.env.JWT_SECRET
+    );
+
+    const base = c.env.OAUTH_REDIRECT_BASE;
+    return c.redirect(`${base}/?token=${encodeURIComponent(token)}`);
+  }
+
+  const tempToken = await sign(
+    {
+      oauth_provider: providerName,
+      oauth_id: profile.id,
+      email: profile.email,
+      name: profile.name,
+      exp: Math.floor(Date.now() / 1000) + 600,
+    },
+    c.env.JWT_SECRET
+  );
+
+  const base = c.env.OAUTH_REDIRECT_BASE;
+  return c.redirect(`${base}/?register=true&token=${encodeURIComponent(tempToken)}`);
+});
+
+auth.get("/:provider", async (c) => {
+  const providerName = c.req.param("provider");
+
+  if (!isValidProvider(providerName)) {
+    return c.json({ error: "Unknown auth provider" }, 404);
+  }
+
+  const provider = getProvider(providerName)!;
+  const client = provider.createClient(c.env);
+
+  const state = arctic.generateState();
+  const codeVerifier = arctic.generateCodeVerifier();
+  const url = client.createAuthorizationURL(state, codeVerifier, provider.scopes);
+
+  setCookie(c, "oauth_state", state, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Lax",
+    path: "/",
+    maxAge: 600,
+  });
+  setCookie(c, "oauth_code_verifier", codeVerifier, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "Lax",
+    path: "/",
+    maxAge: 600,
+  });
+
+  return c.redirect(url.toString());
 });
 
 export { auth as authRoutes };
