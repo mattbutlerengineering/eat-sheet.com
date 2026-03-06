@@ -40,6 +40,112 @@ function mapTypeToCuisine(types: readonly string[]): string | null {
   return null;
 }
 
+// POST /api/places/nearby — discover popular restaurants near a location
+places.post("/nearby", async (c) => {
+  const apiKey = c.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    return c.json({ error: "Places API not configured" }, 503);
+  }
+
+  const body = await c.req.json<{
+    latitude?: number;
+    longitude?: number;
+  }>();
+
+  if (body.latitude == null || body.longitude == null) {
+    return c.json({ error: "latitude and longitude are required" }, 400);
+  }
+
+  const res = await fetch(`${GOOGLE_API_BASE}/places:searchNearby`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask":
+        "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.rating,places.userRatingCount,places.googleMapsUri",
+    },
+    body: JSON.stringify({
+      includedPrimaryTypes: ["restaurant", "cafe", "bar", "bakery", "meal_takeaway"],
+      maxResultCount: 20,
+      rankPreference: "POPULARITY",
+      locationRestriction: {
+        circle: {
+          center: { latitude: body.latitude, longitude: body.longitude },
+          radius: 5000.0,
+        },
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("[Places nearby]", res.status, text);
+    return c.json({ error: "Places API error" }, 502);
+  }
+
+  const data = (await res.json()) as {
+    places?: Array<{
+      id: string;
+      displayName?: { text: string };
+      formattedAddress?: string;
+      location?: { latitude: number; longitude: number };
+      types?: string[];
+      rating?: number;
+      userRatingCount?: number;
+      googleMapsUri?: string;
+    }>;
+  };
+
+  const googlePlaces = data.places ?? [];
+
+  if (googlePlaces.length === 0) {
+    return c.json({ data: [] });
+  }
+
+  // Cross-reference with Eat Sheet community ratings (all families)
+  const placeIds = googlePlaces.map((p) => p.id);
+  const placeholders = placeIds.map(() => "?").join(",");
+  const { results: communityData } = await c.env.DB.prepare(
+    `SELECT r.google_place_id,
+            ROUND(AVG(rv.overall_score), 1) as avg_score,
+            COUNT(rv.id) as review_count
+     FROM restaurants r
+     LEFT JOIN reviews rv ON rv.restaurant_id = r.id
+     WHERE r.google_place_id IN (${placeholders})
+     GROUP BY r.google_place_id`
+  )
+    .bind(...placeIds)
+    .all();
+
+  const communityMap = new Map<string, { avg_score: number | null; review_count: number }>();
+  for (const row of communityData ?? []) {
+    const r = row as { google_place_id: string; avg_score: number | null; review_count: number };
+    communityMap.set(r.google_place_id, {
+      avg_score: r.avg_score,
+      review_count: r.review_count,
+    });
+  }
+
+  const results = googlePlaces.map((place) => {
+    const community = communityMap.get(place.id);
+    return {
+      google_place_id: place.id,
+      name: place.displayName?.text ?? "",
+      address: place.formattedAddress ?? null,
+      latitude: place.location?.latitude ?? null,
+      longitude: place.location?.longitude ?? null,
+      cuisine: mapTypeToCuisine(place.types ?? []),
+      google_rating: place.rating ?? null,
+      google_rating_count: place.userRatingCount ?? 0,
+      google_maps_uri: place.googleMapsUri ?? null,
+      eat_sheet_score: community?.avg_score ?? null,
+      eat_sheet_reviews: community?.review_count ?? 0,
+    };
+  });
+
+  return c.json({ data: results });
+});
+
 // POST /api/places/autocomplete
 places.post("/autocomplete", async (c) => {
   const apiKey = c.env.GOOGLE_PLACES_API_KEY;
