@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS members (
   family_id TEXT NOT NULL REFERENCES families(id),
   name TEXT NOT NULL,
   is_admin INTEGER NOT NULL DEFAULT 0,
-  google_id TEXT UNIQUE,
+  oauth_provider TEXT,
+  oauth_id TEXT,
   email TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(family_id, name)
@@ -82,4 +83,4 @@ CREATE INDEX IF NOT EXISTS idx_reactions_review ON reactions(review_id);
 CREATE INDEX IF NOT EXISTS idx_review_photos_review ON review_photos(review_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_member ON bookmarks(member_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_restaurant ON bookmarks(restaurant_id);
-CREATE INDEX IF NOT EXISTS idx_members_google_id ON members(google_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_members_oauth ON members(oauth_provider, oauth_id);
