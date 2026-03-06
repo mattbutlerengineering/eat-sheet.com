@@ -10,7 +10,8 @@ export interface Member {
   readonly family_id: string;
   readonly name: string;
   readonly is_admin: number;
-  readonly google_id: string | null;
+  readonly oauth_provider: string | null;
+  readonly oauth_id: string | null;
   readonly email: string | null;
   readonly created_at: string;
 }
@@ -55,5 +56,7 @@ export interface Env {
   JWT_SECRET: string;
   PHOTOS: R2Bucket;
   GOOGLE_PLACES_API_KEY: string;
-  GOOGLE_CLIENT_ID: string;
+  GOOGLE_OAUTH_CLIENT_ID: string;
+  GOOGLE_OAUTH_CLIENT_SECRET: string;
+  OAUTH_REDIRECT_BASE: string;
 }

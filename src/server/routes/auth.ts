@@ -15,7 +15,7 @@ auth.post("/google", async (c) => {
     return c.json({ error: "id_token is required" }, 400);
   }
 
-  const clientId = c.env.GOOGLE_CLIENT_ID;
+  const clientId = c.env.GOOGLE_OAUTH_CLIENT_ID;
   if (!clientId) {
     return c.json({ error: "Google auth not configured" }, 503);
   }
@@ -77,7 +77,11 @@ auth.post("/google", async (c) => {
 });
 
 auth.post("/join", async (c) => {
-  const body = await c.req.json<{ invite_code: string; name: string; google_id?: string; email?: string }>();
+  const body = await c.req.json<{ invite_code: string; name: string; google_id: string; email?: string }>();
+
+  if (!body.google_id) {
+    return c.json({ error: "Google sign-in is required" }, 400);
+  }
 
   if (!body.invite_code || !body.name?.trim()) {
     return c.json({ error: "Invite code and name are required" }, 400);
@@ -123,20 +127,15 @@ auth.post("/join", async (c) => {
 
     const isFirst = (memberCount?.count ?? 0) === 0;
 
-    const result = body.google_id
-      ? await db
-          .prepare("INSERT INTO members (family_id, name, is_admin, google_id, email) VALUES (?, ?, ?, ?, ?) RETURNING *")
-          .bind(family.id, name, isFirst ? 1 : 0, body.google_id, body.email ?? null)
-          .first<Member>()
-      : await db
-          .prepare("INSERT INTO members (family_id, name, is_admin) VALUES (?, ?, ?) RETURNING *")
-          .bind(family.id, name, isFirst ? 1 : 0)
-          .first<Member>();
+    const result = await db
+      .prepare("INSERT INTO members (family_id, name, is_admin, google_id, email) VALUES (?, ?, ?, ?, ?) RETURNING *")
+      .bind(family.id, name, isFirst ? 1 : 0, body.google_id, body.email ?? null)
+      .first<Member>();
     member = result;
-  } else if (body.google_id && !member.google_id) {
-    // Link google_id to existing member
+  } else if (body.google_id && !member.oauth_id) {
+    // Link oauth_id to existing member
     member = await db
-      .prepare("UPDATE members SET google_id = ?, email = ? WHERE id = ? RETURNING *")
+      .prepare("UPDATE members SET oauth_provider = 'google', oauth_id = ?, email = ? WHERE id = ? RETURNING *")
       .bind(body.google_id, body.email ?? null, member.id)
       .first<Member>();
   }
