@@ -37,8 +37,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
 export function useAuth() {
   const [auth, setAuth] = useState<AuthState | null>(loadAuth);
   const [loading, setLoading] = useState(true);
-  const [pendingRegistration, setPendingRegistration] = useState<OAuthUser | null>(null);
-  const [registrationToken, setRegistrationToken] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ user: OAuthUser; token: string } | null>(null);
 
   useEffect(() => {
     // Check for OAuth callback params
@@ -72,13 +71,15 @@ export function useAuth() {
       window.history.replaceState({}, "", "/");
       const payload = decodeJwtPayload(token);
       if (payload.oauth_provider) {
-        setPendingRegistration({
-          oauth_provider: payload.oauth_provider as string,
-          oauth_id: payload.oauth_id as string,
-          email: payload.email as string,
-          name: payload.name as string,
+        setPending({
+          user: {
+            oauth_provider: payload.oauth_provider as string,
+            oauth_id: payload.oauth_id as string,
+            email: payload.email as string,
+            name: payload.name as string,
+          },
+          token,
         });
-        setRegistrationToken(token);
       }
       setLoading(false);
       return;
@@ -129,16 +130,14 @@ export function useAuth() {
     const state: AuthState = { token: json.data.token, member: json.data.member };
     saveAuth(state);
     setAuth(state);
-    setPendingRegistration(null);
-    setRegistrationToken(null);
+    setPending(null);
     return state;
   }, []);
 
   const logout = useCallback(() => {
     clearAuth();
     setAuth(null);
-    setPendingRegistration(null);
-    setRegistrationToken(null);
+    setPending(null);
   }, []);
 
   const updateName = useCallback((name: string) => {
@@ -150,5 +149,5 @@ export function useAuth() {
     });
   }, []);
 
-  return { auth, loading, logout, updateName, register, pendingRegistration, registrationToken };
+  return { auth, loading, logout, updateName, register, pendingRegistration: pending?.user ?? null, registrationToken: pending?.token ?? null };
 }
