@@ -65,15 +65,15 @@ function DiscoverCard({
   isAdded,
   onAdd,
   adding,
-  restaurantId,
-  onView,
+  onReview,
+  onDismiss,
 }: {
   readonly place: NearbyPlace;
   readonly isAdded: boolean;
   readonly onAdd: () => void;
   readonly adding: boolean;
-  readonly restaurantId: string | null;
-  readonly onView: () => void;
+  readonly onReview: () => void;
+  readonly onDismiss: () => void;
 }) {
   return (
     <div className="bg-stone-900 rounded-xl p-4 flex items-start gap-3">
@@ -103,43 +103,44 @@ function DiscoverCard({
           </div>
         )}
       </div>
-      {isAdded && restaurantId ? (
+      <div className="shrink-0 flex items-center gap-2">
+        {isAdded ? (
+          <button
+            onClick={onReview}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95 transition-colors"
+          >
+            Review
+          </button>
+        ) : (
+          <button
+            onClick={onAdd}
+            disabled={adding}
+            aria-label={`Add ${place.name}`}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95"
+          >
+            {adding ? (
+              <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            )}
+          </button>
+        )}
         <button
-          onClick={onView}
-          aria-label={`View ${place.name}`}
-          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-green-500/20 text-green-400 hover:bg-green-500/30 active:scale-95"
+          onClick={onDismiss}
+          aria-label={`Dismiss ${place.name}`}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-stone-600 hover:text-stone-400 hover:bg-stone-800 active:scale-95 transition-colors"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-      ) : (
-        <button
-          onClick={onAdd}
-          disabled={isAdded || adding}
-          aria-label={isAdded ? `${place.name} already added` : `Add ${place.name}`}
-          className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-            isAdded
-              ? "bg-green-500/20 text-green-400 cursor-default"
-              : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95"
-          }`}
-        >
-          {adding ? (
-            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
-            </svg>
-          ) : isAdded ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          )}
-        </button>
-      )}
+      </div>
     </div>
   );
 }
@@ -155,6 +156,7 @@ function NearbyContent({ token }: { readonly token: string }) {
   const [error, setError] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<ReadonlyMap<string, string>>(new Map());
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<ReadonlySet<string>>(new Set());
   const fetchedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
@@ -179,6 +181,7 @@ function NearbyContent({ token }: { readonly token: string }) {
     if (!places) return [];
     const q = search.toLowerCase().trim();
     return places.filter((p) => {
+      if (dismissedIds.has(p.google_place_id)) return false;
       if (q && !p.name.toLowerCase().includes(q) && !(p.cuisine?.toLowerCase().includes(q))) {
         return false;
       }
@@ -187,7 +190,7 @@ function NearbyContent({ token }: { readonly token: string }) {
       }
       return true;
     });
-  }, [places, search, cuisineFilter]);
+  }, [places, search, cuisineFilter, dismissedIds]);
 
   // Request geolocation when Nearby content mounts
   useEffect(() => {
@@ -406,8 +409,8 @@ function NearbyContent({ token }: { readonly token: string }) {
                     }
                     onAdd={() => handleAdd(place)}
                     adding={addingId === place.google_place_id}
-                    restaurantId={restaurantId}
-                    onView={() => restaurantId && navigate(`/restaurant/${restaurantId}`)}
+                    onReview={() => restaurantId && navigate(`/restaurant/${restaurantId}`)}
+                    onDismiss={() => setDismissedIds((prev) => new Set([...prev, place.google_place_id]))}
                   />
                 );
               })}
