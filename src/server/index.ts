@@ -14,6 +14,7 @@ import { shareRoutes } from "./routes/share";
 import { placesRoutes } from "./routes/places";
 import { recommendationRoutes } from "./routes/recommendations";
 import { groupRoutes } from "./routes/groups";
+import { enrichRoutes } from "./routes/enrich";
 
 const app = new Hono<{ Bindings: Env; Variables: { sentryReported: boolean } }>();
 
@@ -43,6 +44,7 @@ app.route("/api/share", shareRoutes);
 app.route("/api/places", placesRoutes);
 app.route("/api/recommendations", recommendationRoutes);
 app.route("/api/groups", groupRoutes);
+app.route("/api/admin", enrichRoutes);
 
 app.get("/api/health", (c) => c.json({ status: "ok" }));
 

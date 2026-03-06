@@ -276,6 +276,85 @@ restaurants.post("/", async (c) => {
     )
     .first();
 
+  // Auto-enrich: if no coords, attempt Google Places lookup in the background
+  if (restaurant && body.latitude == null && body.longitude == null) {
+    const apiKey = c.env.GOOGLE_PLACES_API_KEY;
+    const restaurantId = (restaurant as Record<string, unknown>).id as string;
+    const restaurantName = body.name.trim();
+
+    if (apiKey) {
+      c.executionCtx.waitUntil(
+        (async () => {
+          try {
+            const GOOGLE_API_BASE = "https://places.googleapis.com/v1";
+            const res = await fetch(`${GOOGLE_API_BASE}/places:searchText`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": apiKey,
+                "X-Goog-FieldMask":
+                  "places.id,places.displayName,places.formattedAddress,places.location,places.types",
+              },
+              body: JSON.stringify({
+                textQuery: restaurantName,
+                maxResultCount: 1,
+              }),
+            });
+            if (!res.ok) return;
+
+            const data = (await res.json()) as {
+              places?: Array<{
+                id: string;
+                formattedAddress?: string;
+                location?: { latitude: number; longitude: number };
+                types?: string[];
+              }>;
+            };
+            const place = data.places?.[0];
+            if (!place?.location) return;
+
+            const TYPE_TO_CUISINE: Record<string, string> = {
+              italian_restaurant: "Italian", pizza_restaurant: "Pizza",
+              japanese_restaurant: "Japanese", chinese_restaurant: "Chinese",
+              mexican_restaurant: "Mexican", indian_restaurant: "Indian",
+              thai_restaurant: "Thai", french_restaurant: "French",
+              korean_restaurant: "Korean", vietnamese_restaurant: "Vietnamese",
+              greek_restaurant: "Greek", mediterranean_restaurant: "Mediterranean",
+              brazilian_restaurant: "Brazilian", middle_eastern_restaurant: "Middle Eastern",
+              barbecue_restaurant: "Barbecue", seafood_restaurant: "Seafood",
+              american_restaurant: "American",
+            };
+            const cuisine = (place.types ?? []).reduce<string | null>(
+              (acc, t) => acc ?? TYPE_TO_CUISINE[t] ?? null, null
+            );
+
+            await db
+              .prepare(
+                `UPDATE restaurants
+                 SET address = COALESCE(address, ?),
+                     latitude = ?,
+                     longitude = ?,
+                     cuisine = COALESCE(cuisine, ?),
+                     google_place_id = COALESCE(google_place_id, ?)
+                 WHERE id = ?`
+              )
+              .bind(
+                place.formattedAddress ?? null,
+                place.location.latitude,
+                place.location.longitude,
+                cuisine,
+                place.id,
+                restaurantId
+              )
+              .run();
+          } catch {
+            // Best-effort enrichment — don't fail the create
+          }
+        })()
+      );
+    }
+  }
+
   return c.json({ data: restaurant }, 201);
 });
 

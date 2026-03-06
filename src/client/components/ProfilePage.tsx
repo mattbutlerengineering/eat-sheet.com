@@ -19,8 +19,28 @@ interface MemberInfo {
   readonly email: string | null;
 }
 
+interface EnrichStatus {
+  readonly missing_count: number;
+}
+
+interface EnrichDetail {
+  readonly id: string;
+  readonly name: string;
+  readonly status: "enriched" | "skipped" | "failed";
+  readonly matched_name?: string;
+  readonly address?: string;
+  readonly error?: string;
+}
+
+interface EnrichResult {
+  readonly enriched: number;
+  readonly skipped: number;
+  readonly failed: number;
+  readonly details: readonly EnrichDetail[];
+}
+
 export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePageProps) {
-  const { put } = useApi(token);
+  const { put, post } = useApi(token);
   const { data: me, loading } = useFetch<MemberInfo>(token, "/api/auth/me");
   const { data: stats } = useFetch<FamilyStatsData>(token, "/api/stats");
   const navigate = useNavigate();
@@ -30,9 +50,32 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Admin enrichment state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [enrichStatus, setEnrichStatus] = useState<EnrichStatus | null>(null);
+  const [enriching, setEnriching] = useState(false);
+  const [enrichResult, setEnrichResult] = useState<EnrichResult | null>(null);
+  const [enrichError, setEnrichError] = useState<string | null>(null);
+
   useEffect(() => {
     if (me) setNameInput(me.name);
   }, [me]);
+
+  // Check admin status by fetching enrich status (returns 403 for non-admins)
+  useEffect(() => {
+    if (!token) return;
+    fetch("/api/admin/enrich/status", {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(async (res) => {
+      if (res.ok) {
+        const json = (await res.json()) as { data: EnrichStatus };
+        setIsAdmin(true);
+        setEnrichStatus(json.data);
+      }
+    }).catch(() => {
+      // Not admin or API error — ignore
+    });
+  }, [token]);
 
   const handleSaveName = useCallback(async () => {
     const trimmed = nameInput.trim();
@@ -50,6 +93,22 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
       setSaving(false);
     }
   }, [nameInput, put, onNameChange]);
+
+  const handleEnrich = useCallback(async () => {
+    setEnriching(true);
+    setEnrichError(null);
+    setEnrichResult(null);
+    try {
+      const result = await post<EnrichResult>("/api/admin/enrich", { limit: 50 });
+      setEnrichResult(result);
+      // Refresh the missing count
+      setEnrichStatus({ missing_count: result.skipped + result.failed });
+    } catch (err) {
+      setEnrichError(err instanceof Error ? err.message : "Enrichment failed");
+    } finally {
+      setEnriching(false);
+    }
+  }, [post]);
 
   const handleClearCache = useCallback(async () => {
     if ("caches" in window) {
@@ -170,6 +229,87 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
             </div>
           </div>
         </section>
+
+        {/* Admin Section — only visible to admins */}
+        {isAdmin && enrichStatus != null && (
+          <section>
+            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3">Admin</h2>
+            <div className="bg-stone-900 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-stone-300 text-sm font-medium">Enrich Restaurants</p>
+                  <p className="text-stone-500 text-xs mt-0.5">
+                    {enrichStatus.missing_count === 0
+                      ? "All restaurants have location data"
+                      : `${enrichStatus.missing_count} restaurant${enrichStatus.missing_count === 1 ? "" : "s"} missing coordinates`}
+                  </p>
+                </div>
+                {enrichStatus.missing_count > 0 && (
+                  <button
+                    onClick={handleEnrich}
+                    disabled={enriching}
+                    className="bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                  >
+                    {enriching ? "Enriching..." : "Enrich"}
+                  </button>
+                )}
+              </div>
+
+              {enrichError && (
+                <p className="text-red-400 text-sm">{enrichError}</p>
+              )}
+
+              {enrichResult && (
+                <div className="space-y-2">
+                  <div className="flex gap-3 text-xs">
+                    {enrichResult.enriched > 0 && (
+                      <span className="text-green-400">
+                        {enrichResult.enriched} enriched
+                      </span>
+                    )}
+                    {enrichResult.skipped > 0 && (
+                      <span className="text-stone-400">
+                        {enrichResult.skipped} no match
+                      </span>
+                    )}
+                    {enrichResult.failed > 0 && (
+                      <span className="text-red-400">
+                        {enrichResult.failed} failed
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {enrichResult.details.map((d) => (
+                      <div
+                        key={d.id}
+                        className="flex items-center gap-2 text-xs py-1"
+                      >
+                        <span
+                          className={
+                            d.status === "enriched"
+                              ? "text-green-400"
+                              : d.status === "failed"
+                                ? "text-red-400"
+                                : "text-stone-500"
+                          }
+                        >
+                          {d.status === "enriched" ? "+" : d.status === "failed" ? "!" : "-"}
+                        </span>
+                        <span className="text-stone-300 truncate">{d.name}</span>
+                        {d.address && (
+                          <span className="text-stone-500 truncate ml-auto">{d.address}</span>
+                        )}
+                        {d.error && (
+                          <span className="text-stone-500 truncate ml-auto">{d.error}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* App Section */}
         <section>
