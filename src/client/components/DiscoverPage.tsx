@@ -18,6 +18,7 @@ type GeoState =
 
 function useGeolocation() {
   const [geo, setGeo] = useState<GeoState>({ status: "idle" });
+  const retriedRef = useRef(false);
 
   const request = useCallback(() => {
     if (!navigator.geolocation) {
@@ -25,23 +26,37 @@ function useGeolocation() {
       return;
     }
     setGeo({ status: "requesting" });
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGeo({
-          status: "ready",
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-      },
-      (err) => {
-        const message =
-          err.code === err.PERMISSION_DENIED
-            ? "Location access denied. Enable it in your browser settings to discover nearby restaurants."
-            : "Could not determine your location. Please try again.";
-        setGeo({ status: "denied", message });
-      },
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
+
+    const attempt = (retrying: boolean) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setGeo({
+            status: "ready",
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          if (err.code === err.PERMISSION_DENIED) {
+            setGeo({ status: "denied", message: "Location access denied. Enable it in your browser settings to discover nearby restaurants." });
+          } else if (err.code === err.TIMEOUT && !retrying) {
+            // Retry once with high accuracy on timeout
+            retriedRef.current = true;
+            attempt(true);
+          } else {
+            setGeo({ status: "denied", message: "Could not determine your location. Please try again." });
+          }
+        },
+        {
+          enableHighAccuracy: retrying,
+          timeout: retrying ? 20000 : 10000,
+          maximumAge: 300000,
+        }
+      );
+    };
+
+    retriedRef.current = false;
+    attempt(false);
   }, []);
 
   return { geo, request };
