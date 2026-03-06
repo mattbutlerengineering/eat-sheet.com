@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
+import { ActivityFeed } from "./ActivityFeed";
 import type { NearbyPlace, Restaurant } from "../types";
 
 interface DiscoverPageProps {
   readonly token: string;
 }
+
+type DiscoverTab = "activity" | "nearby";
 
 type GeoState =
   | { status: "idle" }
@@ -141,7 +144,7 @@ function DiscoverCard({
   );
 }
 
-export function DiscoverPage({ token }: DiscoverPageProps) {
+function NearbyContent({ token }: { readonly token: string }) {
   const { geo, request } = useGeolocation();
   const { post } = useApi(token);
   const { data: myRestaurants } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
@@ -163,7 +166,6 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
     setCuisineFilter(null);
   };
 
-  // Unique cuisines from nearby places
   const cuisines = useMemo(() => {
     if (!places) return [];
     const set = new Set<string>();
@@ -173,7 +175,6 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
     return [...set].sort();
   }, [places]);
 
-  // Filtered places based on search + cuisine chip
   const filteredPlaces = useMemo(() => {
     if (!places) return [];
     const q = search.toLowerCase().trim();
@@ -188,12 +189,11 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
     });
   }, [places, search, cuisineFilter]);
 
-  // Auto-request geolocation on mount
+  // Request geolocation when Nearby content mounts
   useEffect(() => {
     request();
   }, [request]);
 
-  // Fetch nearby places once we have coords
   useEffect(() => {
     if (geo.status !== "ready" || fetchedRef.current) return;
     fetchedRef.current = true;
@@ -210,7 +210,6 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
       .finally(() => setLoading(false));
   }, [geo, post]);
 
-  // Build map of google_place_id → restaurant_id for family restaurants
   const visiblePlaceIdMap = useMemo(
     () => new Map(
       (myRestaurants ?? [])
@@ -254,13 +253,10 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   }, [request]);
 
   return (
-    <div className="max-w-lg mx-auto px-4 pt-6 pb-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="font-display text-2xl font-black text-orange-500">Discover</h1>
-          <p className="text-stone-500 text-sm">Popular restaurants nearby</p>
-        </div>
-        {places && (
+    <>
+      {/* Refresh button */}
+      {places && (
+        <div className="flex justify-end mb-2">
           <button
             onClick={handleRefresh}
             className="text-stone-500 hover:text-stone-300 p-2"
@@ -271,10 +267,10 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Search + Cuisine Chips — only show when we have results */}
+      {/* Search + Cuisine Chips */}
       {places && places.length > 0 && (
         <>
           <div className="pb-2">
@@ -418,6 +414,58 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
             </div>
           )}
         </>
+      )}
+    </>
+  );
+}
+
+export function DiscoverPage({ token }: DiscoverPageProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "nearby" ? "nearby" : "activity";
+  const [activeTab, setActiveTab] = useState<DiscoverTab>(initialTab);
+
+  const handleTabChange = (tab: DiscoverTab) => {
+    setActiveTab(tab);
+    if (tab === "nearby") {
+      setSearchParams({ tab: "nearby" }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
+    }
+  };
+
+  return (
+    <div className="max-w-lg mx-auto px-4 pt-6 pb-4">
+      <h1 className="font-display text-2xl font-black text-orange-500 mb-4">Discover</h1>
+
+      {/* Segmented Control */}
+      <div className="flex bg-stone-900 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => handleTabChange("activity")}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+            activeTab === "activity"
+              ? "bg-orange-500 text-white"
+              : "text-stone-400 hover:text-stone-200"
+          }`}
+        >
+          Activity
+        </button>
+        <button
+          onClick={() => handleTabChange("nearby")}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+            activeTab === "nearby"
+              ? "bg-orange-500 text-white"
+              : "text-stone-400 hover:text-stone-200"
+          }`}
+        >
+          Nearby
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "activity" ? (
+        <ActivityFeed token={token} embedded />
+      ) : (
+        <NearbyContent token={token} />
       )}
     </div>
   );

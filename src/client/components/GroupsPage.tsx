@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
 import { InviteCodePanel } from "./InviteCodePanel";
 import { MemberAvatar } from "./MemberAvatar";
@@ -23,8 +22,6 @@ const INPUT_CLASS =
 export function GroupsPage({ token }: GroupsPageProps) {
   const { post, del } = useApi(token);
   const { data: groups, loading, refresh } = useFetch<readonly Group[]>(token, "/api/groups");
-  const navigate = useNavigate();
-
   const [mode, setMode] = useState<"list" | "create" | "join">("list");
   const [name, setName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
@@ -127,16 +124,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
 
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
-      <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800/50 px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={() => navigate("/settings")}
-          className="text-stone-400 hover:text-stone-200 transition-colors"
-          aria-label="Back to settings"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </button>
+      <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800/50 px-4 py-3">
         <h1 className="font-display text-xl font-black text-orange-500">Groups</h1>
       </header>
 

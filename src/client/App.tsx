@@ -20,14 +20,11 @@ const RestaurantDetail = lazy(() =>
 const AddRestaurant = lazy(() =>
   import("./components/AddRestaurant").then((m) => ({ default: m.AddRestaurant }))
 );
-const ActivityFeed = lazy(() =>
-  import("./components/ActivityFeed").then((m) => ({ default: m.ActivityFeed }))
-);
 const FamilyStats = lazy(() =>
   import("./components/FamilyStats").then((m) => ({ default: m.FamilyStats }))
 );
-const SettingsPage = lazy(() =>
-  import("./components/SettingsPage").then((m) => ({ default: m.SettingsPage }))
+const ProfilePage = lazy(() =>
+  import("./components/ProfilePage").then((m) => ({ default: m.ProfilePage }))
 );
 const DiscoverPage = lazy(() =>
   import("./components/DiscoverPage").then((m) => ({ default: m.DiscoverPage }))
@@ -129,21 +126,17 @@ export function App() {
               element={<AddRestaurant token={auth.token} />}
             />
             <Route
-              path="/activity"
-              element={<ActivityFeed token={auth.token} />}
-            />
-            <Route
-              path="/stats"
-              element={<FamilyStats token={auth.token} />}
-            />
-            <Route
               path="/discover"
               element={<DiscoverPage token={auth.token} />}
             />
             <Route
-              path="/settings"
+              path="/groups"
+              element={<GroupsPage token={auth.token} />}
+            />
+            <Route
+              path="/profile"
               element={
-                <SettingsPage
+                <ProfilePage
                   token={auth.token}
                   member={auth.member}
                   onLogout={logout}
@@ -152,14 +145,17 @@ export function App() {
               }
             />
             <Route
-              path="/groups"
-              element={<GroupsPage token={auth.token} />}
+              path="/stats"
+              element={<FamilyStats token={auth.token} />}
             />
             <Route
               path="/invite/:code"
               element={<InviteHandler token={auth.token} />}
             />
             <Route path="/share/:type/:token" element={<SharePage />} />
+            {/* Redirects for old routes */}
+            <Route path="/settings" element={<Navigate to="/profile" replace />} />
+            <Route path="/activity" element={<Navigate to="/discover" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

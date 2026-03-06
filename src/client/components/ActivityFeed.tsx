@@ -8,6 +8,7 @@ import type { ActivityEvent } from "../types";
 
 interface ActivityFeedProps {
   readonly token: string;
+  readonly embedded?: boolean;
 }
 
 function activityDescription(event: ActivityEvent): string {
@@ -32,19 +33,21 @@ function activityEmoji(event: ActivityEvent): string {
   }
 }
 
-export function ActivityFeed({ token }: ActivityFeedProps) {
+export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
   const { data: events, loading, error } = useFetch<readonly ActivityEvent[]>(token, "/api/activity");
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-dvh bg-stone-950 pb-20">
-      <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
-        <div className="px-4 py-4">
-          <h1 className="font-display text-xl font-black text-orange-500 italic">Activity</h1>
-        </div>
-      </header>
+    <div className={embedded ? "" : "min-h-dvh bg-stone-950 pb-20"}>
+      {!embedded && (
+        <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
+          <div className="px-4 py-4">
+            <h1 className="font-display text-xl font-black text-orange-500 italic">Activity</h1>
+          </div>
+        </header>
+      )}
 
-      <div className="px-4 py-4">
+      <div className={embedded ? "py-2" : "px-4 py-4"}>
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center py-12">

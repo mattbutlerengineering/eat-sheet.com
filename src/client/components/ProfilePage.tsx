@@ -4,9 +4,9 @@ import { useApi, useFetch } from "../hooks/useApi";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { randomLoadingMessage } from "../utils/personality";
-import type { Member, Group } from "../types";
+import type { Member, Group, FamilyStatsData } from "../types";
 
-interface SettingsPageProps {
+interface ProfilePageProps {
   readonly token: string;
   readonly member: Member;
   readonly onLogout: () => void;
@@ -20,9 +20,10 @@ interface MemberInfo {
   readonly groups: readonly Group[];
 }
 
-export function SettingsPage({ token, member, onLogout, onNameChange }: SettingsPageProps) {
+export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePageProps) {
   const { put } = useApi(token);
   const { data: me, loading } = useFetch<MemberInfo>(token, "/api/auth/me");
+  const { data: stats } = useFetch<FamilyStatsData>(token, "/api/stats");
   const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
@@ -77,7 +78,7 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
       <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800/50 px-4 py-3">
-        <h1 className="font-display text-xl font-black text-orange-500">Settings</h1>
+        <h1 className="font-display text-xl font-black text-orange-500">Profile</h1>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-4 space-y-6">
@@ -135,6 +136,41 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
               </div>
             </div>
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+          </div>
+        </section>
+
+        {/* Your Stats Section */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider">Your Stats</h2>
+            <button
+              onClick={() => navigate("/stats")}
+              className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+            >
+              View all stats
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-stone-900 rounded-2xl p-4 text-center">
+              <p className="font-display font-black text-2xl text-orange-500">
+                {stats?.total_restaurants ?? "—"}
+              </p>
+              <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Restaurants</p>
+            </div>
+            <div className="bg-stone-900 rounded-2xl p-4 text-center">
+              <p className="font-display font-black text-2xl text-orange-500">
+                {stats?.total_reviews ?? "—"}
+              </p>
+              <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Reviews</p>
+            </div>
+            <div className="bg-stone-900 rounded-2xl p-4 text-center">
+              <p className="font-display font-black text-2xl text-orange-500">
+                {stats?.category_averages.food != null
+                  ? stats.category_averages.food.toFixed(1)
+                  : "—"}
+              </p>
+              <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Avg Food</p>
+            </div>
           </div>
         </section>
 
