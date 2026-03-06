@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useApi, useFetch } from "../hooks/useApi";
 import type { NearbyPlace, Restaurant } from "../types";
 
@@ -159,10 +159,13 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   }, [geo, post]);
 
   // Build set of google_place_ids already in family
-  const familyPlaceIds = new Set(
-    (myRestaurants ?? [])
-      .map((r) => r.google_place_id)
-      .filter((id): id is string => id != null)
+  const familyPlaceIds = useMemo(
+    () => new Set(
+      (myRestaurants ?? [])
+        .map((r) => r.google_place_id)
+        .filter((id): id is string => id != null)
+    ),
+    [myRestaurants]
   );
 
   const handleAdd = useCallback(
@@ -179,9 +182,10 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
         });
         setAddedIds((prev) => new Set([...prev, place.google_place_id]));
       } catch (err) {
-        // 409 = duplicate, treat as already added
         if (err instanceof Error && err.message.includes("already in your list")) {
           setAddedIds((prev) => new Set([...prev, place.google_place_id]));
+        } else {
+          setError(err instanceof Error ? err.message : "Failed to add restaurant");
         }
       } finally {
         setAddingId(null);
@@ -193,6 +197,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   const handleRefresh = useCallback(() => {
     fetchedRef.current = false;
     setPlaces(null);
+    setError(null);
     request();
   }, [request]);
 

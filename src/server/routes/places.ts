@@ -52,8 +52,10 @@ places.post("/nearby", async (c) => {
     longitude?: number;
   }>();
 
-  if (body.latitude == null || body.longitude == null) {
-    return c.json({ error: "latitude and longitude are required" }, 400);
+  const lat = Number(body.latitude);
+  const lng = Number(body.longitude);
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return c.json({ error: "Valid latitude and longitude are required" }, 400);
   }
 
   const res = await fetch(`${GOOGLE_API_BASE}/places:searchNearby`, {
@@ -70,7 +72,7 @@ places.post("/nearby", async (c) => {
       rankPreference: "POPULARITY",
       locationRestriction: {
         circle: {
-          center: { latitude: body.latitude, longitude: body.longitude },
+          center: { latitude: lat, longitude: lng },
           radius: 5000.0,
         },
       },
