@@ -69,6 +69,7 @@ export function useAuth() {
 
     if (token && isRegister) {
       // Registration needed — token is a temp registration JWT
+      window.history.replaceState({}, "", "/");
       const payload = decodeJwtPayload(token);
       if (payload.oauth_provider) {
         setPendingRegistration({
@@ -78,28 +79,26 @@ export function useAuth() {
           name: payload.name as string,
         });
         setRegistrationToken(token);
-        window.history.replaceState({}, "", "/");
       }
       setLoading(false);
       return;
     }
 
-    // Normal load — validate stored auth
-    const stored = loadAuth();
-    if (!stored) {
+    // Normal load — validate stored auth (auth already has the value from useState initializer)
+    if (!auth) {
       setLoading(false);
       return;
     }
 
     fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${stored.token}` },
+      headers: { Authorization: `Bearer ${auth.token}` },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Invalid token");
         return res.json() as Promise<{ data: Member }>;
       })
       .then((json) => {
-        const verified: AuthState = { token: stored.token, member: json.data };
+        const verified: AuthState = { token: auth.token, member: json.data };
         saveAuth(verified);
         setAuth(verified);
       })
