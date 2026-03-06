@@ -29,6 +29,9 @@ const FamilyStats = lazy(() =>
 const SettingsPage = lazy(() =>
   import("./components/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
+const DiscoverPage = lazy(() =>
+  import("./components/DiscoverPage").then((m) => ({ default: m.DiscoverPage }))
+);
 const SharePage = lazy(() =>
   import("./components/SharePage").then((m) => ({ default: m.SharePage }))
 );
@@ -120,6 +123,10 @@ export function App() {
             <Route
               path="/stats"
               element={<FamilyStats token={auth.token} />}
+            />
+            <Route
+              path="/discover"
+              element={<DiscoverPage token={auth.token} />}
             />
             <Route
               path="/settings"
