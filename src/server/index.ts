@@ -14,9 +14,21 @@ import { shareRoutes } from "./routes/share";
 import { placesRoutes } from "./routes/places";
 import { recommendationRoutes } from "./routes/recommendations";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { sentryReported: boolean } }>();
 
 app.use("/api/*", cors());
+
+// Capture 5xx responses that don't throw (e.g. explicit c.json({error}, 502))
+// Skips if onError already reported (thrown errors set sentryReported flag)
+app.use("/api/*", async (c, next) => {
+  await next();
+  if (c.res.status >= 500 && !c.get("sentryReported")) {
+    Sentry.captureMessage(`${c.req.method} ${c.req.path} → ${c.res.status}`, {
+      level: "error",
+      extra: { status: c.res.status },
+    });
+  }
+});
 
 app.route("/api/auth", authRoutes);
 app.route("/api/restaurants", restaurantRoutes);
@@ -35,6 +47,7 @@ app.get("/api/health", (c) => c.json({ status: "ok" }));
 app.onError((err, c) => {
   console.error(`[${c.req.method}] ${c.req.path}:`, err.stack ?? err.message);
   Sentry.captureException(err);
+  c.set("sentryReported", true);
   return c.json({ error: err.message }, 500);
 });
 

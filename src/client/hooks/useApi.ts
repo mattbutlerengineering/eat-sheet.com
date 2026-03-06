@@ -1,5 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import type { ApiResponse } from "../types";
+
+function assertOk<T>(res: Response, json: ApiResponse<T>, url: string, method: string): asserts json is ApiResponse<T> & { data: T } {
+  if (!res.ok || json.error) {
+    const err = new Error(json.error || "Request failed");
+    if (res.status >= 500) {
+      Sentry.captureException(err, { extra: { url, method, status: res.status } });
+    }
+    throw err;
+  }
+}
 
 export function useApi(token: string | undefined) {
   const headers = useCallback(
@@ -15,8 +26,8 @@ export function useApi(token: string | undefined) {
     async <T>(url: string): Promise<T> => {
       const res = await fetch(url, { headers: headers() });
       const json = (await res.json()) as ApiResponse<T>;
-      if (!res.ok || json.error) throw new Error(json.error || "Request failed");
-      return json.data as T;
+      assertOk(res, json, url, "GET");
+      return json.data;
     },
     [headers]
   );
@@ -29,8 +40,8 @@ export function useApi(token: string | undefined) {
         body: JSON.stringify(body),
       });
       const json = (await res.json()) as ApiResponse<T>;
-      if (!res.ok || json.error) throw new Error(json.error || "Request failed");
-      return json.data as T;
+      assertOk(res, json, url, "POST");
+      return json.data;
     },
     [headers]
   );
@@ -43,8 +54,8 @@ export function useApi(token: string | undefined) {
         body: JSON.stringify(body),
       });
       const json = (await res.json()) as ApiResponse<T>;
-      if (!res.ok || json.error) throw new Error(json.error || "Request failed");
-      return json.data as T;
+      assertOk(res, json, url, "PUT");
+      return json.data;
     },
     [headers]
   );
@@ -56,8 +67,8 @@ export function useApi(token: string | undefined) {
         headers: headers(),
       });
       const json = (await res.json()) as ApiResponse<T>;
-      if (!res.ok || json.error) throw new Error(json.error || "Request failed");
-      return json.data as T;
+      assertOk(res, json, url, "DELETE");
+      return json.data;
     },
     [headers]
   );
