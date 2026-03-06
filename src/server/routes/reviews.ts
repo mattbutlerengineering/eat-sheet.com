@@ -81,14 +81,12 @@ reviews.post("/:restaurantId", async (c) => {
     return c.json({ error: "You already have a review for this restaurant. Use PUT to update." }, 409);
   }
 
-  // Use first photo_url from array, or fall back to single photo_url
   const photoUrls = body.photo_urls ?? (body.photo_url ? [body.photo_url] : []);
-  const primaryPhoto = photoUrls[0]?.trim() || null;
 
   const review = await db
     .prepare(
-      `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, photo_url, visited_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, visited_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -100,7 +98,6 @@ reviews.post("/:restaurantId", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
-      primaryPhoto,
       body.visited_at || null
     )
     .first();
@@ -155,14 +152,12 @@ reviews.put("/:id", async (c) => {
     return c.json({ error: "Review not found or not yours" }, 404);
   }
 
-  // Use first photo_url from array, or fall back to single photo_url
   const photoUrls = body.photo_urls ?? (body.photo_url != null ? [body.photo_url] : []);
-  const primaryPhoto = photoUrls[0]?.trim() || null;
 
   const review = await db
     .prepare(
       `UPDATE reviews
-       SET overall_score = ?, food_score = ?, service_score = ?, ambiance_score = ?, value_score = ?, notes = ?, photo_url = ?, visited_at = ?, updated_at = datetime('now')
+       SET overall_score = ?, food_score = ?, service_score = ?, ambiance_score = ?, value_score = ?, notes = ?, visited_at = ?, updated_at = datetime('now')
        WHERE id = ? AND member_id = ?
        RETURNING *`
     )
@@ -173,7 +168,6 @@ reviews.put("/:id", async (c) => {
       body.ambiance_score ?? null,
       body.value_score ?? null,
       body.notes?.trim() || null,
-      primaryPhoto,
       body.visited_at || null,
       id,
       payload.member_id

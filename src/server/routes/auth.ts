@@ -82,8 +82,14 @@ auth.post("/join", async (c) => {
     });
   }
 
-  // New user — create member (family_id uses a placeholder for legacy column)
+  // New user — create a placeholder family row to satisfy FK, then create member
   const placeholderFamilyId = "solo_" + crypto.randomUUID().slice(0, 8);
+  const uniqueInviteCode = "SOLO_" + crypto.randomUUID().slice(0, 8);
+
+  await db
+    .prepare("INSERT INTO families (id, name, invite_code) VALUES (?, ?, ?)")
+    .bind(placeholderFamilyId, `${name}'s Family`, uniqueInviteCode)
+    .run();
 
   const member = await db
     .prepare(

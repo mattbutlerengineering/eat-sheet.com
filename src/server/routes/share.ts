@@ -95,7 +95,8 @@ share.get("/review/:token", async (c) => {
   const review = await db
     .prepare(
       `SELECT rv.overall_score, rv.food_score, rv.service_score, rv.ambiance_score,
-              rv.value_score, rv.notes, rv.photo_url, rv.visited_at,
+              rv.value_score, rv.notes, rv.visited_at,
+              (SELECT rp.photo_url FROM review_photos rp WHERE rp.review_id = rv.id ORDER BY rp.sort_order ASC LIMIT 1) as photo_url,
               r.name as restaurant_name, r.cuisine as restaurant_cuisine
        FROM reviews rv
        JOIN restaurants r ON r.id = rv.restaurant_id

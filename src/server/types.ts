@@ -32,6 +32,10 @@ export interface Restaurant {
   readonly cuisine: string | null;
   readonly address: string | null;
   readonly photo_url: string | null;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+  readonly share_token: string | null;
+  readonly google_place_id: string | null;
   readonly created_by: string;
   readonly created_at: string;
 }

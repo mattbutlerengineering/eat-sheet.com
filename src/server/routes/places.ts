@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 
 const places = new Hono<{
   Bindings: Env;
-  Variables: { jwtPayload: { member_id: string; family_id: string; name: string } };
+  Variables: { jwtPayload: JwtPayload };
 }>();
 
 places.use("*", authMiddleware);

@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
   latitude REAL,
   longitude REAL,
   share_token TEXT UNIQUE,
+  google_place_id TEXT,
   created_by TEXT NOT NULL REFERENCES members(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   visited_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   share_token TEXT UNIQUE,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT,
   UNIQUE(restaurant_id, member_id)
 );
 
@@ -58,10 +59,6 @@ CREATE TABLE IF NOT EXISTS reactions (
   UNIQUE(review_id, member_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_members_family ON members(family_id);
-CREATE INDEX IF NOT EXISTS idx_restaurants_family ON restaurants(family_id);
-CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
-CREATE INDEX IF NOT EXISTS idx_reviews_member ON reviews(member_id);
 CREATE TABLE IF NOT EXISTS review_photos (
   id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
   review_id TEXT NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
@@ -79,8 +76,32 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   UNIQUE(member_id, restaurant_id)
 );
 
+CREATE TABLE IF NOT EXISTS groups (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+  name TEXT NOT NULL,
+  invite_code TEXT NOT NULL UNIQUE,
+  created_by TEXT NOT NULL REFERENCES members(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS group_members (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+  group_id TEXT NOT NULL REFERENCES groups(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  is_admin INTEGER NOT NULL DEFAULT 0,
+  joined_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(group_id, member_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_members_family ON members(family_id);
+CREATE INDEX IF NOT EXISTS idx_restaurants_family ON restaurants(family_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_restaurant ON reviews(restaurant_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_member ON reviews(member_id);
 CREATE INDEX IF NOT EXISTS idx_reactions_review ON reactions(review_id);
 CREATE INDEX IF NOT EXISTS idx_review_photos_review ON review_photos(review_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_member ON bookmarks(member_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_restaurant ON bookmarks(restaurant_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_members_oauth ON members(oauth_provider, oauth_id);
+CREATE INDEX IF NOT EXISTS idx_restaurants_google_place_id ON restaurants(google_place_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_member ON group_members(member_id);
