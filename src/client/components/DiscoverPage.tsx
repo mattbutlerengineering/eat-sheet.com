@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
 import type { NearbyPlace, Restaurant } from "../types";
 
@@ -61,11 +62,15 @@ function DiscoverCard({
   isAdded,
   onAdd,
   adding,
+  restaurantId,
+  onView,
 }: {
   readonly place: NearbyPlace;
   readonly isAdded: boolean;
   readonly onAdd: () => void;
   readonly adding: boolean;
+  readonly restaurantId: string | null;
+  readonly onView: () => void;
 }) {
   return (
     <div className="bg-stone-900 rounded-xl p-4 flex items-start gap-3">
@@ -95,31 +100,43 @@ function DiscoverCard({
           </div>
         )}
       </div>
-      <button
-        onClick={onAdd}
-        disabled={isAdded || adding}
-        aria-label={isAdded ? `${place.name} already added` : `Add ${place.name}`}
-        className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          isAdded
-            ? "bg-green-500/20 text-green-400 cursor-default"
-            : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95"
-        }`}
-      >
-        {adding ? (
-          <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
-          </svg>
-        ) : isAdded ? (
+      {isAdded && restaurantId ? (
+        <button
+          onClick={onView}
+          aria-label={`View ${place.name}`}
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-green-500/20 text-green-400 hover:bg-green-500/30 active:scale-95"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        )}
-      </button>
+        </button>
+      ) : (
+        <button
+          onClick={onAdd}
+          disabled={isAdded || adding}
+          aria-label={isAdded ? `${place.name} already added` : `Add ${place.name}`}
+          className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+            isAdded
+              ? "bg-green-500/20 text-green-400 cursor-default"
+              : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95"
+          }`}
+        >
+          {adding ? (
+            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
+            </svg>
+          ) : isAdded ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -128,11 +145,12 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   const { geo, request } = useGeolocation();
   const { post } = useApi(token);
   const { data: myRestaurants } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
+  const navigate = useNavigate();
 
   const [places, setPlaces] = useState<readonly NearbyPlace[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [addedIds, setAddedIds] = useState<ReadonlySet<string>>(new Set());
+  const [addedIds, setAddedIds] = useState<ReadonlyMap<string, string>>(new Map());
   const [addingId, setAddingId] = useState<string | null>(null);
   const fetchedRef = useRef(false);
 
@@ -158,12 +176,12 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
       .finally(() => setLoading(false));
   }, [geo, post]);
 
-  // Build set of google_place_ids already in family
-  const familyPlaceIds = useMemo(
-    () => new Set(
+  // Build map of google_place_id → restaurant_id for family restaurants
+  const familyPlaceIdMap = useMemo(
+    () => new Map(
       (myRestaurants ?? [])
-        .map((r) => r.google_place_id)
-        .filter((id): id is string => id != null)
+        .filter((r): r is Restaurant & { google_place_id: string } => r.google_place_id != null)
+        .map((r) => [r.google_place_id, r.id])
     ),
     [myRestaurants]
   );
@@ -172,7 +190,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
     async (place: NearbyPlace) => {
       setAddingId(place.google_place_id);
       try {
-        await post("/api/restaurants", {
+        const restaurant = await post<Restaurant>("/api/restaurants", {
           name: place.name,
           cuisine: place.cuisine,
           address: place.address,
@@ -180,10 +198,10 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
           longitude: place.longitude,
           google_place_id: place.google_place_id,
         });
-        setAddedIds((prev) => new Set([...prev, place.google_place_id]));
+        setAddedIds((prev) => new Map([...prev, [place.google_place_id, restaurant.id]]));
       } catch (err) {
         if (err instanceof Error && err.message.includes("already in your list")) {
-          setAddedIds((prev) => new Set([...prev, place.google_place_id]));
+          setAddedIds((prev) => new Map([...prev, [place.google_place_id, ""]]));
         } else {
           setError(err instanceof Error ? err.message : "Failed to add restaurant");
         }
@@ -276,18 +294,26 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
             </p>
           ) : (
             <div className="space-y-3">
-              {places.map((place) => (
-                <DiscoverCard
-                  key={place.google_place_id}
-                  place={place}
-                  isAdded={
-                    familyPlaceIds.has(place.google_place_id) ||
-                    addedIds.has(place.google_place_id)
-                  }
-                  onAdd={() => handleAdd(place)}
-                  adding={addingId === place.google_place_id}
-                />
-              ))}
+              {places.map((place) => {
+                const restaurantId =
+                  addedIds.get(place.google_place_id) ||
+                  familyPlaceIdMap.get(place.google_place_id) ||
+                  null;
+                return (
+                  <DiscoverCard
+                    key={place.google_place_id}
+                    place={place}
+                    isAdded={
+                      familyPlaceIdMap.has(place.google_place_id) ||
+                      addedIds.has(place.google_place_id)
+                    }
+                    onAdd={() => handleAdd(place)}
+                    adding={addingId === place.google_place_id}
+                    restaurantId={restaurantId}
+                    onView={() => restaurantId && navigate(`/restaurant/${restaurantId}`)}
+                  />
+                );
+              })}
             </div>
           )}
         </>
