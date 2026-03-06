@@ -94,3 +94,17 @@ export interface ApiResponse<T> {
   readonly data?: T;
   readonly error?: string;
 }
+
+export interface NearbyPlace {
+  readonly google_place_id: string;
+  readonly name: string;
+  readonly address: string | null;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+  readonly cuisine: string | null;
+  readonly google_rating: number | null;
+  readonly google_rating_count: number;
+  readonly google_maps_uri: string | null;
+  readonly eat_sheet_score: number | null;
+  readonly eat_sheet_reviews: number;
+}
