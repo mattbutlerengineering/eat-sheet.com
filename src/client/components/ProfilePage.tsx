@@ -4,7 +4,7 @@ import { useApi, useFetch } from "../hooks/useApi";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { randomLoadingMessage } from "../utils/personality";
-import type { Member, Group, FamilyStatsData } from "../types";
+import type { Member, FamilyStatsData } from "../types";
 
 interface ProfilePageProps {
   readonly token: string;
@@ -17,7 +17,6 @@ interface MemberInfo {
   readonly id: string;
   readonly name: string;
   readonly email: string | null;
-  readonly groups: readonly Group[];
 }
 
 export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePageProps) {
@@ -72,8 +71,6 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
       </div>
     );
   }
-
-  const groups = me?.groups ?? [];
 
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
@@ -171,39 +168,6 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
               </p>
               <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Avg Food</p>
             </div>
-          </div>
-        </section>
-
-        {/* Groups Section */}
-        <section>
-          <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3">Groups</h2>
-          <div className="bg-stone-900 rounded-2xl p-4 space-y-3">
-            {groups.length === 0 ? (
-              <p className="text-stone-500 text-sm">You're not in any groups yet</p>
-            ) : (
-              groups.map((g) => (
-                <div key={g.id} className="flex items-center justify-between">
-                  <div>
-                    <span className="text-stone-50 font-medium text-sm">{g.name}</span>
-                    {g.is_admin && (
-                      <span className="ml-2 text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
-                        Admin
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-stone-500 text-xs">{g.member_count} members</span>
-                </div>
-              ))
-            )}
-            <button
-              onClick={() => navigate("/groups")}
-              className="w-full text-left flex items-center justify-between pt-2 border-t border-stone-800"
-            >
-              <span className="text-orange-400 text-sm font-medium">Manage Groups</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-stone-600" aria-hidden="true">
-                <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
           </div>
         </section>
 
