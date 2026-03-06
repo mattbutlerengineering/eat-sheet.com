@@ -345,7 +345,7 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
 
         {/* Map View */}
         {viewMode === "map" && !loading && filtered.length > 0 && (
-          <div className="mt-2">
+          <div className="mt-2 isolate">
             <Suspense fallback={<div className="shimmer h-[60vh] rounded-xl" />}>
               <MapView restaurants={filtered} />
             </Suspense>
