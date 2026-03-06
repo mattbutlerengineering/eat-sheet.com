@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useApi, useFetch } from "../hooks/useApi";
 import { InviteCodePanel } from "./InviteCodePanel";
 import { MemberAvatar } from "./MemberAvatar";
@@ -35,6 +35,18 @@ export function GroupsPage({ token }: GroupsPageProps) {
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
 
   const { get } = useApi(token);
+
+  // Auto-repair orphaned group_members on first empty load
+  const repairAttempted = useRef(false);
+  useEffect(() => {
+    if (loading || repairAttempted.current) return;
+    if (groups && groups.length === 0) {
+      repairAttempted.current = true;
+      post<{ repaired: number }>("/api/groups/repair", {}).then((result) => {
+        if (result.repaired > 0) refresh();
+      }).catch(() => {});
+    }
+  }, [loading, groups, post, refresh]);
 
   const handleCreate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

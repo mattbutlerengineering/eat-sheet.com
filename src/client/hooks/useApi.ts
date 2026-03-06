@@ -2,6 +2,14 @@ import { useState, useCallback, useEffect } from "react";
 import * as Sentry from "@sentry/react";
 import type { ApiResponse } from "../types";
 
+async function safeJson<T>(res: Response): Promise<ApiResponse<T>> {
+  try {
+    return (await res.json()) as ApiResponse<T>;
+  } catch {
+    return { error: `Server error (${res.status})` };
+  }
+}
+
 function assertOk<T>(res: Response, json: ApiResponse<T>, url: string, method: string): asserts json is ApiResponse<T> & { data: T } {
   if (!res.ok || json.error) {
     const err = new Error(json.error || "Request failed");
@@ -25,7 +33,7 @@ export function useApi(token: string | undefined) {
   const get = useCallback(
     async <T>(url: string): Promise<T> => {
       const res = await fetch(url, { headers: headers() });
-      const json = (await res.json()) as ApiResponse<T>;
+      const json = await safeJson<T>(res);
       assertOk(res, json, url, "GET");
       return json.data;
     },
@@ -39,7 +47,7 @@ export function useApi(token: string | undefined) {
         headers: headers(),
         body: JSON.stringify(body),
       });
-      const json = (await res.json()) as ApiResponse<T>;
+      const json = await safeJson<T>(res);
       assertOk(res, json, url, "POST");
       return json.data;
     },
@@ -53,7 +61,7 @@ export function useApi(token: string | undefined) {
         headers: headers(),
         body: JSON.stringify(body),
       });
-      const json = (await res.json()) as ApiResponse<T>;
+      const json = await safeJson<T>(res);
       assertOk(res, json, url, "PUT");
       return json.data;
     },
@@ -66,7 +74,7 @@ export function useApi(token: string | undefined) {
         method: "DELETE",
         headers: headers(),
       });
-      const json = (await res.json()) as ApiResponse<T>;
+      const json = await safeJson<T>(res);
       assertOk(res, json, url, "DELETE");
       return json.data;
     },

@@ -31,26 +31,31 @@ groups.post("/", async (c) => {
   const db = c.env.DB;
   const code = generateInviteCode();
 
-  const group = await db
-    .prepare(
-      `INSERT INTO groups (name, invite_code, created_by)
-       VALUES (?, ?, ?)
-       RETURNING *`
-    )
-    .bind(name, code, payload.member_id)
-    .first<Group>();
+  try {
+    const group = await db
+      .prepare(
+        `INSERT INTO groups (name, invite_code, created_by)
+         VALUES (?, ?, ?)
+         RETURNING *`
+      )
+      .bind(name, code, payload.member_id)
+      .first<Group>();
 
-  if (!group) {
+    if (!group) {
+      return c.json({ error: "Failed to create group" }, 500);
+    }
+
+    // Creator is automatically admin
+    await db
+      .prepare("INSERT INTO group_members (group_id, member_id, is_admin) VALUES (?, ?, 1)")
+      .bind(group.id, payload.member_id)
+      .run();
+
+    return c.json({ data: { ...group, is_admin: true, member_count: 1 } }, 201);
+  } catch (err) {
+    console.error("Group creation failed:", err);
     return c.json({ error: "Failed to create group" }, 500);
   }
-
-  // Creator is automatically admin
-  await db
-    .prepare("INSERT INTO group_members (group_id, member_id, is_admin) VALUES (?, ?, 1)")
-    .bind(group.id, payload.member_id)
-    .run();
-
-  return c.json({ data: { ...group, is_admin: true, member_count: 1 } }, 201);
 });
 
 // List user's groups
@@ -73,6 +78,51 @@ groups.get("/", async (c) => {
   return c.json({
     data: results.map((g) => ({ ...g, is_admin: g.is_admin === 1 })),
   });
+});
+
+// Repair orphaned group_members (missing groups row)
+groups.post("/repair", async (c) => {
+  const payload = c.get("jwtPayload");
+  const db = c.env.DB;
+
+  const { results: orphans } = await db
+    .prepare(
+      `SELECT DISTINCT gm.group_id
+       FROM group_members gm
+       LEFT JOIN groups g ON g.id = gm.group_id
+       WHERE gm.member_id = ? AND g.id IS NULL`
+    )
+    .bind(payload.member_id)
+    .all<{ group_id: string }>();
+
+  let repaired = 0;
+  for (const orphan of orphans) {
+    // Try to get original name from families table
+    const family = await db
+      .prepare("SELECT name FROM families WHERE id = ?")
+      .bind(orphan.group_id)
+      .first<{ name: string }>();
+
+    const name = family?.name ?? `${payload.name}'s Group`;
+    const code = generateInviteCode();
+
+    await db
+      .prepare(
+        `INSERT INTO groups (id, name, invite_code, created_by) VALUES (?, ?, ?, ?)`
+      )
+      .bind(orphan.group_id, name, code, payload.member_id)
+      .run();
+
+    // Ensure caller is admin of the repaired group
+    await db
+      .prepare("UPDATE group_members SET is_admin = 1 WHERE group_id = ? AND member_id = ?")
+      .bind(orphan.group_id, payload.member_id)
+      .run();
+
+    repaired++;
+  }
+
+  return c.json({ data: { repaired } });
 });
 
 // Join a group by invite code
