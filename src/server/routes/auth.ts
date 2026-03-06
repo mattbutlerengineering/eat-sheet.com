@@ -12,7 +12,7 @@ const auth = new Hono<{
 }>();
 
 auth.post("/join", async (c) => {
-  const body = await c.req.json<{ invite_code: string; name: string; registration_token: string }>();
+  const body = await c.req.json<{ invite_code: string; registration_token: string }>();
 
   if (!body.registration_token) {
     return c.json({ error: "A registration token is required" }, 400);
@@ -25,11 +25,11 @@ auth.post("/join", async (c) => {
     return c.json({ error: "Invalid or expired registration token" }, 401);
   }
 
-  if (!body.invite_code || !body.name?.trim()) {
-    return c.json({ error: "Invite code and name are required" }, 400);
+  if (!body.invite_code) {
+    return c.json({ error: "Invite code is required" }, 400);
   }
 
-  const name = body.name.trim();
+  const name = regPayload.name;
   const db = c.env.DB;
   const { oauth_provider, oauth_id, email } = regPayload;
 

@@ -71,7 +71,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt" }),
+        body: JSON.stringify({ invite_code: "TEST123" }),
       },
       env(db)
     );
@@ -87,14 +87,14 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: "bad-token" }),
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: "bad-token" }),
       },
       env(db)
     );
     expect(res.status).toBe(401);
   });
 
-  it("returns 400 when name is missing", async () => {
+  it("returns 400 when invite code is missing", async () => {
     const regToken = await makeRegistrationToken();
     const { db } = createMockDb();
     const res = await app.request(
@@ -102,7 +102,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
+        body: JSON.stringify({ registration_token: regToken }),
       },
       env(db)
     );
@@ -119,7 +119,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "WRONG", name: "Matt", registration_token: regToken }),
+        body: JSON.stringify({ invite_code: "WRONG", registration_token: regToken }),
       },
       env(db)
     );
@@ -141,7 +141,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
       },
       env(db)
     );
@@ -167,7 +167,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
       },
       env(db)
     );
@@ -193,7 +193,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
       },
       env(db)
     );
@@ -216,7 +216,7 @@ describe("POST /api/auth/join", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invite_code: "TEST123", name: "Matt", registration_token: regToken }),
+        body: JSON.stringify({ invite_code: "TEST123", registration_token: regToken }),
       },
       env(db)
     );

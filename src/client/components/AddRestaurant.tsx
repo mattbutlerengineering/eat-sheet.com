@@ -160,9 +160,10 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             id="r-address"
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Where is it? (enables map pin)"
-            className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
+            readOnly
+            tabIndex={-1}
+            placeholder="Auto-filled from place search"
+            className="w-full px-4 py-3.5 bg-stone-800/50 border border-stone-700 rounded-xl text-stone-400 placeholder:text-stone-600 cursor-not-allowed"
           />
         </div>
 

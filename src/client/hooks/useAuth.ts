@@ -110,13 +110,12 @@ export function useAuth() {
       .finally(() => setLoading(false));
   }, []);
 
-  const register = useCallback(async (inviteCode: string, name: string, regToken: string) => {
+  const register = useCallback(async (inviteCode: string, regToken: string) => {
     const res = await fetch("/api/auth/join", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         invite_code: inviteCode,
-        name,
         registration_token: regToken,
       }),
     });

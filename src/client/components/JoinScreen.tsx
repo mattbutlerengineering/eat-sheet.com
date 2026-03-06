@@ -7,7 +7,7 @@ import type { OAuthUser } from "../types";
 interface JoinScreenProps {
   readonly pendingRegistration: OAuthUser | null;
   readonly registrationToken: string | null;
-  readonly onRegister: (inviteCode: string, name: string, registrationToken: string) => Promise<unknown>;
+  readonly onRegister: (inviteCode: string, registrationToken: string) => Promise<unknown>;
 }
 
 const FLOATING_FOOD = [
@@ -67,18 +67,17 @@ function Branding() {
 
 export function JoinScreen({ pendingRegistration, registrationToken, onRegister }: JoinScreenProps) {
   const [inviteCode, setInviteCode] = useState("");
-  const [name, setName] = useState(pendingRegistration?.name ?? "");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteCode.trim() || !name.trim() || !registrationToken) return;
+    if (!inviteCode.trim() || !registrationToken) return;
 
     setError("");
     setSubmitting(true);
     try {
-      await onRegister(inviteCode.trim(), name.trim(), registrationToken);
+      await onRegister(inviteCode.trim(), registrationToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join");
     } finally {
@@ -136,26 +135,11 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
               />
             </div>
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-stone-400 uppercase tracking-wider mb-2">
-                Your Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="What should we call you?"
-                autoComplete="name"
-                className={INPUT_CLASS}
-              />
-            </div>
-
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
             <button
               type="submit"
-              disabled={submitting || !inviteCode.trim() || !name.trim()}
+              disabled={submitting || !inviteCode.trim()}
               className="btn-shimmer w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
             >
               {submitting ? "Joining..." : "Join the Sheet"}

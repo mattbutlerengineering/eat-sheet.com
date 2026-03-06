@@ -1,9 +1,12 @@
 export const CUISINES = [
   "American",
   "Asian Fusion",
+  "Bakery/Cafe",
   "Barbecue",
   "Brazilian",
   "Chinese",
+  "Deli",
+  "Dessert",
   "French",
   "Greek",
   "Indian",
