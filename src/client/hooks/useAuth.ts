@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { AuthState, Member } from "../types";
+import type { AuthState, Member, GoogleUser, GoogleAuthResult } from "../types";
 
 const STORAGE_KEY = "eat-sheet-auth";
 
@@ -86,5 +86,51 @@ export function useAuth() {
     });
   }, []);
 
-  return { auth, loading, join, logout, updateName };
+  const googleAuth = useCallback(async (idToken: string): Promise<GoogleAuthResult> => {
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+
+    const json = (await res.json()) as { data?: GoogleAuthResult; error?: string };
+
+    if (!res.ok || !json.data) {
+      throw new Error(json.error || "Google sign-in failed");
+    }
+
+    if (json.data.status === "authenticated" && json.data.token && json.data.member) {
+      const state: AuthState = { token: json.data.token, member: json.data.member };
+      saveAuth(state);
+      setAuth(state);
+    }
+
+    return json.data;
+  }, []);
+
+  const googleRegister = useCallback(async (inviteCode: string, name: string, googleUser: GoogleUser) => {
+    const res = await fetch("/api/auth/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        invite_code: inviteCode,
+        name,
+        google_id: googleUser.google_id,
+        email: googleUser.email,
+      }),
+    });
+
+    const json = (await res.json()) as { data?: { token: string; member: Member }; error?: string };
+
+    if (!res.ok || !json.data) {
+      throw new Error(json.error || "Failed to join");
+    }
+
+    const state: AuthState = { token: json.data.token, member: json.data.member };
+    saveAuth(state);
+    setAuth(state);
+    return state;
+  }, []);
+
+  return { auth, loading, join, logout, updateName, googleAuth, googleRegister };
 }

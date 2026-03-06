@@ -3,6 +3,20 @@ export interface Member {
   readonly family_id: string;
   readonly name: string;
   readonly is_admin: boolean;
+  readonly email?: string | null;
+}
+
+export interface GoogleUser {
+  readonly google_id: string;
+  readonly email: string;
+  readonly name: string;
+}
+
+export interface GoogleAuthResult {
+  readonly status: "authenticated" | "needs_registration";
+  readonly token?: string;
+  readonly member?: Member;
+  readonly google_user?: GoogleUser;
 }
 
 export interface Restaurant {

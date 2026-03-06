@@ -64,7 +64,7 @@ function PublicRoutes() {
 }
 
 export function App() {
-  const { auth, loading, join, logout, updateName } = useAuth();
+  const { auth, loading, join, logout, updateName, googleAuth, googleRegister } = useAuth();
 
   // Public share pages don't need auth
   if (!auth && window.location.pathname.startsWith("/share/")) {
@@ -88,7 +88,7 @@ export function App() {
   }
 
   if (!auth) {
-    return <JoinScreen onJoin={join} />;
+    return <JoinScreen onJoin={join} onGoogleAuth={googleAuth} onGoogleRegister={googleRegister} />;
   }
 
   return (

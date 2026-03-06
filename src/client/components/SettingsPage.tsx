@@ -18,6 +18,7 @@ interface MemberInfo {
   readonly family_id: string;
   readonly name: string;
   readonly is_admin: boolean;
+  readonly email: string | null;
   readonly family_name: string | null;
 }
 
@@ -135,19 +136,24 @@ export function SettingsPage({ token, member, onLogout, onNameChange }: Settings
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-stone-50 font-bold">{me?.name ?? member.name}</span>
-                    {member.is_admin && (
-                      <span className="text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
-                        Admin
-                      </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-stone-50 font-bold">{me?.name ?? member.name}</span>
+                      {member.is_admin && (
+                        <span className="text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
+                          Admin
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setEditing(true)}
+                        className="ml-auto text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    {me?.email && (
+                      <p className="text-stone-500 text-xs mt-0.5">{me.email}</p>
                     )}
-                    <button
-                      onClick={() => setEditing(true)}
-                      className="ml-auto text-sm text-orange-400 hover:text-orange-300 transition-colors"
-                    >
-                      Edit
-                    </button>
                   </div>
                 )}
               </div>
