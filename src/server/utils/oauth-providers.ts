@@ -9,7 +9,7 @@ export interface OAuthProfile {
 
 interface OAuthProvider {
   readonly createClient: (env: Env) => arctic.Google;
-  readonly scopes: readonly string[];
+  readonly scopes: string[];
   readonly usePKCE: boolean;
   readonly getProfile: (tokens: arctic.OAuth2Tokens) => OAuthProfile;
 }

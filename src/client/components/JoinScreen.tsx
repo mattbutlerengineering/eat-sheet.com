@@ -1,21 +1,20 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Slurms } from "./Slurms";
-import { GoogleSignInButton } from "./GoogleSignInButton";
+import { OAuthButton } from "./OAuthButton";
 import { SLURMS_QUOTES } from "../utils/personality";
-import type { GoogleUser, GoogleAuthResult } from "../types";
+import type { OAuthUser } from "../types";
 
 interface JoinScreenProps {
-  readonly onGoogleAuth: (idToken: string) => Promise<GoogleAuthResult>;
-  readonly onGoogleRegister: (inviteCode: string, name: string, googleUser: GoogleUser) => Promise<unknown>;
+  readonly pendingRegistration: OAuthUser | null;
+  readonly registrationToken: string | null;
+  readonly onRegister: (inviteCode: string, name: string, registrationToken: string) => Promise<unknown>;
 }
 
-type ScreenState = "sign_in" | "register";
-
 const FLOATING_FOOD = [
-  { emoji: "🍕", top: "8%", left: "10%", delay: "0s", duration: "6s" },
-  { emoji: "🍣", top: "15%", right: "12%", delay: "1.5s", duration: "7s" },
-  { emoji: "🌮", bottom: "20%", left: "8%", delay: "3s", duration: "5.5s" },
-  { emoji: "🍷", bottom: "12%", right: "10%", delay: "0.8s", duration: "6.5s" },
+  { emoji: "\u{1F355}", top: "8%", left: "10%", delay: "0s", duration: "6s" },
+  { emoji: "\u{1F363}", top: "15%", right: "12%", delay: "1.5s", duration: "7s" },
+  { emoji: "\u{1F32E}", bottom: "20%", left: "8%", delay: "3s", duration: "5.5s" },
+  { emoji: "\u{1F377}", bottom: "12%", right: "10%", delay: "0.8s", duration: "6.5s" },
 ] as const;
 
 const INPUT_CLASS =
@@ -66,37 +65,20 @@ function Branding() {
   );
 }
 
-export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) {
-  const [screen, setScreen] = useState<ScreenState>("sign_in");
-  const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
+export function JoinScreen({ pendingRegistration, registrationToken, onRegister }: JoinScreenProps) {
   const [inviteCode, setInviteCode] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(pendingRegistration?.name ?? "");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleGoogleToken = useCallback(async (idToken: string) => {
-    setError("");
-    try {
-      const result = await onGoogleAuth(idToken);
-      if (result.status === "needs_registration" && result.google_user) {
-        setGoogleUser(result.google_user);
-        setName(result.google_user.name);
-        setScreen("register");
-      }
-      // If "authenticated", useAuth already set the state — component will unmount
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed");
-    }
-  }, [onGoogleAuth]);
-
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteCode.trim() || !name.trim() || !googleUser) return;
+    if (!inviteCode.trim() || !name.trim() || !registrationToken) return;
 
     setError("");
     setSubmitting(true);
     try {
-      await onGoogleRegister(inviteCode.trim(), name.trim(), googleUser);
+      await onRegister(inviteCode.trim(), name.trim(), registrationToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join");
     } finally {
@@ -111,9 +93,9 @@ export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) 
       <div className="w-full max-w-sm relative z-10">
         <Branding />
 
-        {screen === "sign_in" && (
+        {!pendingRegistration && (
           <div className="space-y-5 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            <GoogleSignInButton onToken={handleGoogleToken} />
+            <OAuthButton provider="google" />
 
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
@@ -123,7 +105,7 @@ export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) 
           </div>
         )}
 
-        {screen === "register" && googleUser && (
+        {pendingRegistration && (
           <form
             onSubmit={handleRegisterSubmit}
             className="space-y-5 animate-fade-up"
@@ -131,11 +113,11 @@ export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) 
           >
             <div className="bg-stone-900 rounded-xl p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-lg">
-                {googleUser.name.charAt(0).toUpperCase()}
+                {pendingRegistration.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-stone-50 text-sm font-medium">{googleUser.name}</p>
-                <p className="text-stone-500 text-xs">{googleUser.email}</p>
+                <p className="text-stone-50 text-sm font-medium">{pendingRegistration.name}</p>
+                <p className="text-stone-500 text-xs">{pendingRegistration.email}</p>
               </div>
             </div>
 
@@ -179,13 +161,12 @@ export function JoinScreen({ onGoogleAuth, onGoogleRegister }: JoinScreenProps) 
               {submitting ? "Joining..." : "Join the Sheet"}
             </button>
 
-            <button
-              type="button"
-              onClick={() => { setScreen("sign_in"); setError(""); setGoogleUser(null); }}
-              className="w-full py-2 text-stone-500 hover:text-stone-300 text-sm transition-colors"
+            <a
+              href="/"
+              className="block w-full py-2 text-stone-500 hover:text-stone-300 text-sm transition-colors text-center"
             >
               Back
-            </button>
+            </a>
           </form>
         )}
 

@@ -6,17 +6,11 @@ export interface Member {
   readonly email?: string | null;
 }
 
-export interface GoogleUser {
-  readonly google_id: string;
+export interface OAuthUser {
+  readonly oauth_provider: string;
+  readonly oauth_id: string;
   readonly email: string;
   readonly name: string;
-}
-
-export interface GoogleAuthResult {
-  readonly status: "authenticated" | "needs_registration";
-  readonly token?: string;
-  readonly member?: Member;
-  readonly google_user?: GoogleUser;
 }
 
 export interface Restaurant {
