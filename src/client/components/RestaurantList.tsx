@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
 // InviteCodePanel moved to GroupsPage
@@ -16,7 +16,6 @@ const MapView = lazy(() =>
 interface RestaurantListProps {
   readonly token: string;
   readonly member: Member;
-  readonly onLogout: () => void;
 }
 
 type SortMode = "recent" | "score";
@@ -35,7 +34,8 @@ function scoreBadgeColor(score: number | null): string {
   return "bg-green-500/20 text-green-500";
 }
 
-export function RestaurantList({ token, member, onLogout }: RestaurantListProps) {
+export function RestaurantList({ token, member }: RestaurantListProps) {
+  const navigate = useNavigate();
   const { data: restaurants, loading, error, refresh } = useFetch<readonly Restaurant[]>(token, "/api/restaurants");
   const { data: bookmarkedList } = useFetch<readonly Restaurant[]>(token, "/api/bookmarks");
   const [sort, setSort] = useState<SortMode>("recent");
@@ -112,10 +112,14 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
           <div className="flex items-center gap-3">
             <span className="text-base text-stone-400">{member.name}</span>
             <button
-              onClick={onLogout}
-              className="text-sm text-stone-500 hover:text-stone-300 transition-colors"
+              onClick={() => navigate("/profile")}
+              aria-label="Settings"
+              className="text-stone-500 hover:text-stone-300 transition-colors"
             >
-              Leave
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+              </svg>
             </button>
           </div>
         </div>
@@ -315,6 +319,12 @@ export function RestaurantList({ token, member, onLogout }: RestaurantListProps)
             >
               Add Your First Restaurant
             </Link>
+            <p className="text-stone-500 text-sm mt-3">
+              or{" "}
+              <Link to="/import" className="text-orange-400 hover:text-orange-300 underline">
+                import from Google Maps
+              </Link>
+            </p>
           </div>
         )}
 

@@ -114,6 +114,110 @@ restaurants.get("/:id", async (c) => {
   return c.json({ data: { ...restaurant, reviews: reviewsWithReactions } });
 });
 
+restaurants.post("/import", async (c) => {
+  const payload = c.get("jwtPayload");
+  const body = await c.req.json<{
+    restaurants: Array<{
+      name: string;
+      cuisine?: string;
+      address?: string;
+      latitude?: number;
+      longitude?: number;
+      google_place_id?: string;
+    }>;
+  }>();
+
+  const items = body.restaurants;
+  if (!Array.isArray(items) || items.length === 0) {
+    return c.json({ error: "Must provide at least one restaurant" }, 400);
+  }
+  if (items.length > 50) {
+    return c.json({ error: "Maximum 50 restaurants per import" }, 400);
+  }
+  for (const item of items) {
+    if (!item.name?.trim()) {
+      return c.json({ error: "Every restaurant must have a name" }, 400);
+    }
+  }
+
+  const db = c.env.DB;
+
+  // Batch duplicate check for items with google_place_id
+  const placeIds = items
+    .map((r) => r.google_place_id?.trim())
+    .filter((id): id is string => !!id);
+
+  const existingMap = new Map<string, string>();
+  if (placeIds.length > 0) {
+    const placeholders = placeIds.map(() => "?").join(",");
+    const { results } = await db
+      .prepare(
+        `${visiblePeersCte()}
+         SELECT id, google_place_id FROM restaurants
+         WHERE google_place_id IN (${placeholders}) AND created_by IN (SELECT member_id FROM visible_peers)`
+      )
+      .bind(payload.member_id, payload.member_id, ...placeIds)
+      .all<{ id: string; google_place_id: string }>();
+
+    for (const row of results) {
+      existingMap.set(row.google_place_id, row.id);
+    }
+  }
+
+  // Build results and INSERT statements for non-duplicates
+  type ImportResult = { name: string; id: string | null; status: "created" | "duplicate" };
+  const results: ImportResult[] = [];
+  const insertStmts: ReturnType<D1Database["prepare"]>[] = [];
+  const insertIndices: number[] = [];
+
+  for (const [i, item] of items.entries()) {
+    const gpid = item.google_place_id?.trim() || null;
+
+    if (gpid && existingMap.has(gpid)) {
+      results.push({ name: item.name.trim(), id: existingMap.get(gpid)!, status: "duplicate" });
+    } else {
+      results.push({ name: item.name.trim(), id: null, status: "created" });
+      insertStmts.push(
+        db
+          .prepare(
+            `INSERT INTO restaurants (family_id, name, cuisine, address, latitude, longitude, google_place_id, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             RETURNING id, name`
+          )
+          .bind(
+            "legacy",
+            item.name.trim(),
+            item.cuisine?.trim() || null,
+            item.address?.trim() || null,
+            item.latitude ?? null,
+            item.longitude ?? null,
+            gpid,
+            payload.member_id
+          )
+      );
+      insertIndices.push(i);
+    }
+  }
+
+  // Execute batch insert
+  if (insertStmts.length > 0) {
+    const batchResults = await db.batch(insertStmts);
+    for (const [j, batchResult] of batchResults.entries()) {
+      const row = batchResult.results?.[0] as { id: string } | undefined;
+      const idx = insertIndices[j];
+      const resultEntry = idx !== undefined ? results[idx] : undefined;
+      if (row && resultEntry) {
+        resultEntry.id = row.id;
+      }
+    }
+  }
+
+  const imported = results.filter((r) => r.status === "created").length;
+  const skipped = results.filter((r) => r.status === "duplicate").length;
+
+  return c.json({ data: { imported, skipped, results } });
+});
+
 restaurants.post("/", async (c) => {
   const payload = c.get("jwtPayload");
   const body = await c.req.json<{

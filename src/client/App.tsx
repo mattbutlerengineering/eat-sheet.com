@@ -35,6 +35,9 @@ const SharePage = lazy(() =>
 const GroupsPage = lazy(() =>
   import("./components/GroupsPage").then((m) => ({ default: m.GroupsPage }))
 );
+const ImportRestaurants = lazy(() =>
+  import("./components/ImportRestaurants").then((m) => ({ default: m.ImportRestaurants }))
+);
 const InviteHandler = lazy(() =>
   import("./components/InviteHandler").then((m) => ({ default: m.InviteHandler }))
 );
@@ -113,7 +116,7 @@ export function App() {
               element={
                 !isOnboarded()
                   ? <Navigate to="/onboarding" replace />
-                  : <RestaurantList token={auth.token} member={auth.member} onLogout={logout} />
+                  : <RestaurantList token={auth.token} member={auth.member} />
               }
             />
             <Route path="/onboarding" element={<OnboardingFlow />} />
@@ -124,6 +127,10 @@ export function App() {
             <Route
               path="/add"
               element={<AddRestaurant token={auth.token} />}
+            />
+            <Route
+              path="/import"
+              element={<ImportRestaurants token={auth.token} />}
             />
             <Route
               path="/discover"

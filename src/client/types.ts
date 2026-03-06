@@ -108,6 +108,18 @@ export interface ApiResponse<T> {
   readonly error?: string;
 }
 
+export interface ImportResult {
+  readonly name: string;
+  readonly id: string | null;
+  readonly status: "created" | "duplicate";
+}
+
+export interface ImportResponse {
+  readonly imported: number;
+  readonly skipped: number;
+  readonly results: readonly ImportResult[];
+}
+
 export interface NearbyPlace {
   readonly google_place_id: string;
   readonly name: string;
