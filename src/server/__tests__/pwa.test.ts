@@ -16,7 +16,7 @@ describe("PWA manifest config", () => {
   it("vite.config.ts has theme and background colors", async () => {
     const config = readFileSync(resolve(ROOT, "vite.config.ts"), "utf-8");
     expect(config).toContain('"#E8836E"');
-    expect(config).toContain('"#1c1917"');
+    expect(config).toContain('"#0c0a09"');
     expect(config).toContain('"standalone"');
   });
 
@@ -42,8 +42,8 @@ describe("PWA icon files", () => {
     expect(existsSync(resolve(ROOT, "public/apple-touch-icon.png"))).toBe(true);
   });
 
-  it("favicon.svg exists", () => {
-    expect(existsSync(resolve(ROOT, "public/favicon.svg"))).toBe(true);
+  it("favicon.png exists", () => {
+    expect(existsSync(resolve(ROOT, "public/favicon.png"))).toBe(true);
   });
 });
 

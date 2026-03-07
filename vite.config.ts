@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+      includeAssets: ["favicon.png", "apple-touch-icon.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
@@ -33,14 +33,19 @@ export default defineConfig({
       },
       manifest: {
         name: "Eat Sheet",
-        short_name: "EatSheet",
+        short_name: "Eat Sheet",
         description: "Family restaurant rating app",
         theme_color: "#E8836E",
-        background_color: "#1c1917",
+        background_color: "#0c0a09",
         display: "standalone",
         scope: "/",
         start_url: "/",
         icons: [
+          {
+            src: "/monsters/teal-big-256.png",
+            sizes: "256x256",
+            type: "image/png",
+          },
           {
             src: "/icons/icon-192.png",
             sizes: "192x192",
