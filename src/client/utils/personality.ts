@@ -183,8 +183,6 @@ export const CHOMPS_QUOTES = new Proxy({} as Record<string, string>, {
   },
 });
 
-/** @deprecated Use CHOMPS_QUOTES instead */
-export const SLURMS_QUOTES = CHOMPS_QUOTES;
 
 const OFFLINE_MESSAGES: readonly string[] = [
   "Looks like the WiFi took a dinner break",
