@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
+import { initAnalytics } from "./utils/analytics";
 import { App } from "./App";
 import "./index.css";
 
@@ -12,6 +13,8 @@ if (sentryDsn) {
     enableLogs: true,
   });
 }
+
+initAnalytics();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");

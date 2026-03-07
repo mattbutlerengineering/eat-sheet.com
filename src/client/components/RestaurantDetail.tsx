@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 import { useFetch, useApi } from "../hooks/useApi";
 import { useCountUp } from "../hooks/useCountUp";
 import { ReviewForm } from "./ReviewForm";
@@ -86,8 +87,10 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const handleSubmitReview = async (data: ReviewData) => {
     if (myReview) {
       await put(`/api/reviews/${myReview.id}`, data);
+      track("review_edited", { restaurant_id: id });
     } else {
       await post(`/api/reviews/${id}`, data);
+      track("review_submitted", { restaurant_id: id });
     }
     setShowForm(false);
     refresh();
@@ -184,6 +187,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
               }
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => track("directions_clicked", { restaurant_id: id })}
               className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
 // InviteCodePanel moved to GroupsPage
@@ -89,6 +90,17 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       });
   }, [restaurants, search, cuisineFilter, sort, showWantToTry, bookmarkedIds]);
 
+  // Debounced search tracking
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const trackSearch = useCallback((q: string) => {
+    clearTimeout(searchTimerRef.current);
+    if (!q.trim()) return;
+    searchTimerRef.current = setTimeout(() => {
+      track("search_used", { query_length: q.trim().length });
+    }, 1000);
+  }, []);
+  useEffect(() => () => clearTimeout(searchTimerRef.current), []);
+
   const hasFilters = search.trim() !== "" || cuisineFilter !== null || showWantToTry;
 
   const clearFilters = () => {
@@ -133,7 +145,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); trackSearch(e.target.value); }}
               placeholder="Search restaurants..."
               className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-orange-500/50 transition-colors"
             />
@@ -179,7 +191,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             {cuisines.map((c) => (
               <button
                 key={c}
-                onClick={() => setCuisineFilter(cuisineFilter === c ? null : c)}
+                onClick={() => { const next = cuisineFilter === c ? null : c; setCuisineFilter(next); if (next) track("cuisine_filter_applied", { cuisine: next }); }}
                 className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                   cuisineFilter === c
                     ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
@@ -196,7 +208,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         <div className="flex items-center justify-between py-2">
           <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5">
             <button
-              onClick={() => setSort("recent")}
+              onClick={() => { setSort("recent"); track("sort_mode_changed", { sort: "recent" }); }}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 sort === "recent"
                   ? "bg-stone-700 text-stone-50"
@@ -206,7 +218,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               Recent
             </button>
             <button
-              onClick={() => setSort("score")}
+              onClick={() => { setSort("score"); track("sort_mode_changed", { sort: "score" }); }}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 sort === "score"
                   ? "bg-stone-700 text-stone-50"
@@ -216,7 +228,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               Top Rated
             </button>
             <button
-              onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
+              onClick={() => { const next = viewMode === "list" ? "map" : "list"; setViewMode(next); track("view_mode_changed", { mode: next }); }}
               aria-label={viewMode === "list" ? "Show map view" : "Show list view"}
               className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                 viewMode === "map"
@@ -246,7 +258,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowTonight(true)}
+              onClick={() => { setShowTonight(true); track("feature_opened", { feature: "tonight" }); }}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
               aria-label="Tonight suggestions"
             >
@@ -257,7 +269,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             </button>
             {filtered.length > 1 && (
               <button
-                onClick={() => setShowSizzle(true)}
+                onClick={() => { setShowSizzle(true); track("feature_opened", { feature: "sizzle" }); }}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
                 aria-label="Sizzle or Fizzle"
               >
@@ -266,7 +278,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             )}
             {filtered.length > 1 && (
               <button
-                onClick={() => setShowPicker(true)}
+                onClick={() => { setShowPicker(true); track("feature_opened", { feature: "picker" }); }}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
               >
                 <svg

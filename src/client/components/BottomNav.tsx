@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 
 const tabs = [
   {
@@ -69,7 +70,7 @@ export function BottomNav() {
               role="tab"
               aria-selected={active}
               aria-label={tab.label}
-              onClick={() => navigate(tab.path)}
+              onClick={() => { track("nav_tab_clicked", { tab: tab.key }); navigate(tab.path); }}
               className={`flex flex-col items-center gap-0.5 px-4 py-1 transition-colors ${
                 active ? "text-orange-500" : "text-stone-500 hover:text-stone-300"
               }`}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApi } from "../hooks/useApi";
+import { track } from "../utils/analytics";
 
 interface ShareButtonProps {
   readonly token: string;
@@ -28,9 +29,11 @@ export function ShareButton({ token, type, id, name }: ShareButtonProps) {
           text: `Check out ${name} on Eat Sheet!`,
           url,
         });
+        track(type === "restaurant" ? "restaurant_shared" : "review_shared", { method: "native_share" });
       } else {
         // Fallback: copy to clipboard
         await navigator.clipboard.writeText(url);
+        track(type === "restaurant" ? "restaurant_shared" : "review_shared", { method: "clipboard" });
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }

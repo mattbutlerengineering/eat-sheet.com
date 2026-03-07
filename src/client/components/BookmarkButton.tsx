@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApi } from "../hooks/useApi";
+import { track } from "../utils/analytics";
 
 interface BookmarkButtonProps {
   readonly token: string;
@@ -20,6 +21,7 @@ export function BookmarkButton({ token, restaurantId, isBookmarked, onToggled }:
     setToggling(true);
     try {
       await post(`/api/bookmarks/${restaurantId}`, {});
+      track("bookmark_toggled", { restaurant_id: restaurantId, action: isBookmarked ? "removed" : "added" });
       onToggled();
     } catch {
       // Non-critical — silently fail

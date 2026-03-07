@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useApi } from "../hooks/useApi";
+import { track } from "../utils/analytics";
 import type { Reaction } from "../types";
 
 interface ReactionBarProps {
@@ -53,6 +54,7 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
     setAnimating(emoji);
     try {
       await post(`/api/reactions/${reviewId}`, { emoji });
+      track("reaction_toggled", { emoji, review_id: reviewId });
       onReacted();
     } catch {
       // silently fail — not critical

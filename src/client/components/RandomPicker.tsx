@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 import { Slurms } from "./Slurms";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
 import { SLURMS_QUOTES } from "../utils/personality";
@@ -56,6 +57,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
 
   const spin = useCallback(() => {
     if (restaurants.length === 0) return;
+    track("picker_spin", { restaurant_count: restaurants.length });
 
     const thisSpinId = ++spinIdRef.current;
 
@@ -208,7 +210,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
             Spin again
           </button>
           <button
-            onClick={() => navigate(`/restaurant/${winner.id}`)}
+            onClick={() => { track("picker_result_accepted", { restaurant_id: winner.id }); navigate(`/restaurant/${winner.id}`); }}
             className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-orange-500/25"
           >
             Let's go!

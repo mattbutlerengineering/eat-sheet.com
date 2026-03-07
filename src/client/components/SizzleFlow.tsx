@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { Restaurant } from "../types";
+import { track } from "../utils/analytics";
 import { useApi } from "../hooks/useApi";
 import { OverlayCloseButton } from "./OverlayParts";
 import { Slurms } from "./Slurms";
@@ -85,6 +86,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
         post(`/api/bookmarks/${current.id}`, {}).catch(() => {});
       }
 
+      track("sizzle_swipe", { verdict: v, restaurant_id: current.id, index, total: stack.length });
       setVerdict(v);
 
       // Show stamp, then advance
@@ -167,7 +169,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
 
   return (
     <div className="fixed inset-0 z-50 bg-stone-950/95 flex flex-col items-center justify-center animate-slide-up">
-      <OverlayCloseButton onClick={onClose} />
+      <OverlayCloseButton onClick={() => { track("feature_closed", { feature: "sizzle", cards_swiped: index }); onClose(); }} />
 
       {/* Title */}
       <h2 className="font-display text-2xl font-black text-orange-500 italic mb-6">
@@ -185,7 +187,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
             You've swiped through every restaurant!
           </p>
           <button
-            onClick={onClose}
+            onClick={() => { track("feature_closed", { feature: "sizzle", cards_swiped: index }); onClose(); }}
             className="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
           >
             Back to Eats

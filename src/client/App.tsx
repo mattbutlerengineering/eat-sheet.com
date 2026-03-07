@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { JoinScreen } from "./components/JoinScreen";
@@ -7,8 +7,10 @@ import { InstallPrompt } from "./components/InstallPrompt";
 import { BottomNav } from "./components/BottomNav";
 import { OnboardingFlow, isOnboarded } from "./components/OnboardingFlow";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PageViewTracker } from "./components/PageViewTracker";
 import { Slurms } from "./components/Slurms";
 import { randomLoadingMessage } from "./utils/personality";
+import { identifyUser, resetUser } from "./utils/analytics";
 
 // Code-split route components
 const RestaurantList = lazy(() =>
@@ -57,6 +59,7 @@ function PublicRoutes() {
   if (window.location.pathname.startsWith("/share/")) {
     return (
       <BrowserRouter>
+        <PageViewTracker />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/share/:type/:token" element={<SharePage />} />
@@ -71,6 +74,14 @@ function PublicRoutes() {
 
 export function App() {
   const { auth, loading, logout, updateName, register, pendingRegistration, registrationToken } = useAuth();
+
+  useEffect(() => {
+    if (auth) {
+      identifyUser(auth.member.id, auth.member.name);
+    } else {
+      resetUser();
+    }
+  }, [auth]);
 
   // Public share pages don't need auth
   if (!auth && window.location.pathname.startsWith("/share/")) {
@@ -106,6 +117,7 @@ export function App() {
   return (
     <ErrorBoundary>
     <BrowserRouter>
+      <PageViewTracker />
       <OfflineBanner />
       <InstallPrompt />
       <main className="pb-16">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 import { useApi, useFetch } from "../hooks/useApi";
 import { PhotoUpload } from "./PhotoUpload";
 import { PlaceAutocomplete } from "./PlaceAutocomplete";
@@ -85,6 +86,11 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         latitude: lat ?? undefined,
         longitude: lng ?? undefined,
         google_place_id: googlePlaceId ?? undefined,
+      });
+      track("restaurant_created", {
+        has_cuisine: !!cuisine.trim(),
+        has_photo: !!photoUrl,
+        source: googlePlaceId ? "google_places" : "manual",
       });
       navigate(`/restaurant/${restaurant.id}`);
     } catch (err) {

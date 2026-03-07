@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { track } from "../utils/analytics";
 import { useApi, useFetch } from "../hooks/useApi";
 import { ActivityFeed } from "./ActivityFeed";
 import { cuisineLabel } from "../utils/cuisines";
@@ -250,6 +251,7 @@ function NearbyContent({ token }: { readonly token: string }) {
           longitude: place.longitude,
           google_place_id: place.google_place_id,
         });
+        track("nearby_place_added", { google_place_id: place.google_place_id });
         setAddedIds((prev) => new Map([...prev, [place.google_place_id, restaurant.id]]));
       } catch (err) {
         if (err instanceof Error && err.message.includes("already in your list")) {
@@ -444,6 +446,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
   const [activeTab, setActiveTab] = useState<DiscoverTab>(initialTab);
 
   const handleTabChange = (tab: DiscoverTab) => {
+    track("discover_tab_changed", { tab });
     setActiveTab(tab);
     if (tab === "nearby") {
       setSearchParams({ tab: "nearby" }, { replace: true });

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { track } from "../utils/analytics";
 import { useApi } from "../hooks/useApi";
 import { Slurms } from "./Slurms";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
@@ -28,6 +29,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
 
   const handleModeSelect = useCallback(
     async (mode: TonightMode) => {
+      track("tonight_mode_selected", { mode });
       setPhase("loading");
       try {
         const data = await get<readonly TonightSuggestion[]>(`/api/tonight?mode=${mode}`);
@@ -46,6 +48,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
   );
 
   const handleNext = () => {
+    if (current) track("tonight_suggestion_skipped", { restaurant_id: current.id });
     const nextIndex = currentIndex + 1;
     if (nextIndex >= suggestions.length) {
       setPhase("empty");
@@ -153,7 +156,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
               onToggled={() => handleBookmarkToggled(current.id)}
             />
             <button
-              onClick={() => navigate(`/restaurant/${current.id}`)}
+              onClick={() => { track("tonight_suggestion_accepted", { restaurant_id: current.id }); navigate(`/restaurant/${current.id}`); }}
               className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-orange-500/25"
             >
               Let's go!
