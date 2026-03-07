@@ -14,7 +14,7 @@ const SLIDER_LINES: Record<string, readonly string[]> = {
     "Brian's been here. You can tell.",
     "Did someone microwave this?",
     "Bold of them to charge money for this.",
-    "Even Slurms wouldn't party here.",
+    "Even Chomps wouldn't party here.",
   ],
   mid_low: [
     "Getting there...",
@@ -66,7 +66,7 @@ export function sliderPersonality(score: number): string {
   return randomFrom(SLIDER_LINES.perfect!);
 }
 
-// Rotating loading messages — Slurms is doing important work
+// Rotating loading messages — Chomps is doing important work
 const LOADING_MESSAGES: readonly string[] = [
   "Checking the menu...",
   "Asking the chef...",
@@ -81,7 +81,7 @@ const LOADING_MESSAGES: readonly string[] = [
   "Googling what 'al dente' means...",
   "Brian's parking the car. He'll be a while.",
   "Convincing Brian that sushi is safe...",
-  "Slurms is freshening up...",
+  "Chomps is freshening up...",
   "Judging the font on the menu...",
   "Sniffing the bread basket...",
   "Counting Brian's complaints so far...",
@@ -94,18 +94,18 @@ export function randomLoadingMessage(): string {
   return randomFrom(LOADING_MESSAGES);
 }
 
-// Slurms quotes — randomized per context for variety
-const SLURMS_QUOTE_POOL: Record<string, readonly string[]> = {
+// Chomps quotes — randomized per context for variety
+const QUOTE_POOL: Record<string, readonly string[]> = {
   welcome: [
     "Wimmy wam wam wozzle! Join the party.",
-    "Slurms approves of your appetite.",
+    "Chomps approves of your appetite.",
     "Another mouth to feed. Excellent.",
     "Brian said you'd show up eventually.",
-    "Pull up a chair. Slurms saved you a seat.",
+    "Pull up a chair. Chomps saved you a seat.",
     "The party doesn't start 'til you walk in. Okay it started already. But still.",
   ],
   empty: [
-    "Even Slurms needs restaurants to party at.",
+    "Even Chomps needs restaurants to party at.",
     "It's quiet... too quiet.",
     "Brian ate all the content.",
     "Nothing here but vibes and sadness.",
@@ -115,7 +115,7 @@ const SLURMS_QUOTE_POOL: Record<string, readonly string[]> = {
   emptyList: [
     "Your list is emptier than a Monday night buffet.",
     "Brian's restaurant suggestions aren't here either.",
-    "Slurms has been to more places than this. And Slurms is a worm.",
+    "Chomps has been to more places than this. And Chomps is a monster.",
     "Zero restaurants? Even Brian's done better than this.",
     "The void stares back. Add a restaurant.",
     "This list is giving 'new phone who dis' energy.",
@@ -123,7 +123,7 @@ const SLURMS_QUOTE_POOL: Record<string, readonly string[]> = {
   perfect10: [
     "Party on, dude!",
     "A PERFECT TEN. Brian could never.",
-    "Slurms is doing backflips right now.",
+    "Chomps is doing backflips right now.",
     "Chef deserves a standing ovation and a hug.",
     "This is the peak. It's all downhill from here.",
     "10 out of 10. Tell Brian we found it.",
@@ -132,56 +132,59 @@ const SLURMS_QUOTE_POOL: Record<string, readonly string[]> = {
   celebrate: [
     "Wimmy wam wam wozzle!",
     "Now we're cooking!",
-    "Slurms stamps this with the worm of approval.",
+    "Chomps stamps this with the monster of approval.",
     "Brian's gonna be jealous.",
     "That's what I'm talking about!",
   ],
   error: [
-    "Slurms partied too hard. Try again.",
+    "Chomps partied too hard. Try again.",
     "Something broke. Blame Brian.",
     "The kitchen is on fire. Metaphorically.",
     "Brian unplugged the server again.",
     "Error 🍝: Spaghetti code. Not the good kind.",
-    "Slurms needs a nap. And a fix.",
+    "Chomps needs a nap. And a fix.",
   ],
   noResults: [
-    "Slurms looked everywhere. Nada.",
+    "Chomps looked everywhere. Nada.",
     "Not a single match. Brian's filter game is too strong.",
     "Nothing. Zilch. The void.",
     "Try a different search? Or blame Brian.",
-    "Even Slurms can't find what doesn't exist.",
+    "Even Chomps can't find what doesn't exist.",
     "Results machine broke.",
   ],
   pickerWin: [
     "Now THAT'S a party!",
-    "The worm has spoken.",
+    "The monster has spoken.",
     "Destiny has chosen. Don't question it.",
     "Brian wouldn't have picked this. That's how you know it's good.",
-    "Slurms has decreed it. So it shall be.",
+    "Chomps has decreed it. So it shall be.",
     "The universe provides. You're welcome.",
-    "Trust the worm. The worm knows.",
+    "Trust the monster. The monster knows.",
   ],
   offline: [
     "Looks like the WiFi took a dinner break.",
     "Brian forgot to pay the internet bill.",
     "We're flying blind. Showing what we've got cached.",
     "The cloud is... elsewhere right now.",
-    "No signal. Slurms blames Brian.",
+    "No signal. Chomps blames Brian.",
   ],
 };
 
-export function randomQuote(key: keyof typeof SLURMS_QUOTE_POOL): string {
-  return randomFrom(SLURMS_QUOTE_POOL[key]!);
+export function randomQuote(key: keyof typeof QUOTE_POOL): string {
+  return randomFrom(QUOTE_POOL[key]!);
 }
 
-// Keep SLURMS_QUOTES for backward compat — now just picks randomly
-export const SLURMS_QUOTES = new Proxy({} as Record<string, string>, {
+// CHOMPS_QUOTES picks randomly from QUOTE_POOL via Proxy
+export const CHOMPS_QUOTES = new Proxy({} as Record<string, string>, {
   get(_target, prop: string) {
-    const pool = SLURMS_QUOTE_POOL[prop];
+    const pool = QUOTE_POOL[prop];
     if (pool) return randomFrom(pool);
     return "";
   },
 });
+
+/** @deprecated Use CHOMPS_QUOTES instead */
+export const SLURMS_QUOTES = CHOMPS_QUOTES;
 
 const OFFLINE_MESSAGES: readonly string[] = [
   "Looks like the WiFi took a dinner break",
