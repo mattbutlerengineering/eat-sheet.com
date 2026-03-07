@@ -236,7 +236,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
               </div>
               <button
                 onClick={toggleAll}
-                className="text-sm text-coral-500 hover:text-orange-300 font-medium"
+                className="text-sm text-coral-500 hover:text-coral-600 font-medium"
               >
                 {selected.size === parsedPlaces.length ? "Deselect All" : "Select All"}
               </button>

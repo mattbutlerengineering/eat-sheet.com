@@ -179,7 +179,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                       <span className="text-stone-50 font-bold">{me?.name ?? member.name}</span>
                       <button
                         onClick={() => setEditing(true)}
-                        className="ml-auto text-sm text-coral-500 hover:text-orange-300 transition-colors"
+                        className="ml-auto text-sm text-coral-500 hover:text-coral-600 transition-colors"
                       >
                         Edit
                       </button>
@@ -201,7 +201,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
             <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider">Your Stats</h2>
             <button
               onClick={() => navigate("/stats")}
-              className="text-xs text-coral-500 hover:text-orange-300 transition-colors"
+              className="text-xs text-coral-500 hover:text-coral-600 transition-colors"
             >
               View all stats
             </button>

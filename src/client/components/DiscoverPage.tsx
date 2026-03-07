@@ -364,7 +364,7 @@ function NearbyContent({ token }: { readonly token: string }) {
           <p className="text-stone-400 text-sm">{geo.message}</p>
           <button
             onClick={request}
-            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-500"
+            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-600"
           >
             Try again
           </button>
@@ -386,7 +386,7 @@ function NearbyContent({ token }: { readonly token: string }) {
           <p className="text-red-400 text-sm">{error}</p>
           <button
             onClick={handleRefresh}
-            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-500"
+            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-600"
           >
             Retry
           </button>
@@ -405,7 +405,7 @@ function NearbyContent({ token }: { readonly token: string }) {
               <p className="text-stone-400 text-sm">No matches found</p>
               <button
                 onClick={clearFilters}
-                className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-500"
+                className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-600"
               >
                 Clear filters
               </button>

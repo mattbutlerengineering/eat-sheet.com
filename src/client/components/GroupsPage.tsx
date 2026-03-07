@@ -316,7 +316,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
                   {group.is_admin && (
                     <button
                       onClick={() => setShowInviteCode(group.id)}
-                      className="text-sm text-coral-500 hover:text-orange-300 transition-colors"
+                      className="text-sm text-coral-500 hover:text-coral-600 transition-colors"
                     >
                       Invite Code
                     </button>

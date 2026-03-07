@@ -348,7 +348,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             </Link>
             <p className="text-stone-500 text-sm mt-3">
               or{" "}
-              <Link to="/import" className="text-coral-500 hover:text-orange-300 underline">
+              <Link to="/import" className="text-coral-500 hover:text-coral-600 underline">
                 import from Google Maps
               </Link>
             </p>
@@ -364,7 +364,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             </p>
             <button
               onClick={clearFilters}
-              className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-500"
+              className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-600"
             >
               Clear filters
             </button>
