@@ -1,8 +1,8 @@
 import { useFetch } from "../hooks/useApi";
 import { useCountUp } from "../hooks/useCountUp";
 import { MemberAvatar } from "./MemberAvatar";
-import { Slurms } from "./Slurms";
-import { randomLoadingMessage, SLURMS_QUOTES } from "../utils/personality";
+import { Monster } from "./Monster";
+import { randomLoadingMessage, CHOMPS_QUOTES } from "../utils/personality";
 import { cuisineLabel } from "../utils/cuisines";
 import type { FamilyStatsData, MemberStats } from "../types";
 
@@ -58,7 +58,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
           </div>
         </header>
         <div className="flex flex-col items-center py-12">
-          <Slurms variant="party" size={48} />
+          <Monster variant="party" size={48} />
           <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
         </div>
       </div>
@@ -74,8 +74,8 @@ export function FamilyStats({ token }: FamilyStatsProps) {
           </div>
         </header>
         <div className="flex flex-col items-center py-16">
-          <Slurms variant="snarky" size={56} />
-          <p className="text-stone-400 font-medium mt-4">{error ?? SLURMS_QUOTES.error}</p>
+          <Monster variant="snarky" size={56} />
+          <p className="text-stone-400 font-medium mt-4">{error ?? CHOMPS_QUOTES.error}</p>
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
           </div>
         </header>
         <div className="flex flex-col items-center py-16 px-6 animate-fade-up">
-          <Slurms variant="sleeping" size={56} />
+          <Monster variant="sleeping" size={56} />
           <p className="text-stone-300 font-display font-bold text-lg mt-4 text-center">
             No stats yet
           </p>

@@ -7,8 +7,8 @@ import { useFetch } from "../hooks/useApi";
 import { RandomPicker } from "./RandomPicker";
 import { TonightFlow } from "./TonightFlow";
 import { SizzleFlow } from "./SizzleFlow";
-import { Slurms } from "./Slurms";
-import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
+import { Monster } from "./Monster";
+import { CHOMPS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
 import { relativeTime } from "../utils/time";
 import { RecommendationCards } from "./RecommendationCards";
 import { cuisineLabel } from "../utils/cuisines";
@@ -308,7 +308,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {loading && (
           <div className="space-y-3">
             <div className="flex flex-col items-center py-8">
-              <Slurms variant="party" size={48} />
+              <Monster variant="party" size={48} />
               <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
             </div>
             {[1, 2, 3].map((i) => (
@@ -320,7 +320,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {/* Error State */}
         {!loading && error && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="snarky" size={48} className="mx-auto" />
+            <Monster variant="snarky" size={48} className="mx-auto" />
             <p className="text-stone-300 font-display font-bold mt-4">Something went wrong</p>
             <p className="text-stone-500 text-sm mt-2">{error}</p>
             <button
@@ -335,9 +335,9 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {/* Empty State — no restaurants at all */}
         {!loading && restaurants && restaurants.length === 0 && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="bored" size={56} className="mx-auto" />
+            <Monster variant="bored" size={56} className="mx-auto" />
             <p className="text-stone-300 font-display font-bold text-lg mt-4">
-              {SLURMS_QUOTES.emptyList}
+              {CHOMPS_QUOTES.emptyList}
             </p>
             <p className="text-stone-500 text-sm mt-2">Add a restaurant to get this party started</p>
             <Link
@@ -358,9 +358,9 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {/* Empty State — filters returned nothing */}
         {!loading && restaurants && restaurants.length > 0 && filtered.length === 0 && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="snarky" size={48} className="mx-auto" />
+            <Monster variant="snarky" size={48} className="mx-auto" />
             <p className="text-stone-300 font-display font-bold mt-4">
-              {SLURMS_QUOTES.noResults}
+              {CHOMPS_QUOTES.noResults}
             </p>
             <button
               onClick={clearFilters}

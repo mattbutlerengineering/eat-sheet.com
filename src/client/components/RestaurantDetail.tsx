@@ -5,8 +5,8 @@ import { useFetch, useApi } from "../hooks/useApi";
 import { useCountUp } from "../hooks/useCountUp";
 import { ReviewForm } from "./ReviewForm";
 import { MemberAvatar } from "./MemberAvatar";
-import { Slurms } from "./Slurms";
-import { scorePersonality, SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
+import { Monster } from "./Monster";
+import { scorePersonality, CHOMPS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { ReactionBar } from "./ReactionBar";
 import { PhotoGallery } from "./PhotoGallery";
 import { BookmarkButton } from "./BookmarkButton";
@@ -101,7 +101,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
       <div className="min-h-dvh bg-stone-950">
         <div className="px-4 py-6 space-y-4">
           <div className="flex flex-col items-center py-8">
-            <Slurms variant="party" size={48} />
+            <Monster variant="party" size={48} />
             <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
           </div>
           <div className="shimmer h-8 w-48 rounded-lg" />
@@ -115,8 +115,8 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   if (!restaurant) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3">
-        <Slurms variant="snarky" size={56} />
-        <p className="text-stone-400 font-display font-bold">{SLURMS_QUOTES.error}</p>
+        <Monster variant="snarky" size={56} />
+        <p className="text-stone-400 font-display font-bold">{CHOMPS_QUOTES.error}</p>
       </div>
     );
   }
@@ -214,12 +214,12 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                   {personality.emoji} {personality.label}
                 </p>
               )}
-              {/* Slurms celebrates perfect 10 */}
+              {/* Monster celebrates perfect 10 */}
               {isPerfect && (
                 <div className="flex items-center gap-2 mt-2">
-                  <Slurms variant="celebrate" size={36} />
+                  <Monster variant="celebrate" size={36} />
                   <span className="text-gold-400 font-display font-bold text-sm italic">
-                    {SLURMS_QUOTES.perfect10}
+                    {CHOMPS_QUOTES.perfect10}
                   </span>
                 </div>
               )}
@@ -323,7 +323,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
 
           {restaurant.reviews.length === 0 && (
             <div className="text-center py-8 animate-fade-up">
-              <Slurms variant="bored" size={44} className="mx-auto" />
+              <Monster variant="bored" size={44} className="mx-auto" />
               <p className="text-stone-500 text-base mt-3">
                 No reviews yet. Be the first!
               </p>

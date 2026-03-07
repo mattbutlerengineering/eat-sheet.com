@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useFetch } from "../hooks/useApi";
 import { MemberAvatar } from "./MemberAvatar";
-import { Slurms } from "./Slurms";
-import { SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
+import { Monster } from "./Monster";
+import { CHOMPS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { relativeTime } from "../utils/time";
 import type { ActivityEvent } from "../types";
 
@@ -51,7 +51,7 @@ export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center py-12">
-            <Slurms variant="party" size={48} />
+            <Monster variant="party" size={48} />
             <p className="text-stone-500 text-sm italic mt-3">{randomLoadingMessage()}</p>
           </div>
         )}
@@ -59,7 +59,7 @@ export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
         {/* Empty State */}
         {!loading && error && (
           <div className="flex flex-col items-center py-16 animate-fade-up">
-            <Slurms variant="snarky" size={56} />
+            <Monster variant="snarky" size={56} />
             <p className="text-stone-300 font-display font-bold mt-4">Something went wrong</p>
             <p className="text-stone-500 text-sm mt-2">{error}</p>
           </div>
@@ -67,7 +67,7 @@ export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
 
         {!loading && !error && (!events || events.length === 0) && (
           <div className="flex flex-col items-center py-16 animate-fade-up">
-            <Slurms variant="bored" size={56} />
+            <Monster variant="bored" size={56} />
             <p className="text-stone-300 font-display font-bold text-lg mt-4 text-center">
               No activity yet
             </p>
@@ -75,7 +75,7 @@ export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
               When you or your groups add restaurants and leave reviews, activity will show up here.
             </p>
             <p className="text-stone-600 text-xs mt-3 italic text-center">
-              {SLURMS_QUOTES.empty}
+              {CHOMPS_QUOTES.empty}
             </p>
           </div>
         )}

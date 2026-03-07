@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { track } from "../utils/analytics";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
-import { SLURMS_QUOTES } from "../utils/personality";
+import { CHOMPS_QUOTES } from "../utils/personality";
 import { scoreBadgeColor } from "../utils/score";
 import { cuisineLabel } from "../utils/cuisines";
 import type { Restaurant } from "../types";
@@ -106,9 +106,9 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
     return (
       <div className="fixed inset-0 z-50 bg-stone-950/95 backdrop-blur-md flex items-center justify-center p-4">
         <div className="text-center">
-          <Slurms variant="bored" size={48} className="mx-auto" />
+          <Monster variant="bored" size={48} className="mx-auto" />
           <p className="text-stone-400 font-medium mt-3">
-            {SLURMS_QUOTES.empty}
+            {CHOMPS_QUOTES.empty}
           </p>
           <button
             onClick={onClose}
@@ -181,11 +181,10 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
               </div>
             )}
 
-            {/* Slurms celebrates */}
             <div className="flex items-center justify-center gap-2 mt-4">
-              <Slurms variant="celebrate" size={36} />
+              <Monster variant="celebrate" size={36} />
               <span className="text-stone-400 text-sm italic font-display">
-                {SLURMS_QUOTES.pickerWin}
+                {CHOMPS_QUOTES.pickerWin}
               </span>
             </div>
           </div>

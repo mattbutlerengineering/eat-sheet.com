@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
 import { MemberAvatar } from "./MemberAvatar";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 import { randomLoadingMessage } from "../utils/personality";
 import type { Member, FamilyStatsData } from "../types";
 
@@ -125,7 +125,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
   if (loading) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4 pb-20">
-        <Slurms variant="bored" size={48} />
+        <Monster variant="bored" size={48} />
         <p className="text-stone-500 text-sm italic">{randomLoadingMessage()}</p>
       </div>
     );
@@ -336,7 +336,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
 
         {/* Footer */}
         <div className="text-center pt-4">
-          <Slurms variant="bored" size={32} />
+          <Monster variant="bored" size={32} />
           <p className="text-stone-600 text-xs mt-2">eat sheet — the restaurant rater</p>
         </div>
       </div>
