@@ -56,7 +56,7 @@ describe("GET /api/admin/enrich/status", () => {
 
   it("returns 403 for non-admin", async () => {
     const { db } = createMockDb({
-      first: { "is_admin FROM members": { is_admin: 0 } },
+      first: { "is_admin FROM members": null },
     });
     const token = await makeToken({ member_id: TEST_MEMBER_2.id });
     const res = await app.request(
@@ -128,7 +128,7 @@ describe("POST /api/admin/enrich", () => {
 
   it("returns 403 for non-admin", async () => {
     const { db } = createMockDb({
-      first: { "is_admin FROM members": { is_admin: 0 } },
+      first: { "is_admin FROM members": null },
     });
     const token = await makeToken({ member_id: TEST_MEMBER_2.id });
     const res = await app.request(

@@ -98,13 +98,18 @@ enrich.post("/enrich", async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
-  // Admin check
-  const member = await db
-    .prepare("SELECT is_admin FROM members WHERE id = ?")
-    .bind(payload.member_id)
+  // Admin check: member-level OR any group admin
+  const adminCheck = await db
+    .prepare(
+      `SELECT 1 as is_admin FROM members WHERE id = ? AND is_admin = 1
+       UNION
+       SELECT 1 FROM group_members WHERE member_id = ? AND is_admin = 1
+       LIMIT 1`
+    )
+    .bind(payload.member_id, payload.member_id)
     .first<{ is_admin: number }>();
 
-  if (!member || member.is_admin !== 1) {
+  if (!adminCheck) {
     return c.json({ error: "Admin access required" }, 403);
   }
 
@@ -220,12 +225,17 @@ enrich.get("/enrich/status", async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
-  const member = await db
-    .prepare("SELECT is_admin FROM members WHERE id = ?")
-    .bind(payload.member_id)
+  const adminCheck = await db
+    .prepare(
+      `SELECT 1 as is_admin FROM members WHERE id = ? AND is_admin = 1
+       UNION
+       SELECT 1 FROM group_members WHERE member_id = ? AND is_admin = 1
+       LIMIT 1`
+    )
+    .bind(payload.member_id, payload.member_id)
     .first<{ is_admin: number }>();
 
-  if (!member || member.is_admin !== 1) {
+  if (!adminCheck) {
     return c.json({ error: "Admin access required" }, 403);
   }
 
