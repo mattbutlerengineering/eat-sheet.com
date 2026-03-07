@@ -5,10 +5,12 @@ import { useFetch } from "../hooks/useApi";
 // InviteCodePanel moved to GroupsPage
 import { RandomPicker } from "./RandomPicker";
 import { TonightFlow } from "./TonightFlow";
+import { SizzleFlow } from "./SizzleFlow";
 import { Slurms } from "./Slurms";
 import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
 import { relativeTime } from "../utils/time";
 import { RecommendationCards } from "./RecommendationCards";
+import { cuisineLabel } from "../utils/cuisines";
 
 const MapView = lazy(() =>
   import("./MapView").then((m) => ({ default: m.MapView }))
@@ -35,6 +37,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [showPicker, setShowPicker] = useState(false);
   const [showTonight, setShowTonight] = useState(false);
+  const [showSizzle, setShowSizzle] = useState(false);
   const fabRef = useRef<HTMLAnchorElement>(null);
 
   const bookmarkedIds = useMemo(() => {
@@ -117,6 +120,9 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       </header>
 
       <div className="px-4 pb-28">
+        {/* Recommendations — only in list view */}
+        {viewMode === "list" && <RecommendationCards token={token} />}
+
         {/* Search */}
         <div className="pt-4 pb-2">
           <div className="relative">
@@ -180,14 +186,11 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
                     : "bg-stone-800 text-stone-400 border border-stone-700"
                 }`}
               >
-                {c}
+                {cuisineLabel(c)}
               </button>
             ))}
           </div>
         )}
-
-        {/* Recommendations — only in list view */}
-        {viewMode === "list" && <RecommendationCards token={token} />}
 
         {/* Sort, View & Pick */}
         <div className="flex items-center justify-between py-2">
@@ -252,6 +255,15 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               </svg>
               Tonight
             </button>
+            {filtered.length > 1 && (
+              <button
+                onClick={() => setShowSizzle(true)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+                aria-label="Sizzle or Fizzle"
+              >
+                🔥 Sizzle
+              </button>
+            )}
             {filtered.length > 1 && (
               <button
                 onClick={() => setShowPicker(true)}
@@ -382,7 +394,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       {restaurant.cuisine && (
                         <span className={`text-xs px-2 py-0.5 rounded-md font-medium text-white/90 ${avatarColor(restaurant.cuisine)}`}>
-                          {restaurant.cuisine}
+                          {cuisineLabel(restaurant.cuisine)}
                         </span>
                       )}
                       <span className="text-sm text-stone-500">
@@ -446,6 +458,15 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         <TonightFlow
           token={token}
           onClose={() => setShowTonight(false)}
+        />
+      )}
+
+      {showSizzle && filtered.length > 0 && (
+        <SizzleFlow
+          restaurants={filtered}
+          token={token}
+          bookmarkedIds={bookmarkedIds}
+          onClose={() => setShowSizzle(false)}
         />
       )}
     </div>
