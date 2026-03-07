@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useGeolocation } from "../hooks/useGeolocation";
+import { cuisineEmoji } from "../utils/cuisines";
 import type { Restaurant } from "../types";
 
 interface MapViewProps {
@@ -129,7 +130,7 @@ export function MapView({ restaurants }: MapViewProps) {
       });
 
       const scoreText = r.avg_score !== null ? r.avg_score.toFixed(1) : "\u2014";
-      const cuisineText = r.cuisine ? `<br/><span style="color:#a8a29e;font-size:12px">${r.cuisine}</span>` : "";
+      const cuisineText = r.cuisine ? `<br/><span style="color:#a8a29e;font-size:12px">${cuisineEmoji(r.cuisine)} ${r.cuisine}</span>` : "";
       const dirUrl = directionsUrl(r);
 
       marker.bindPopup(

@@ -5,7 +5,7 @@ import { PhotoUpload } from "./PhotoUpload";
 import { PlaceAutocomplete } from "./PlaceAutocomplete";
 import type { PlaceSelection } from "./PlaceAutocomplete";
 import { geocodeAddress } from "../utils/geocode";
-import { CUISINES } from "../utils/cuisines";
+import { CUISINES, cuisineLabel } from "../utils/cuisines";
 import type { Restaurant } from "../types";
 
 const SELECT_ARROW_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")";
@@ -147,7 +147,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
           >
             <option value="">Select cuisine...</option>
             {CUISINES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>{cuisineLabel(c)}</option>
             ))}
           </select>
         </div>

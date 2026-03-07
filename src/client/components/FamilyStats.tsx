@@ -3,6 +3,7 @@ import { useCountUp } from "../hooks/useCountUp";
 import { MemberAvatar } from "./MemberAvatar";
 import { Slurms } from "./Slurms";
 import { randomLoadingMessage, SLURMS_QUOTES } from "../utils/personality";
+import { cuisineLabel } from "../utils/cuisines";
 import type { FamilyStatsData, MemberStats } from "../types";
 
 interface FamilyStatsProps {
@@ -23,7 +24,7 @@ function CuisineBar({ cuisine, count, maxCount }: { readonly cuisine: string; re
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
   return (
     <div className="flex items-center gap-3">
-      <span className="text-stone-300 text-sm w-24 truncate flex-shrink-0">{cuisine}</span>
+      <span className="text-stone-300 text-sm w-28 truncate flex-shrink-0">{cuisineLabel(cuisine)}</span>
       <div className="flex-1 h-4 bg-stone-800 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full animate-bar-fill"

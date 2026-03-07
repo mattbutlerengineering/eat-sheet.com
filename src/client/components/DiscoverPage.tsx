@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useApi, useFetch } from "../hooks/useApi";
 import { ActivityFeed } from "./ActivityFeed";
+import { cuisineLabel } from "../utils/cuisines";
 import type { NearbyPlace, Restaurant } from "../types";
 
 interface DiscoverPageProps {
@@ -97,7 +98,7 @@ function DiscoverCard({
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           {place.cuisine && (
             <span className="text-xs bg-stone-800 text-stone-400 px-2 py-0.5 rounded-full">
-              {place.cuisine}
+              {cuisineLabel(place.cuisine)}
             </span>
           )}
           {place.google_rating != null && (
@@ -337,7 +338,7 @@ function NearbyContent({ token }: { readonly token: string }) {
                       : "bg-stone-800 text-stone-400 border border-stone-700"
                   }`}
                 >
-                  {c}
+                  {cuisineLabel(c)}
                 </button>
               ))}
             </div>

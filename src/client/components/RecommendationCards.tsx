@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useFetch } from "../hooks/useApi";
 import { avatarColor } from "../utils/personality";
+import { cuisineLabel } from "../utils/cuisines";
 
 interface RecommendationRestaurant {
   readonly id: string;
@@ -132,7 +133,7 @@ export function RecommendationCards({ token }: RecommendationCardsProps) {
               <div className="flex items-center gap-2 mt-1">
                 {item.cuisine && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium text-white/90 ${avatarColor(item.cuisine)}`}>
-                    {item.cuisine}
+                    {cuisineLabel(item.cuisine)}
                   </span>
                 )}
                 {item.avg_score !== null && (

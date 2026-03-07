@@ -12,6 +12,7 @@ import { BookmarkButton } from "./BookmarkButton";
 import { ShareButton } from "./ShareButton";
 import type { RestaurantDetail as RestaurantDetailType, Member, Review } from "../types";
 import type { ReviewData } from "./ReviewForm";
+import { cuisineLabel } from "../utils/cuisines";
 
 interface RestaurantDetailProps {
   readonly token: string;
@@ -166,7 +167,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           <h2 className="font-display font-black text-3xl text-stone-50">{restaurant.name}</h2>
           <div className="flex items-center gap-3 mt-2">
             {restaurant.cuisine && (
-              <span className="text-base text-orange-500 font-medium">{restaurant.cuisine}</span>
+              <span className="text-base text-orange-500 font-medium">{cuisineLabel(restaurant.cuisine)}</span>
             )}
             {restaurant.address && (
               <span className="text-base text-stone-500">{restaurant.address}</span>

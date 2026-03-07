@@ -4,6 +4,7 @@ import { Slurms } from "./Slurms";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
 import { SLURMS_QUOTES } from "../utils/personality";
 import { scoreBadgeColor } from "../utils/score";
+import { cuisineLabel } from "../utils/cuisines";
 import type { Restaurant } from "../types";
 
 interface RandomPickerProps {
@@ -145,7 +146,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
               {display.name}
             </p>
             {display.cuisine && (
-              <p className="text-stone-500 text-sm mt-1">{display.cuisine}</p>
+              <p className="text-stone-500 text-sm mt-1">{cuisineLabel(display.cuisine)}</p>
             )}
           </div>
         )}
@@ -164,7 +165,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
             </p>
             {winner.cuisine && (
               <p className="text-orange-500/80 font-medium mt-2">
-                {winner.cuisine}
+                {cuisineLabel(winner.cuisine)}
               </p>
             )}
             {winner.address && (

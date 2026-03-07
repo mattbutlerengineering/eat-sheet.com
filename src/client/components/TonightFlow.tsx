@@ -5,6 +5,7 @@ import { Slurms } from "./Slurms";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
 import { SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { scoreBadgeColor } from "../utils/score";
+import { cuisineLabel } from "../utils/cuisines";
 import { BookmarkButton } from "./BookmarkButton";
 import { TonightModeSelect } from "./TonightModeSelect";
 import type { TonightMode } from "./TonightModeSelect";
@@ -114,7 +115,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
             </h3>
 
             {current.cuisine && (
-              <p className="text-orange-500/80 font-medium mt-1">{current.cuisine}</p>
+              <p className="text-orange-500/80 font-medium mt-1">{cuisineLabel(current.cuisine)}</p>
             )}
 
             {current.address && (
