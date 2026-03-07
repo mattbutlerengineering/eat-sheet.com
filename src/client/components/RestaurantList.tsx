@@ -205,8 +205,8 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         )}
 
         {/* Sort, View & Pick */}
-        <div className="flex items-center justify-between py-2">
-          <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5">
+        <div className="flex items-center justify-between py-2 gap-2 overflow-x-auto scrollbar-none -mx-4 px-4">
+          <div className="flex gap-1 bg-stone-800/50 rounded-lg p-0.5 flex-shrink-0">
             <button
               onClick={() => { setSort("recent"); track("sort_mode_changed", { sort: "recent" }); }}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -256,7 +256,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               </svg>
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => { setShowTonight(true); track("feature_opened", { feature: "tonight" }); }}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-coral-500 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
