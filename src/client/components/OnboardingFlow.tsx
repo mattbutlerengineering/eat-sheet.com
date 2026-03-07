@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 const ONBOARDING_KEY = "eat-sheet-onboarded";
 
@@ -49,7 +49,7 @@ export function OnboardingFlow() {
   return (
     <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center px-6">
       <div className="max-w-sm w-full text-center animate-fade-up" key={step}>
-        <Slurms variant={current.variant} size={80} className="mx-auto" />
+        <Monster variant={current.variant} size={80} className="mx-auto" />
         <h2 className="font-display text-2xl font-black text-orange-500 mt-6">
           {current.title}
         </h2>

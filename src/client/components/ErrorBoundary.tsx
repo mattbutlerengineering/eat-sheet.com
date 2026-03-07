@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 interface Props {
   readonly children: ReactNode;
@@ -34,12 +34,12 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4 px-6 text-center">
-          <Slurms variant="snarky" size={64} />
+          <Monster variant="snarky" size={64} />
           <h2 className="font-display font-bold text-xl text-stone-200">
             Well, that's not great...
           </h2>
           <p className="text-stone-400 text-sm max-w-xs">
-            Something went wrong. Slurms is embarrassed.
+            Something went wrong. Chomps is embarrassed.
           </p>
           <button
             onClick={this.handleRetry}

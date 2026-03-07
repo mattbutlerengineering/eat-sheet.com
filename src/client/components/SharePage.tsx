@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 interface SharedRestaurant {
   readonly name: string;
@@ -40,7 +40,7 @@ export function SharePage() {
   if (loading) {
     return (
       <div className="min-h-dvh bg-stone-950 flex items-center justify-center">
-        <Slurms variant="party" size={48} />
+        <Monster variant="party" size={48} />
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function SharePage() {
   if (error || !data) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3 px-4">
-        <Slurms variant="snarky" size={56} />
+        <Monster variant="snarky" size={56} />
         <p className="text-stone-400 text-center">This share link is no longer available.</p>
       </div>
     );

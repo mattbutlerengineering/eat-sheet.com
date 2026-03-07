@@ -8,7 +8,7 @@ import { BottomNav } from "./components/BottomNav";
 import { OnboardingFlow, isOnboarded } from "./components/OnboardingFlow";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PageViewTracker } from "./components/PageViewTracker";
-import { Slurms } from "./components/Slurms";
+import { Monster } from "./components/Monster";
 import { randomLoadingMessage } from "./utils/personality";
 import { identifyUser, resetUser } from "./utils/analytics";
 
@@ -47,7 +47,7 @@ const InviteHandler = lazy(() =>
 function PageLoader() {
   return (
     <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3" role="status">
-      <Slurms variant="party" size={40} />
+      <Monster variant="party" size={40} />
       <p className="text-stone-500 text-sm italic">{randomLoadingMessage()}</p>
     </div>
   );
@@ -95,7 +95,7 @@ export function App() {
   if (loading) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4" role="status" aria-label="Loading application">
-        <Slurms variant="party" size={56} />
+        <Monster variant="party" size={56} />
         <h1 className="font-display text-3xl font-black text-orange-500 animate-pulse">
           eat sheet
         </h1>

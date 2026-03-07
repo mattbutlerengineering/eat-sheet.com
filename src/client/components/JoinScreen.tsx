@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 import { OAuthButton } from "./OAuthButton";
-import { SLURMS_QUOTES } from "../utils/personality";
+import { CHOMPS_QUOTES } from "../utils/personality";
 import type { OAuthUser } from "../types";
 
 interface JoinScreenProps {
@@ -56,9 +56,9 @@ function Branding() {
       </div>
 
       <div className="flex items-center justify-center gap-3 mb-8 animate-fade-up" style={{ animationDelay: "0.05s" }}>
-        <Slurms variant="welcome" size={48} />
+        <Monster variant="welcome" size={48} />
         <p className="text-stone-400 text-sm italic font-display">
-          {SLURMS_QUOTES.welcome}
+          {CHOMPS_QUOTES.welcome}
         </p>
       </div>
     </>

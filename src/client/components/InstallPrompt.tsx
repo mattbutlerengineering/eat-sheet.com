@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 const DISMISSED_KEY = "eat-sheet-install-dismissed";
 
@@ -51,7 +51,7 @@ export function InstallPrompt() {
       role="banner"
       aria-label="Install app prompt"
     >
-      <Slurms variant="party" size={32} />
+      <Monster variant="party" size={32} />
       <p className="text-stone-200 text-sm flex-1">
         Add <span className="font-bold text-orange-400">Eat Sheet</span> to
         your home screen!
