@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useApi, useFetch } from "../hooks/useApi";
 import { InviteCodePanel } from "./InviteCodePanel";
 import { MemberAvatar } from "./MemberAvatar";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 import { randomLoadingMessage } from "../utils/personality";
 import type { Group } from "../types";
 
@@ -128,7 +128,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
   if (loading) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4 pb-20">
-        <Slurms variant="bored" size={48} />
+        <Monster variant="bored" size={48} />
         <p className="text-stone-500 text-sm italic">{randomLoadingMessage()}</p>
       </div>
     );
@@ -232,7 +232,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
         {/* Groups list */}
         {(!groups || groups.length === 0) && mode === "list" && (
           <div className="text-center py-12">
-            <Slurms variant="bored" size={48} />
+            <Monster variant="bored" size={48} />
             <p className="text-stone-400 text-sm mt-4">
               You're not in any groups yet
             </p>

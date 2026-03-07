@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 interface InviteHandlerProps {
   readonly token: string;
@@ -26,7 +26,7 @@ export function InviteHandler({ token }: InviteHandlerProps) {
   if (error) {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4 px-6">
-        <Slurms variant="snarky" size={56} />
+        <Monster variant="snarky" size={56} />
         <p className="text-stone-300 font-display font-bold text-lg text-center">
           Couldn't join group
         </p>
@@ -43,7 +43,7 @@ export function InviteHandler({ token }: InviteHandlerProps) {
 
   return (
     <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4">
-      <Slurms variant="party" size={48} />
+      <Monster variant="party" size={48} />
       <p className="text-stone-500 text-sm italic">Joining group...</p>
     </div>
   );

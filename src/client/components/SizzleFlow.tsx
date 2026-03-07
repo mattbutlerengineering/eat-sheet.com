@@ -3,8 +3,8 @@ import type { Restaurant } from "../types";
 import { track } from "../utils/analytics";
 import { useApi } from "../hooks/useApi";
 import { OverlayCloseButton } from "./OverlayParts";
-import { Slurms } from "./Slurms";
-import { SLURMS_QUOTES } from "../utils/personality";
+import { Monster } from "./Monster";
+import { CHOMPS_QUOTES } from "../utils/personality";
 import { cuisineEmoji, cuisineLabel } from "../utils/cuisines";
 import { scoreBadgeColor, scoreDisplay } from "../utils/score";
 
@@ -184,9 +184,9 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
       {isEmpty ? (
         /* Empty state */
         <div className="text-center px-6 animate-fade-up">
-          <Slurms variant="party" size={64} className="mx-auto" />
+          <Monster variant="party" size={64} className="mx-auto" />
           <p className="text-stone-300 font-display font-bold text-lg mt-4">
-            {SLURMS_QUOTES.allDone}
+            {CHOMPS_QUOTES.allDone}
           </p>
           <p className="text-stone-500 text-sm mt-2">
             You've swiped through every restaurant!

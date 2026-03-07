@@ -4,7 +4,7 @@ import { useApi, useFetch } from "../hooks/useApi";
 import { parseTakeoutFile } from "../utils/takeout-parser";
 import type { ParsedPlace } from "../utils/takeout-parser";
 import type { Restaurant, ImportResponse } from "../types";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 
 type Phase = "upload" | "preview" | "enriching" | "done";
 
@@ -302,7 +302,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
         {/* Enriching Phase */}
         {phase === "enriching" && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="party" size={48} className="mx-auto" />
+            <Monster variant="party" size={48} className="mx-auto" />
             <p className="text-stone-200 font-display font-bold mt-4">Importing restaurants...</p>
             {enrichProgress.total > 0 && (
               <>
@@ -323,7 +323,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
         {/* Done Phase */}
         {phase === "done" && importResult && (
           <div className="text-center py-16 animate-fade-up">
-            <Slurms variant="party" size={56} className="mx-auto" />
+            <Monster variant="party" size={56} className="mx-auto" />
             <p className="text-stone-200 font-display font-bold text-xl mt-4">
               Imported {importResult.imported} restaurant{importResult.imported !== 1 ? "s" : ""}!
             </p>

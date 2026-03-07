@@ -2,9 +2,9 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { track } from "../utils/analytics";
 import { useApi } from "../hooks/useApi";
-import { Slurms } from "./Slurms";
+import { Monster } from "./Monster";
 import { OverlayCloseButton, BounceDots } from "./OverlayParts";
-import { SLURMS_QUOTES, randomLoadingMessage } from "../utils/personality";
+import { CHOMPS_QUOTES, randomLoadingMessage } from "../utils/personality";
 import { scoreBadgeColor } from "../utils/score";
 import { cuisineLabel } from "../utils/cuisines";
 import { BookmarkButton } from "./BookmarkButton";
@@ -91,7 +91,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
       {/* Phase: Loading */}
       {phase === "loading" && (
         <div className="flex flex-col items-center gap-4">
-          <Slurms variant="party" size={56} />
+          <Monster variant="party" size={56} />
           <p className="text-stone-500 text-sm italic">{loadingMessage}</p>
           <BounceDots />
         </div>
@@ -134,9 +134,9 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
             <p className="text-stone-400 text-sm mt-3 italic">{current.reason}</p>
 
             <div className="flex items-center justify-center gap-2 mt-4">
-              <Slurms variant="celebrate" size={32} />
+              <Monster variant="celebrate" size={32} />
               <span className="text-stone-400 text-sm italic font-display">
-                {SLURMS_QUOTES.pickerWin}
+                {CHOMPS_QUOTES.pickerWin}
               </span>
             </div>
           </div>
@@ -168,9 +168,9 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
       {/* Phase: Empty / Exhausted */}
       {phase === "empty" && (
         <div className="flex flex-col items-center gap-4 animate-fade-up">
-          <Slurms variant="bored" size={56} />
+          <Monster variant="bored" size={56} />
           <p className="text-stone-300 font-display font-bold text-lg text-center">
-            {suggestions.length > 0 ? "That's all we've got!" : SLURMS_QUOTES.empty}
+            {suggestions.length > 0 ? "That's all we've got!" : CHOMPS_QUOTES.empty}
           </p>
           <p className="text-stone-500 text-sm text-center">
             {suggestions.length > 0
