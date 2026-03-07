@@ -4,6 +4,7 @@ import type { Restaurant, Member } from "../types";
 import { useFetch } from "../hooks/useApi";
 // InviteCodePanel moved to GroupsPage
 import { RandomPicker } from "./RandomPicker";
+import { TonightFlow } from "./TonightFlow";
 import { Slurms } from "./Slurms";
 import { SLURMS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/personality";
 import { relativeTime } from "../utils/time";
@@ -21,18 +22,7 @@ interface RestaurantListProps {
 type SortMode = "recent" | "score";
 type ViewMode = "list" | "map";
 
-function scoreDisplay(score: number | null): string {
-  if (score === null) return "—";
-  return score.toFixed(1);
-}
-
-function scoreBadgeColor(score: number | null): string {
-  if (score === null) return "bg-stone-700 text-stone-400";
-  if (score <= 3) return "bg-red-500/20 text-red-500";
-  if (score <= 5) return "bg-amber-500/20 text-amber-500";
-  if (score <= 7) return "bg-amber-400/20 text-amber-400";
-  return "bg-green-500/20 text-green-500";
-}
+import { scoreBadgeColor, scoreDisplay } from "../utils/score";
 
 export function RestaurantList({ token, member }: RestaurantListProps) {
   const navigate = useNavigate();
@@ -44,6 +34,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
   const [showWantToTry, setShowWantToTry] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [showPicker, setShowPicker] = useState(false);
+  const [showTonight, setShowTonight] = useState(false);
   const fabRef = useRef<HTMLAnchorElement>(null);
 
   const bookmarkedIds = useMemo(() => {
@@ -250,31 +241,43 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               </svg>
             </button>
           </div>
-          {filtered.length > 1 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowPicker(true)}
+              onClick={() => setShowTonight(true)}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+              aria-label="Tonight suggestions"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="2" y="2" width="20" height="20" rx="3" />
-                <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-                <circle cx="16" cy="8" r="1.5" fill="currentColor" />
-                <circle cx="8" cy="16" r="1.5" fill="currentColor" />
-                <circle cx="16" cy="16" r="1.5" fill="currentColor" />
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2c1 3 4 6 4 10a4 4 0 01-8 0c0-4 3-7 4-10z" />
               </svg>
-              Pick
+              Tonight
             </button>
-          )}
+            {filtered.length > 1 && (
+              <button
+                onClick={() => setShowPicker(true)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="3" />
+                  <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                  <circle cx="16" cy="8" r="1.5" fill="currentColor" />
+                  <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+                  <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+                Pick
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Loading */}
@@ -436,6 +439,13 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         <RandomPicker
           restaurants={filtered}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {showTonight && (
+        <TonightFlow
+          token={token}
+          onClose={() => setShowTonight(false)}
         />
       )}
     </div>

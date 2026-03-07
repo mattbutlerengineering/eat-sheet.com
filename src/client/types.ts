@@ -120,6 +120,18 @@ export interface ImportResponse {
   readonly results: readonly ImportResult[];
 }
 
+export interface TonightSuggestion {
+  readonly id: string;
+  readonly name: string;
+  readonly cuisine: string | null;
+  readonly address: string | null;
+  readonly photo_url: string | null;
+  readonly avg_score: number | null;
+  readonly review_count: number;
+  readonly user_bookmarked: boolean;
+  readonly reason: string;
+}
+
 export interface NearbyPlace {
   readonly google_place_id: string;
   readonly name: string;
