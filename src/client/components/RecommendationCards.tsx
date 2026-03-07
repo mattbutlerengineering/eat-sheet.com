@@ -123,9 +123,9 @@ export function RecommendationCards({ token }: RecommendationCardsProps) {
             <Link
               key={`${card.key}-${item.id}`}
               to={`/restaurant/${item.id}`}
-              className="flex-shrink-0 w-44 bg-stone-900 border border-stone-800/50 rounded-xl p-3 hover:border-orange-500/30 transition-colors"
+              className="flex-shrink-0 w-44 bg-stone-900 border border-stone-800/50 rounded-xl p-3 hover:border-coral-500/30 transition-colors"
             >
-              <div className="flex items-center gap-1.5 text-orange-500 mb-2">
+              <div className="flex items-center gap-1.5 text-coral-500 mb-2">
                 {card.icon}
                 <span className="text-xs font-medium truncate">{card.label}</span>
               </div>

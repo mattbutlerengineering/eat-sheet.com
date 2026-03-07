@@ -112,7 +112,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
           </p>
           <button
             onClick={onClose}
-            className="mt-4 text-orange-500 font-medium"
+            className="mt-4 text-coral-500 font-medium"
           >
             Close
           </button>
@@ -134,7 +134,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
         relative w-full max-w-sm rounded-2xl p-8 text-center transition-all duration-700 ease-out
         ${
           phase === "result"
-            ? "bg-stone-900 border-2 border-orange-500/40 shadow-[0_0_40px_rgba(249,115,22,0.2)] scale-105"
+            ? "bg-stone-900 border-2 border-coral-500/40 shadow-[0_0_40px_rgba(232,131,110,0.2)] scale-105"
             : "bg-stone-900/80 border border-stone-800/50 scale-100"
         }
       `}
@@ -159,14 +159,14 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
               <img
                 src={winner.photo_url}
                 alt=""
-                className="w-20 h-20 rounded-xl object-cover mx-auto mb-4 ring-2 ring-orange-500/30"
+                className="w-20 h-20 rounded-xl object-cover mx-auto mb-4 ring-2 ring-coral-500/30"
               />
             )}
             <p className="font-display font-black text-3xl text-stone-50">
               {winner.name}
             </p>
             {winner.cuisine && (
-              <p className="text-orange-500/80 font-medium mt-2">
+              <p className="text-coral-500/80 font-medium mt-2">
                 {cuisineLabel(winner.cuisine)}
               </p>
             )}
@@ -210,7 +210,7 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
           </button>
           <button
             onClick={() => { track("picker_result_accepted", { restaurant_id: winner.id }); navigate(`/restaurant/${winner.id}`); }}
-            className="px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-orange-500/25"
+            className="px-6 py-3.5 bg-coral-500 hover:bg-coral-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-coral-500/25"
           >
             Let's go!
           </button>

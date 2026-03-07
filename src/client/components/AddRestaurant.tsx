@@ -133,7 +133,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             <button
               type="button"
               onClick={() => navigate(`/restaurant/${duplicateRestaurant.id}`)}
-              className="text-orange-400 text-sm underline mt-1"
+              className="text-coral-500 text-sm underline mt-1"
             >
               View {duplicateRestaurant.name} &rarr;
             </button>
@@ -148,7 +148,7 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
             id="r-cuisine"
             value={cuisine}
             onChange={(e) => setCuisine(e.target.value)}
-            className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors appearance-none"
+            className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-colors appearance-none"
             style={{ backgroundImage: SELECT_ARROW_SVG, backgroundRepeat: "no-repeat", backgroundPosition: "right 1rem center" }}
           >
             <option value="">Select cuisine...</option>
@@ -182,14 +182,14 @@ export function AddRestaurant({ token }: AddRestaurantProps) {
         <button
           type="submit"
           disabled={submitting || !name.trim() || !!duplicateRestaurant}
-          className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
+          className="w-full py-3.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
         >
           {submitting ? "Adding..." : "Add Restaurant"}
         </button>
 
         <Link
           to="/import"
-          className="flex items-center justify-center gap-2 text-sm text-stone-400 hover:text-orange-400 transition-colors mt-4"
+          className="flex items-center justify-center gap-2 text-sm text-stone-400 hover:text-coral-500 transition-colors mt-4"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />

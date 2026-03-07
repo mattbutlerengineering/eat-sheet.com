@@ -120,7 +120,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
               onClick={() => setVisitedAt(d.value)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 visitedAt === d.value
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                  ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                   : "bg-stone-800 text-stone-400 border border-stone-700 hover:border-stone-600"
               }`}
             >
@@ -133,7 +133,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
           type="date"
           value={visitedAt}
           onChange={(e) => setVisitedAt(e.target.value)}
-          className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
+          className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-colors"
         />
       </div>
 
@@ -147,7 +147,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
           onChange={(e) => setNotes(e.target.value)}
           placeholder="What stood out? Any dishes to remember?"
           rows={3}
-          className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors resize-none"
+          className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-colors resize-none"
         />
       </div>
 
@@ -173,7 +173,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         <button
           type="submit"
           disabled={!isReady}
-          className={`flex-1 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-bold rounded-xl transition-all active:scale-[0.98] ${
+          className={`flex-1 py-3 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 text-white font-bold rounded-xl transition-all active:scale-[0.98] ${
             isReady ? "animate-submit-pulse" : ""
           }`}
         >

@@ -32,12 +32,12 @@ export function TonightModeSelect({ onSelect }: TonightModeSelectProps) {
           <button
             key={mode}
             onClick={() => onSelect(mode)}
-            className="w-full p-6 bg-stone-900 border border-stone-800/50 rounded-2xl text-left hover:border-orange-500/40 hover:bg-stone-900/80 active:scale-[0.98] transition-all group"
+            className="w-full p-6 bg-stone-900 border border-stone-800/50 rounded-2xl text-left hover:border-coral-500/40 hover:bg-stone-900/80 active:scale-[0.98] transition-all group"
           >
             <div className="flex items-center gap-4">
               <Monster variant={monsterVariant} size={44} />
               <div>
-                <p className="font-display font-bold text-lg text-stone-50 group-hover:text-orange-400 transition-colors">
+                <p className="font-display font-bold text-lg text-stone-50 group-hover:text-coral-500 transition-colors">
                   {label}
                 </p>
                 <p className="text-stone-500 text-sm mt-0.5">{description}</p>

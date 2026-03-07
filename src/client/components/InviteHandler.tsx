@@ -33,7 +33,7 @@ export function InviteHandler({ token }: InviteHandlerProps) {
         <p className="text-red-400 text-sm text-center">{error}</p>
         <button
           onClick={() => navigate("/", { replace: true })}
-          className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+          className="mt-4 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
         >
           Go Home
         </button>

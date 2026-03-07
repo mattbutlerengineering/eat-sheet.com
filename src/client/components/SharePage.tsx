@@ -62,7 +62,7 @@ export function SharePage() {
     <div className="min-h-dvh bg-stone-950 px-4 py-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
-          <h1 className="font-display text-2xl font-black text-orange-500 italic">eat sheet</h1>
+          <h1 className="font-display text-2xl font-black text-coral-500 italic">eat sheet</h1>
         </div>
 
         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6">
@@ -72,7 +72,7 @@ export function SharePage() {
                 <img src={r.photo_url} alt={r.name} className="w-full h-48 object-cover rounded-lg mb-4" />
               )}
               <h2 className="font-display font-bold text-2xl text-stone-50">{r.name}</h2>
-              {r.cuisine && <p className="text-orange-500 text-sm mt-1">{r.cuisine}</p>}
+              {r.cuisine && <p className="text-coral-500 text-sm mt-1">{r.cuisine}</p>}
               {r.address && <p className="text-stone-500 text-sm mt-1">{r.address}</p>}
               {r.avg_score !== null && (
                 <div className="mt-4 flex items-baseline gap-2">
@@ -84,13 +84,13 @@ export function SharePage() {
           ) : (
             <>
               <h2 className="font-display font-bold text-xl text-stone-50">{rv.restaurant_name}</h2>
-              {rv.restaurant_cuisine && <p className="text-orange-500 text-sm mt-1">{rv.restaurant_cuisine}</p>}
+              {rv.restaurant_cuisine && <p className="text-coral-500 text-sm mt-1">{rv.restaurant_cuisine}</p>}
               <div className="mt-3 flex items-baseline gap-2">
                 <span className="font-display font-black text-3xl text-green-500">{rv.overall_score}</span>
                 <span className="text-stone-500">/ 10</span>
               </div>
               {rv.notes && (
-                <div className="mt-3 bg-stone-800/40 rounded-lg p-3 border-l-2 border-orange-500/30">
+                <div className="mt-3 bg-stone-800/40 rounded-lg p-3 border-l-2 border-coral-500/30">
                   <p className="text-stone-300 italic">{rv.notes}</p>
                 </div>
               )}
@@ -103,7 +103,7 @@ export function SharePage() {
 
         <div className="text-center mt-8">
           <p className="text-stone-500 text-sm mb-3">Rate restaurants with your family</p>
-          <a href="/" className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+          <a href="/" className="inline-block bg-coral-500 hover:bg-coral-600 text-white font-bold px-6 py-3 rounded-xl transition-colors">
             Join Eat Sheet
           </a>
         </div>

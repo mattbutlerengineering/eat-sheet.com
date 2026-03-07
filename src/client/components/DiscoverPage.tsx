@@ -124,7 +124,7 @@ function DiscoverCard({
         {isAdded ? (
           <button
             onClick={onReview}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-coral-500/20 text-coral-500 hover:bg-coral-500/30 active:scale-95 transition-colors"
           >
             Review
           </button>
@@ -133,7 +133,7 @@ function DiscoverCard({
             onClick={onAdd}
             disabled={adding}
             aria-label={`Add ${place.name}`}
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 active:scale-95"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-coral-500/20 text-coral-500 hover:bg-coral-500/30 active:scale-95"
           >
             {adding ? (
               <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -305,7 +305,7 @@ function NearbyContent({ token }: { readonly token: string }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search nearby..."
-                className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
               />
               {hasFilters && (
                 <button
@@ -324,7 +324,7 @@ function NearbyContent({ token }: { readonly token: string }) {
                 onClick={() => setCuisineFilter(null)}
                 className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                   cuisineFilter === null
-                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                     : "bg-stone-800 text-stone-400 border border-stone-700"
                 }`}
               >
@@ -336,7 +336,7 @@ function NearbyContent({ token }: { readonly token: string }) {
                   onClick={() => setCuisineFilter(cuisineFilter === c ? null : c)}
                   className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                     cuisineFilter === c
-                      ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                      ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                       : "bg-stone-800 text-stone-400 border border-stone-700"
                   }`}
                 >
@@ -364,7 +364,7 @@ function NearbyContent({ token }: { readonly token: string }) {
           <p className="text-stone-400 text-sm">{geo.message}</p>
           <button
             onClick={request}
-            className="mt-4 text-orange-500 text-sm font-medium hover:text-orange-400"
+            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-500"
           >
             Try again
           </button>
@@ -386,7 +386,7 @@ function NearbyContent({ token }: { readonly token: string }) {
           <p className="text-red-400 text-sm">{error}</p>
           <button
             onClick={handleRefresh}
-            className="mt-4 text-orange-500 text-sm font-medium hover:text-orange-400"
+            className="mt-4 text-coral-500 text-sm font-medium hover:text-coral-500"
           >
             Retry
           </button>
@@ -405,7 +405,7 @@ function NearbyContent({ token }: { readonly token: string }) {
               <p className="text-stone-400 text-sm">No matches found</p>
               <button
                 onClick={clearFilters}
-                className="text-orange-500 text-sm font-medium mt-3 hover:text-orange-400"
+                className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-500"
               >
                 Clear filters
               </button>
@@ -457,7 +457,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
 
   return (
     <div className="max-w-lg mx-auto px-4 pt-6 pb-4">
-      <h1 className="font-display text-2xl font-black text-orange-500 mb-4">Discover</h1>
+      <h1 className="font-display text-2xl font-black text-coral-500 mb-4">Discover</h1>
 
       {/* Segmented Control */}
       <div className="flex bg-stone-900 rounded-xl p-1 mb-4">
@@ -465,7 +465,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
           onClick={() => handleTabChange("activity")}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
             activeTab === "activity"
-              ? "bg-orange-500 text-white"
+              ? "bg-coral-500 text-white"
               : "text-stone-400 hover:text-stone-200"
           }`}
         >
@@ -475,7 +475,7 @@ export function DiscoverPage({ token }: DiscoverPageProps) {
           onClick={() => handleTabChange("nearby")}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
             activeTab === "nearby"
-              ? "bg-orange-500 text-white"
+              ? "bg-coral-500 text-white"
               : "text-stone-400 hover:text-stone-200"
           }`}
         >

@@ -18,7 +18,7 @@ const FLOATING_FOOD = [
 ] as const;
 
 const INPUT_CLASS =
-  "w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 focus:shadow-[0_0_12px_rgba(249,115,22,0.15)] transition-all";
+  "w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 focus:shadow-[0_0_12px_rgba(232,131,110,0.15)] transition-all";
 
 function FloatingFood() {
   return (
@@ -47,7 +47,7 @@ function Branding() {
   return (
     <>
       <div className="text-center mb-10 animate-fade-up">
-        <h1 className="font-display text-6xl font-black text-orange-500 tracking-tight italic">
+        <h1 className="font-display text-6xl font-black text-coral-500 tracking-tight italic">
           eat sheet
         </h1>
         <p className="mt-3 text-stone-400 font-body text-sm tracking-widest uppercase">
@@ -126,7 +126,7 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
             style={{ animationDelay: "0.1s" }}
           >
             <div className="bg-stone-900 rounded-xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-lg">
+              <div className="w-10 h-10 rounded-full bg-coral-500/20 flex items-center justify-center text-coral-500 font-bold text-lg">
                 {pendingRegistration.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -155,7 +155,7 @@ export function JoinScreen({ pendingRegistration, registrationToken, onRegister 
             <button
               type="submit"
               disabled={submitting || !inviteCode.trim()}
-              className="btn-shimmer w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
+              className="btn-shimmer w-full py-3.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
             >
               {submitting ? "Joining..." : "Join Group"}
             </button>

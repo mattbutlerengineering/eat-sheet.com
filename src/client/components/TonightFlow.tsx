@@ -79,10 +79,10 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
 
       {/* Title */}
       <div className="flex items-center gap-2 mb-8">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-coral-500">
           <path d="M12 2c1 3 4 6 4 10a4 4 0 01-8 0c0-4 3-7 4-10z" />
         </svg>
-        <h2 className="font-display font-black text-xl text-orange-500 italic">Tonight</h2>
+        <h2 className="font-display font-black text-xl text-coral-500 italic">Tonight</h2>
       </div>
 
       {/* Phase: Mode Select */}
@@ -109,7 +109,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
               <img
                 src={current.photo_url}
                 alt=""
-                className="w-20 h-20 rounded-xl object-cover mx-auto mb-4 ring-2 ring-orange-500/30"
+                className="w-20 h-20 rounded-xl object-cover mx-auto mb-4 ring-2 ring-coral-500/30"
               />
             )}
 
@@ -118,7 +118,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
             </h3>
 
             {current.cuisine && (
-              <p className="text-orange-500/80 font-medium mt-1">{cuisineLabel(current.cuisine)}</p>
+              <p className="text-coral-500/80 font-medium mt-1">{cuisineLabel(current.cuisine)}</p>
             )}
 
             {current.address && (
@@ -157,7 +157,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
             />
             <button
               onClick={() => { track("tonight_suggestion_accepted", { restaurant_id: current.id }); navigate(`/restaurant/${current.id}`); }}
-              className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-orange-500/25"
+              className="px-5 py-3 bg-coral-500 hover:bg-coral-600 text-white font-bold rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-coral-500/25"
             >
               Let's go!
             </button>

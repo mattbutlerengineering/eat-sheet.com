@@ -102,7 +102,7 @@ export function MultiPhotoUpload({ token, photoUrls, onPhotosChanged, maxPhotos 
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="w-full py-3 border-2 border-dashed border-stone-700 hover:border-orange-500/50 rounded-xl text-stone-400 hover:text-stone-300 transition-colors disabled:opacity-40"
+          className="w-full py-3 border-2 border-dashed border-stone-700 hover:border-coral-500/50 rounded-xl text-stone-400 hover:text-stone-300 transition-colors disabled:opacity-40"
         >
           {uploading
             ? "Uploading..."

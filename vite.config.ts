@@ -35,7 +35,7 @@ export default defineConfig({
         name: "Eat Sheet",
         short_name: "EatSheet",
         description: "Family restaurant rating app",
-        theme_color: "#f97316",
+        theme_color: "#E8836E",
         background_color: "#1c1917",
         display: "standalone",
         scope: "/",

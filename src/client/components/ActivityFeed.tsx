@@ -42,7 +42,7 @@ export function ActivityFeed({ token, embedded = false }: ActivityFeedProps) {
       {!embedded && (
         <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
           <div className="px-4 py-4">
-            <h1 className="font-display text-xl font-black text-orange-500 italic">Activity</h1>
+            <h1 className="font-display text-xl font-black text-coral-500 italic">Activity</h1>
           </div>
         </header>
       )}

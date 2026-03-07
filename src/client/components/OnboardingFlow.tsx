@@ -50,7 +50,7 @@ export function OnboardingFlow() {
     <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center px-6">
       <div className="max-w-sm w-full text-center animate-fade-up" key={step}>
         <Monster variant={current.variant} size={80} className="mx-auto" />
-        <h2 className="font-display text-2xl font-black text-orange-500 mt-6">
+        <h2 className="font-display text-2xl font-black text-coral-500 mt-6">
           {current.title}
         </h2>
         <p className="text-stone-400 text-sm mt-3 leading-relaxed">
@@ -59,7 +59,7 @@ export function OnboardingFlow() {
 
         <button
           onClick={isLast ? complete : () => setStep(step + 1)}
-          className="mt-8 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all"
+          className="mt-8 w-full bg-coral-500 hover:bg-coral-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-all"
         >
           {current.cta}
         </button>
@@ -77,7 +77,7 @@ export function OnboardingFlow() {
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition-colors ${
-                i === step ? "bg-orange-500" : "bg-stone-700"
+                i === step ? "bg-coral-500" : "bg-stone-700"
               }`}
             />
           ))}

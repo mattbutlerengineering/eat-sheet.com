@@ -15,7 +15,7 @@ describe("PWA manifest config", () => {
 
   it("vite.config.ts has theme and background colors", async () => {
     const config = readFileSync(resolve(ROOT, "vite.config.ts"), "utf-8");
-    expect(config).toContain('"#f97316"');
+    expect(config).toContain('"#E8836E"');
     expect(config).toContain('"#1c1917"');
     expect(config).toContain('"standalone"');
   });
@@ -23,7 +23,7 @@ describe("PWA manifest config", () => {
   it("index.html has theme-color meta and apple-touch-icon", async () => {
     const html = readFileSync(resolve(ROOT, "index.html"), "utf-8");
     expect(html).toContain('name="theme-color"');
-    expect(html).toContain('content="#f97316"');
+    expect(html).toContain('content="#E8836E"');
     expect(html).toContain('rel="apple-touch-icon"');
     expect(html).toContain("apple-touch-icon.png");
   });

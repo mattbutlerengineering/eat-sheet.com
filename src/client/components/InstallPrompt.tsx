@@ -53,12 +53,12 @@ export function InstallPrompt() {
     >
       <Monster variant="party" size={32} />
       <p className="text-stone-200 text-sm flex-1">
-        Add <span className="font-bold text-orange-400">Eat Sheet</span> to
+        Add <span className="font-bold text-coral-500">Eat Sheet</span> to
         your home screen!
       </p>
       <button
         onClick={handleInstall}
-        className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-lg hover:bg-orange-600 active:scale-95 transition-all"
+        className="bg-coral-500 text-white text-sm font-bold px-3 py-1 rounded-lg hover:bg-coral-600 active:scale-95 transition-all"
       >
         Install
       </button>

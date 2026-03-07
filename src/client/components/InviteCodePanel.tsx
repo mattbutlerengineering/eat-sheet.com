@@ -53,7 +53,7 @@ export function InviteCodePanel({ token, groupId, onClose }: InviteCodePanelProp
         ) : (
           <>
             <div className="flex items-center gap-3 mb-4">
-              <code className="flex-1 bg-stone-800 text-orange-400 font-mono text-xl font-bold text-center py-3 rounded-xl tracking-widest">
+              <code className="flex-1 bg-stone-800 text-coral-500 font-mono text-xl font-bold text-center py-3 rounded-xl tracking-widest">
                 {code}
               </code>
               <button

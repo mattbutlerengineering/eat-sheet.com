@@ -191,7 +191,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
             <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 space-y-3">
               <h2 className="font-display font-bold text-stone-50">How to export your saved places</h2>
               <ol className="text-sm text-stone-400 space-y-2 list-decimal list-inside">
-                <li>Go to <span className="text-orange-400">takeout.google.com</span></li>
+                <li>Go to <span className="text-coral-500">takeout.google.com</span></li>
                 <li>Click &quot;Deselect all&quot;, then select only <span className="text-stone-200">Maps (Your Places)</span></li>
                 <li>Export and download the archive</li>
                 <li>Unzip and find <span className="text-stone-200">Saved Places.json</span></li>
@@ -199,7 +199,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
             </div>
 
             <label className="block cursor-pointer">
-              <div className="border-2 border-dashed border-stone-700 hover:border-orange-500/50 rounded-xl p-8 text-center transition-colors">
+              <div className="border-2 border-dashed border-stone-700 hover:border-coral-500/50 rounded-xl p-8 text-center transition-colors">
                 <svg className="mx-auto mb-3 text-stone-500" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
@@ -236,7 +236,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
               </div>
               <button
                 onClick={toggleAll}
-                className="text-sm text-orange-400 hover:text-orange-300 font-medium"
+                className="text-sm text-coral-500 hover:text-orange-300 font-medium"
               >
                 {selected.size === parsedPlaces.length ? "Deselect All" : "Select All"}
               </button>
@@ -252,14 +252,14 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
                     onClick={() => toggleSelect(i)}
                     className={`w-full text-left p-3 rounded-xl border transition-colors ${
                       selected.has(i)
-                        ? "bg-orange-500/10 border-orange-500/30"
+                        ? "bg-coral-500/10 border-coral-500/30"
                         : "bg-stone-900 border-stone-800/50"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                         selected.has(i)
-                          ? "border-orange-500 bg-orange-500"
+                          ? "border-coral-500 bg-coral-500"
                           : "border-stone-600"
                       }`}>
                         {selected.has(i) && (
@@ -292,7 +292,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
             <button
               onClick={handleImport}
               disabled={selected.size === 0}
-              className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
+              className="w-full py-3.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all active:scale-[0.98]"
             >
               Import Selected ({selected.size})
             </button>
@@ -311,7 +311,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
                 </p>
                 <div className="mt-4 mx-auto max-w-xs bg-stone-800 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-orange-500 h-full rounded-full transition-all duration-300"
+                    className="bg-coral-500 h-full rounded-full transition-all duration-300"
                     style={{ width: `${enrichProgress.total > 0 ? (enrichProgress.current / enrichProgress.total) * 100 : 0}%` }}
                   />
                 </div>
@@ -351,7 +351,7 @@ export function ImportRestaurants({ token }: ImportRestaurantsProps) {
 
             <button
               onClick={() => navigate("/")}
-              className="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+              className="mt-6 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
             >
               View All Restaurants
             </button>

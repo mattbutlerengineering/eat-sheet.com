@@ -39,7 +39,7 @@ export function BookmarkButton({ token, restaurantId, isBookmarked, onToggled }:
       aria-pressed={isBookmarked}
       className={`p-1.5 rounded-lg transition-all ${
         isBookmarked
-          ? "text-orange-400 hover:text-orange-300"
+          ? "text-coral-500 hover:text-orange-300"
           : "text-stone-500 hover:text-stone-300"
       } ${toggling ? "opacity-50" : ""}`}
     >

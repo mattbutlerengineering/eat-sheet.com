@@ -170,7 +170,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           <h2 className="font-display font-black text-3xl text-stone-50">{restaurant.name}</h2>
           <div className="flex items-center gap-3 mt-2">
             {restaurant.cuisine && (
-              <span className="text-base text-orange-500 font-medium">{cuisineLabel(restaurant.cuisine)}</span>
+              <span className="text-base text-coral-500 font-medium">{cuisineLabel(restaurant.cuisine)}</span>
             )}
             {restaurant.address && (
               <span className="text-base text-stone-500">{restaurant.address}</span>
@@ -297,7 +297,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full py-3.5 mb-6 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all active:scale-[0.98]"
+            className="w-full py-3.5 mb-6 bg-coral-500 hover:bg-coral-600 text-white font-bold rounded-xl transition-all active:scale-[0.98]"
           >
             {myReview ? "Edit Your Review" : "Add Your Review"}
           </button>
@@ -382,7 +382,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
 
                 {/* Notes — styled as handwritten note */}
                 {review.notes && (
-                  <div className="mt-3 bg-stone-800/40 rounded-lg p-3 border-l-2 border-orange-500/30">
+                  <div className="mt-3 bg-stone-800/40 rounded-lg p-3 border-l-2 border-coral-500/30">
                     <p className="text-base text-stone-300 leading-relaxed italic">{review.notes}</p>
                   </div>
                 )}

@@ -14,7 +14,7 @@ function StatCard({ label, value }: { readonly label: string; readonly value: nu
   const animated = useCountUp(value) ?? 0;
   return (
     <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-5 text-center animate-fade-up">
-      <p className="font-display font-black text-4xl text-orange-500">{animated}</p>
+      <p className="font-display font-black text-4xl text-coral-500">{animated}</p>
       <p className="text-stone-400 text-sm mt-1 uppercase tracking-wider">{label}</p>
     </div>
   );
@@ -27,7 +27,7 @@ function CuisineBar({ cuisine, count, maxCount }: { readonly cuisine: string; re
       <span className="text-stone-300 text-sm w-28 truncate flex-shrink-0">{cuisineLabel(cuisine)}</span>
       <div className="flex-1 h-4 bg-stone-800 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full animate-bar-fill"
+          className="h-full bg-gradient-to-r from-coral-500 to-amber-400 rounded-full animate-bar-fill"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -54,7 +54,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
       <div className="min-h-dvh bg-stone-950 pb-20">
         <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
           <div className="px-4 py-4">
-            <h1 className="font-display text-xl font-black text-orange-500 italic">Stats</h1>
+            <h1 className="font-display text-xl font-black text-coral-500 italic">Stats</h1>
           </div>
         </header>
         <div className="flex flex-col items-center py-12">
@@ -70,7 +70,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
       <div className="min-h-dvh bg-stone-950 pb-20">
         <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
           <div className="px-4 py-4">
-            <h1 className="font-display text-xl font-black text-orange-500 italic">Stats</h1>
+            <h1 className="font-display text-xl font-black text-coral-500 italic">Stats</h1>
           </div>
         </header>
         <div className="flex flex-col items-center py-16">
@@ -86,7 +86,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
       <div className="min-h-dvh bg-stone-950 pb-20">
         <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
           <div className="px-4 py-4">
-            <h1 className="font-display text-xl font-black text-orange-500 italic">Stats</h1>
+            <h1 className="font-display text-xl font-black text-coral-500 italic">Stats</h1>
           </div>
         </header>
         <div className="flex flex-col items-center py-16 px-6 animate-fade-up">
@@ -99,11 +99,11 @@ export function FamilyStats({ token }: FamilyStatsProps) {
           </p>
           <div className="mt-6 grid grid-cols-2 gap-3 w-full max-w-xs opacity-30">
             <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 text-center">
-              <p className="font-display font-black text-3xl text-orange-500">0</p>
+              <p className="font-display font-black text-3xl text-coral-500">0</p>
               <p className="text-stone-500 text-xs uppercase">Restaurants</p>
             </div>
             <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4 text-center">
-              <p className="font-display font-black text-3xl text-orange-500">0</p>
+              <p className="font-display font-black text-3xl text-coral-500">0</p>
               <p className="text-stone-500 text-xs uppercase">Reviews</p>
             </div>
           </div>
@@ -123,7 +123,7 @@ export function FamilyStats({ token }: FamilyStatsProps) {
     <div className="min-h-dvh bg-stone-950 pb-20">
       <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
         <div className="px-4 py-4">
-          <h1 className="font-display text-xl font-black text-orange-500 italic">Stats</h1>
+          <h1 className="font-display text-xl font-black text-coral-500 italic">Stats</h1>
         </div>
       </header>
 

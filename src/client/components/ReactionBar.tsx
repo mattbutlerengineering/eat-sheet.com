@@ -79,13 +79,13 @@ export function ReactionBar({ token, reviewId, memberId, reactions, onReacted }:
             aria-pressed={isActive}
             className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all ${
               isActive
-                ? "bg-orange-500/20 border border-orange-500/40"
+                ? "bg-coral-500/20 border border-coral-500/40"
                 : "bg-stone-800/60 border border-stone-700/50 hover:border-stone-600"
             } ${isPop ? "score-pop" : ""}`}
           >
             <span className="text-sm">{EMOJI_MAP[key]}</span>
             {count > 0 && (
-              <span className={`font-medium ${isActive ? "text-orange-400" : "text-stone-400"}`}>
+              <span className={`font-medium ${isActive ? "text-coral-500" : "text-stone-400"}`}>
                 {count}
               </span>
             )}

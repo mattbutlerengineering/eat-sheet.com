@@ -96,7 +96,7 @@ export function App() {
     return (
       <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-4" role="status" aria-label="Loading application">
         <Monster variant="party" size={56} />
-        <h1 className="font-display text-3xl font-black text-orange-500 animate-pulse">
+        <h1 className="font-display text-3xl font-black text-coral-500 animate-pulse">
           eat sheet
         </h1>
         <p className="text-stone-500 text-sm italic">{randomLoadingMessage()}</p>

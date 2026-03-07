@@ -134,7 +134,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
       <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800/50 px-4 py-3">
-        <h1 className="font-display text-xl font-black text-orange-500">Profile</h1>
+        <h1 className="font-display text-xl font-black text-coral-500">Profile</h1>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-4 space-y-6">
@@ -152,7 +152,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                       value={nameInput}
                       onChange={(e) => setNameInput(e.target.value)}
                       maxLength={50}
-                      className="flex-1 bg-stone-800 text-stone-50 text-sm px-3 py-2 rounded-lg border border-stone-700 focus:border-orange-500 focus:outline-none"
+                      className="flex-1 bg-stone-800 text-stone-50 text-sm px-3 py-2 rounded-lg border border-stone-700 focus:border-coral-500 focus:outline-none"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSaveName();
@@ -162,7 +162,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                     <button
                       onClick={handleSaveName}
                       disabled={saving || !nameInput.trim()}
-                      className="bg-orange-500 text-white text-sm font-bold px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                      className="bg-coral-500 text-white text-sm font-bold px-3 py-2 rounded-lg hover:bg-coral-600 disabled:opacity-50 transition-colors"
                     >
                       {saving ? "..." : "Save"}
                     </button>
@@ -179,7 +179,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                       <span className="text-stone-50 font-bold">{me?.name ?? member.name}</span>
                       <button
                         onClick={() => setEditing(true)}
-                        className="ml-auto text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                        className="ml-auto text-sm text-coral-500 hover:text-orange-300 transition-colors"
                       >
                         Edit
                       </button>
@@ -201,26 +201,26 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
             <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider">Your Stats</h2>
             <button
               onClick={() => navigate("/stats")}
-              className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+              className="text-xs text-coral-500 hover:text-orange-300 transition-colors"
             >
               View all stats
             </button>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-stone-900 rounded-2xl p-4 text-center">
-              <p className="font-display font-black text-2xl text-orange-500">
+              <p className="font-display font-black text-2xl text-coral-500">
                 {stats?.total_restaurants ?? "—"}
               </p>
               <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Restaurants</p>
             </div>
             <div className="bg-stone-900 rounded-2xl p-4 text-center">
-              <p className="font-display font-black text-2xl text-orange-500">
+              <p className="font-display font-black text-2xl text-coral-500">
                 {stats?.total_reviews ?? "—"}
               </p>
               <p className="text-stone-500 text-xs mt-1 uppercase tracking-wider">Reviews</p>
             </div>
             <div className="bg-stone-900 rounded-2xl p-4 text-center">
-              <p className="font-display font-black text-2xl text-orange-500">
+              <p className="font-display font-black text-2xl text-coral-500">
                 {stats?.category_averages.food != null
                   ? stats.category_averages.food.toFixed(1)
                   : "—"}
@@ -248,7 +248,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                   <button
                     onClick={handleEnrich}
                     disabled={enriching}
-                    className="bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                    className="bg-coral-500 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-coral-600 disabled:opacity-50 transition-colors"
                   >
                     {enriching ? "Enriching..." : "Enrich"}
                   </button>
@@ -321,7 +321,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
             </div>
             <button
               onClick={handleClearCache}
-              className="w-full px-4 py-3 text-left text-stone-300 text-sm hover:text-orange-400 transition-colors"
+              className="w-full px-4 py-3 text-left text-stone-300 text-sm hover:text-coral-500 transition-colors"
             >
               Clear Cache & Reload
             </button>

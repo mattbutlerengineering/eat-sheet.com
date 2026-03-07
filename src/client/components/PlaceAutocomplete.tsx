@@ -213,12 +213,12 @@ export function PlaceAutocomplete({ token, onSelect, onManualInput, initialValue
         aria-activedescendant={activeIndex >= 0 ? `place-option-${activeIndex}` : undefined}
         aria-autocomplete="list"
         aria-label="Restaurant name"
-        className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-colors"
+        className="w-full px-4 py-3.5 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-colors"
       />
 
       {loading && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-coral-500 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
@@ -239,7 +239,7 @@ export function PlaceAutocomplete({ token, onSelect, onManualInput, initialValue
               onMouseEnter={() => setActiveIndex(i)}
               className={`px-4 py-3 cursor-pointer transition-colors ${
                 i === activeIndex
-                  ? "bg-orange-500/20 text-stone-50"
+                  ? "bg-coral-500/20 text-stone-50"
                   : "text-stone-300 hover:bg-stone-700/50"
               }`}
             >

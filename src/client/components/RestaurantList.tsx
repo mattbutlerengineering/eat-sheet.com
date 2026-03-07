@@ -114,7 +114,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
         <div className="px-4 py-4 flex items-center justify-between">
-          <h1 className="font-display text-xl font-black text-orange-500 italic">eat sheet</h1>
+          <h1 className="font-display text-xl font-black text-coral-500 italic">eat sheet</h1>
           <div className="flex items-center gap-3">
             <span className="text-base text-stone-400">{member.name}</span>
             <button
@@ -147,7 +147,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               value={search}
               onChange={(e) => { setSearch(e.target.value); trackSearch(e.target.value); }}
               placeholder="Search restaurants..."
-              className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-orange-500/50 transition-colors"
+              className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
             />
             {hasFilters && (
               <button
@@ -167,7 +167,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               onClick={() => { setCuisineFilter(null); setShowWantToTry(false); }}
               className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 cuisineFilter === null && !showWantToTry
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                  ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                   : "bg-stone-800 text-stone-400 border border-stone-700"
               }`}
             >
@@ -178,7 +178,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
                 onClick={() => setShowWantToTry(!showWantToTry)}
                 className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
                   showWantToTry
-                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                     : "bg-stone-800 text-stone-400 border border-stone-700"
                 }`}
               >
@@ -194,7 +194,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
                 onClick={() => { const next = cuisineFilter === c ? null : c; setCuisineFilter(next); if (next) track("cuisine_filter_applied", { cuisine: next }); }}
                 className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                   cuisineFilter === c
-                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
                     : "bg-stone-800 text-stone-400 border border-stone-700"
                 }`}
               >
@@ -259,7 +259,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setShowTonight(true); track("feature_opened", { feature: "tonight" }); }}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-coral-500 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
               aria-label="Tonight suggestions"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -270,7 +270,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             {filtered.length > 1 && (
               <button
                 onClick={() => { setShowSizzle(true); track("feature_opened", { feature: "sizzle" }); }}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-coral-500 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
                 aria-label="Sizzle or Fizzle"
               >
                 🔥 Sizzle
@@ -279,7 +279,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             {filtered.length > 1 && (
               <button
                 onClick={() => { setShowPicker(true); track("feature_opened", { feature: "picker" }); }}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-orange-400 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-coral-500 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
               >
                 <svg
                   width="16"
@@ -325,7 +325,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             <p className="text-stone-500 text-sm mt-2">{error}</p>
             <button
               onClick={refresh}
-              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+              className="mt-4 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
             >
               Try Again
             </button>
@@ -342,13 +342,13 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             <p className="text-stone-500 text-sm mt-2">Add a restaurant to get this party started</p>
             <Link
               to="/add"
-              className="inline-block mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+              className="inline-block mt-4 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
             >
               Add Your First Restaurant
             </Link>
             <p className="text-stone-500 text-sm mt-3">
               or{" "}
-              <Link to="/import" className="text-orange-400 hover:text-orange-300 underline">
+              <Link to="/import" className="text-coral-500 hover:text-orange-300 underline">
                 import from Google Maps
               </Link>
             </p>
@@ -364,7 +364,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
             </p>
             <button
               onClick={clearFilters}
-              className="text-orange-500 text-sm font-medium mt-3 hover:text-orange-400"
+              className="text-coral-500 text-sm font-medium mt-3 hover:text-coral-500"
             >
               Clear filters
             </button>
@@ -426,7 +426,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
                       {(restaurant.bookmark_count ?? 0) > 0 && (
                         <>
                           <span>·</span>
-                          <span className="text-orange-500/70">
+                          <span className="text-coral-500/70">
                             🔖 {restaurant.bookmark_count} {restaurant.bookmark_count === 1 ? "wants" : "want"} to try
                           </span>
                         </>
@@ -454,7 +454,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       <Link
         ref={fabRef}
         to="/add"
-        className="fixed bottom-20 right-6 w-14 h-14 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition-all z-30"
+        className="fixed bottom-20 right-6 w-14 h-14 bg-coral-500 hover:bg-coral-600 rounded-full flex items-center justify-center shadow-lg shadow-coral-500/30 active:scale-95 transition-all z-30"
       >
         <span className="text-2xl text-white leading-none">+</span>
       </Link>

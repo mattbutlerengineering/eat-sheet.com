@@ -177,7 +177,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
       <OverlayCloseButton onClick={handleClose} />
 
       {/* Title */}
-      <h2 className="font-display text-2xl font-black text-orange-500 italic mb-6">
+      <h2 className="font-display text-2xl font-black text-coral-500 italic mb-6">
         Sizzle or Fizzle
       </h2>
 
@@ -193,7 +193,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
           </p>
           <button
             onClick={handleClose}
-            className="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
+            className="mt-6 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
           >
             Back to Eats
           </button>
@@ -297,7 +297,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
             <button
               onClick={() => handleVerdict("sizzle")}
               disabled={!!verdict || exiting}
-              className="w-16 h-16 rounded-full bg-stone-800 border-2 border-green-500/30 text-orange-400 hover:bg-green-500/10 active:scale-90 transition-all flex items-center justify-center disabled:opacity-50 text-3xl"
+              className="w-16 h-16 rounded-full bg-stone-800 border-2 border-green-500/30 text-coral-500 hover:bg-green-500/10 active:scale-90 transition-all flex items-center justify-center disabled:opacity-50 text-3xl"
               aria-label="Sizzle — bookmark restaurant"
             >
               🔥

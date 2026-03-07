@@ -17,7 +17,7 @@ interface GroupMemberInfo {
 }
 
 const INPUT_CLASS =
-  "w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all";
+  "w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-all";
 
 export function GroupsPage({ token }: GroupsPageProps) {
   const { post, del } = useApi(token);
@@ -137,7 +137,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
   return (
     <div className="min-h-dvh bg-stone-950 pb-24">
       <header className="sticky top-0 z-30 bg-stone-950/95 backdrop-blur-md border-b border-stone-800/50 px-4 py-3">
-        <h1 className="font-display text-xl font-black text-orange-500">Groups</h1>
+        <h1 className="font-display text-xl font-black text-coral-500">Groups</h1>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
@@ -152,7 +152,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
           <div className="flex gap-2">
             <button
               onClick={() => { setMode("create"); setError(null); }}
-              className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors active:scale-[0.98]"
+              className="flex-1 py-3 bg-coral-500 hover:bg-coral-600 text-white font-bold rounded-xl transition-colors active:scale-[0.98]"
             >
               Create Group
             </button>
@@ -182,7 +182,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
               <button
                 type="submit"
                 disabled={submitting || !name.trim()}
-                className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
+                className="flex-1 py-2.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
               >
                 {submitting ? "Creating..." : "Create"}
               </button>
@@ -214,7 +214,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
               <button
                 type="submit"
                 disabled={submitting || !inviteCode.trim()}
-                className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
+                className="flex-1 py-2.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-40 text-white font-bold rounded-xl transition-colors"
               >
                 {submitting ? "Joining..." : "Join"}
               </button>
@@ -252,7 +252,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-stone-50 font-bold">{group.name}</span>
                   {group.is_admin && (
-                    <span className="text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold uppercase bg-coral-500/20 text-coral-500 px-1.5 py-0.5 rounded">
                       Admin
                     </span>
                   )}
@@ -278,7 +278,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
                         <MemberAvatar name={m.name} size="sm" />
                         <span className="text-stone-300 text-sm flex-1">{m.name}</span>
                         {m.is_admin && (
-                          <span className="text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-bold uppercase bg-coral-500/20 text-coral-500 px-1.5 py-0.5 rounded">
                             Admin
                           </span>
                         )}
@@ -316,7 +316,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
                   {group.is_admin && (
                     <button
                       onClick={() => setShowInviteCode(group.id)}
-                      className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                      className="text-sm text-coral-500 hover:text-orange-300 transition-colors"
                     >
                       Invite Code
                     </button>
