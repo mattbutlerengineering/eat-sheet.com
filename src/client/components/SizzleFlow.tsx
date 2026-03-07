@@ -70,6 +70,11 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
     return () => timersRef.current.forEach(clearTimeout);
   }, []);
 
+  const handleClose = useCallback(() => {
+    track("feature_closed", { feature: "sizzle", cards_swiped: index });
+    onClose();
+  }, [index, onClose]);
+
   const advanceCard = useCallback(() => {
     setVerdict(null);
     setExiting(false);
@@ -169,7 +174,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
 
   return (
     <div className="fixed inset-0 z-50 bg-stone-950/95 flex flex-col items-center justify-center animate-slide-up">
-      <OverlayCloseButton onClick={() => { track("feature_closed", { feature: "sizzle", cards_swiped: index }); onClose(); }} />
+      <OverlayCloseButton onClick={handleClose} />
 
       {/* Title */}
       <h2 className="font-display text-2xl font-black text-orange-500 italic mb-6">
@@ -187,7 +192,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
             You've swiped through every restaurant!
           </p>
           <button
-            onClick={() => { track("feature_closed", { feature: "sizzle", cards_swiped: index }); onClose(); }}
+            onClick={handleClose}
             className="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl active:scale-95 transition-all"
           >
             Back to Eats

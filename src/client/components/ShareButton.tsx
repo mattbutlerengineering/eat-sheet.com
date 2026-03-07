@@ -21,6 +21,7 @@ export function ShareButton({ token, type, id, name }: ShareButtonProps) {
     try {
       const result = await post<{ share_token: string }>(`/api/share/${type}/${id}`, {});
       const url = `${window.location.origin}/share/${type}/${result.share_token}`;
+      const shareEvent = type === "restaurant" ? "restaurant_shared" : "review_shared" as const;
 
       // Try native share API first
       if (navigator.share) {
@@ -29,11 +30,11 @@ export function ShareButton({ token, type, id, name }: ShareButtonProps) {
           text: `Check out ${name} on Eat Sheet!`,
           url,
         });
-        track(type === "restaurant" ? "restaurant_shared" : "review_shared", { method: "native_share" });
+        track(shareEvent, { method: "native_share" });
       } else {
         // Fallback: copy to clipboard
         await navigator.clipboard.writeText(url);
-        track(type === "restaurant" ? "restaurant_shared" : "review_shared", { method: "clipboard" });
+        track(shareEvent, { method: "clipboard" });
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }

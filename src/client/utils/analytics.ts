@@ -1,6 +1,7 @@
 import posthog from "posthog-js";
 
 const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY;
+let analyticsReady = false;
 
 export function initAnalytics(): void {
   if (!POSTHOG_KEY) return;
@@ -11,6 +12,7 @@ export function initAnalytics(): void {
     capture_pageview: false,
     persistence: "localStorage+cookie",
     loaded: (ph) => {
+      analyticsReady = true;
       if (import.meta.env.DEV) {
         ph.debug();
       }
@@ -19,7 +21,7 @@ export function initAnalytics(): void {
 }
 
 function isReady(): boolean {
-  return !!POSTHOG_KEY && posthog.__loaded;
+  return !!POSTHOG_KEY && analyticsReady;
 }
 
 export function identifyUser(id: string, name: string): void {
