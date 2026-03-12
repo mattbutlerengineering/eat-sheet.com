@@ -114,7 +114,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-stone-950/90 backdrop-blur-md border-b border-stone-800/50">
         <div className="px-4 py-4 flex items-center justify-between">
-          <h1 className="font-display text-xl font-black text-coral-500 italic">eat sheet</h1>
+          <h1 className="font-display text-xl font-black text-coral-500 italic">eat sheet and dine</h1>
           <div className="flex items-center gap-3">
             <span className="text-base text-stone-400">{member.name}</span>
             <button
