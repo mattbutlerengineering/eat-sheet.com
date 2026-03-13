@@ -1,9 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Outfit:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Playfair Display", serif;
-  --font-body: "DM Sans", sans-serif;
+  --font-display: "Fraunces", serif;
+  --font-body: "Outfit", sans-serif;
 
   --color-stone-950: #0c0a09;
   --color-stone-900: #1c1917;
@@ -30,7 +30,7 @@
   --color-gold-300: #fcd34d;
   --color-glow: #fbbf24;
 
-  /* Monster palette — from Molly's painting */
+  /* Primary palette */
   --color-coral-500: #E8836E;
   --color-coral-600: #D4705C;
   --color-teal-accent: #3BA8A0;

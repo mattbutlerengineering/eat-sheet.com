@@ -47,10 +47,10 @@ function Branding() {
   return (
     <>
       <div className="text-center mb-10 animate-fade-up">
-        <h1 className="font-display text-6xl font-black text-coral-500 tracking-tight italic">
-          eat sheet
+        <h1 className="font-display text-5xl font-black text-coral-500 tracking-tight italic leading-tight">
+          eat sheet<br /><span className="text-stone-400 text-3xl">and dine</span>
         </h1>
-        <p className="mt-3 text-stone-400 font-body text-sm tracking-widest uppercase">
+        <p className="mt-3 text-stone-500 font-body text-sm tracking-widest uppercase">
           Your brutally honest restaurant guide
         </p>
       </div>

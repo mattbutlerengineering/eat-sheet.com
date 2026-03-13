@@ -32,7 +32,7 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: "Eat Sheet",
+        name: "Eat Sheet and Dine",
         short_name: "Eat Sheet",
         description: "Family restaurant rating app",
         theme_color: "#E8836E",
@@ -41,11 +41,6 @@ export default defineConfig({
         scope: "/",
         start_url: "/",
         icons: [
-          {
-            src: "/monsters/teal-big-256.png",
-            sizes: "256x256",
-            type: "image/png",
-          },
           {
             src: "/icons/icon-192.png",
             sizes: "192x192",
