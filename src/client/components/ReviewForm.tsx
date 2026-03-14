@@ -40,7 +40,8 @@ function quickDates(): readonly { readonly label: string; readonly value: string
   ];
 }
 
-const QUICK_DATES = quickDates();
+// Computed inside component to stay fresh past midnight
+
 
 function getExistingPhotoUrls(review?: Review): readonly string[] {
   if (!review) return [];
@@ -89,7 +90,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
     }
   };
 
-  const dates = QUICK_DATES;
+  const dates = quickDates();
   const isReady = overall !== null && !submitting;
 
   return (

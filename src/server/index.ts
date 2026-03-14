@@ -19,7 +19,18 @@ import { tonightRoutes } from "./routes/tonight";
 
 const app = new Hono<{ Bindings: Env; Variables: { sentryReported: boolean } }>();
 
-app.use("/api/*", cors());
+app.use(
+  "/api/*",
+  cors({
+    origin: (origin) => {
+      const allowed = ["https://eat-sheet.com", "https://www.eat-sheet.com"];
+      if (!origin || allowed.includes(origin) || origin.startsWith("http://localhost:")) {
+        return origin ?? "";
+      }
+      return "";
+    },
+  })
+);
 
 // Capture 5xx responses that don't throw (e.g. explicit c.json({error}, 502))
 // Skips if onError already reported (thrown errors set sentryReported flag)
@@ -54,7 +65,7 @@ app.onError((err, c) => {
   console.error(`[${c.req.method}] ${c.req.path}:`, err.stack ?? err.message);
   Sentry.captureException(err);
   c.set("sentryReported", true);
-  return c.json({ error: err.message }, 500);
+  return c.json({ error: "Internal server error" }, 500);
 });
 
 export default Sentry.withSentry(

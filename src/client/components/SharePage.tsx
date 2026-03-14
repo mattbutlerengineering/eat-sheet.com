@@ -29,8 +29,9 @@ export function SharePage() {
     if (!type || !token) return;
     fetch(`/api/share/${type}/${token}`)
       .then((r) => r.json())
-      .then((json: any) => {
-        if (json.data) setData(json.data);
+      .then((json) => {
+        const result = json as { data?: SharedRestaurant | SharedReview };
+        if (result.data) setData(result.data);
         else setError(true);
       })
       .catch(() => setError(true))

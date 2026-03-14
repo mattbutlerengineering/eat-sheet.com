@@ -280,6 +280,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               <button
                 onClick={() => { setShowPicker(true); track("feature_opened", { feature: "picker" }); }}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-stone-400 hover:text-coral-500 bg-stone-800/50 hover:bg-stone-800 rounded-lg transition-colors"
+                aria-label="Random restaurant picker"
               >
                 <svg
                   width="16"
@@ -454,6 +455,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
       <Link
         ref={fabRef}
         to="/add"
+        aria-label="Add restaurant"
         className="fixed bottom-20 right-6 w-14 h-14 bg-coral-500 hover:bg-coral-600 rounded-full flex items-center justify-center shadow-lg shadow-coral-500/30 active:scale-95 transition-all z-30"
       >
         <span className="text-2xl text-white leading-none">+</span>

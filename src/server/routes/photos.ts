@@ -47,7 +47,14 @@ photos.post("/upload", authMiddleware, async (c) => {
 // Serve — no auth (photos are semi-public, keys are unguessable UUIDs)
 // Supports both old family_id/ and new member_id/ prefixes
 photos.get("/:prefix/:filename", async (c) => {
-  const key = `${c.req.param("prefix")}/${c.req.param("filename")}`;
+  const prefix = c.req.param("prefix");
+  const filename = c.req.param("filename");
+
+  if (/[^a-zA-Z0-9_\-]/.test(prefix) || /[^a-zA-Z0-9_\-.]/.test(filename)) {
+    return c.json({ error: "Invalid photo key" }, 400);
+  }
+
+  const key = `${prefix}/${filename}`;
   const object = await c.env.PHOTOS.get(key);
 
   if (!object) {

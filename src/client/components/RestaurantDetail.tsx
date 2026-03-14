@@ -355,24 +355,24 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
                 </div>
 
                 {/* Category Scores */}
-                {(review.food_score || review.service_score || review.ambiance_score || review.value_score) && (
+                {(review.food_score != null || review.service_score != null || review.ambiance_score != null || review.value_score != null) && (
                   <div className="flex gap-3 mt-2 flex-wrap">
-                    {review.food_score && (
+                    {review.food_score != null && (
                       <span className="text-sm text-stone-400">
                         Food: <span className={scoreColor(review.food_score)}>{review.food_score}</span>
                       </span>
                     )}
-                    {review.service_score && (
+                    {review.service_score != null && (
                       <span className="text-sm text-stone-400">
                         Service: <span className={scoreColor(review.service_score)}>{review.service_score}</span>
                       </span>
                     )}
-                    {review.ambiance_score && (
+                    {review.ambiance_score != null && (
                       <span className="text-sm text-stone-400">
                         Ambiance: <span className={scoreColor(review.ambiance_score)}>{review.ambiance_score}</span>
                       </span>
                     )}
-                    {review.value_score && (
+                    {review.value_score != null && (
                       <span className="text-sm text-stone-400">
                         Value: <span className={scoreColor(review.value_score)}>{review.value_score}</span>
                       </span>

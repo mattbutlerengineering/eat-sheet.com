@@ -6,6 +6,15 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { cuisineEmoji } from "../utils/cuisines";
 import type { Restaurant } from "../types";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 interface MapViewProps {
   readonly restaurants: readonly Restaurant[];
 }
@@ -130,12 +139,13 @@ export function MapView({ restaurants }: MapViewProps) {
       });
 
       const scoreText = r.avg_score !== null ? r.avg_score.toFixed(1) : "\u2014";
-      const cuisineText = r.cuisine ? `<br/><span style="color:#a8a29e;font-size:12px">${cuisineEmoji(r.cuisine)} ${r.cuisine}</span>` : "";
+      const safeName = escapeHtml(r.name);
+      const cuisineText = r.cuisine ? `<br/><span style="color:#a8a29e;font-size:12px">${cuisineEmoji(r.cuisine)} ${escapeHtml(r.cuisine)}</span>` : "";
       const dirUrl = directionsUrl(r);
 
       marker.bindPopup(
         `<div style="font-family:sans-serif;min-width:120px">
-          <strong>${r.name}</strong>${cuisineText}
+          <strong>${safeName}</strong>${cuisineText}
           <br/><span style="font-size:14px;font-weight:bold;color:${color}">${scoreText}</span>
           <span style="color:#a8a29e;font-size:12px"> / 10</span>
           <br/><a href="/restaurant/${r.id}" data-nav style="color:#f97316;font-size:12px;text-decoration:none">View details \u2192</a>

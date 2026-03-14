@@ -20,7 +20,7 @@ const INPUT_CLASS =
   "w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-stone-50 placeholder:text-stone-500 focus:outline-none focus:border-coral-500 focus:ring-1 focus:ring-coral-500/50 transition-all";
 
 export function GroupsPage({ token }: GroupsPageProps) {
-  const { post, del } = useApi(token);
+  const { post, del, get } = useApi(token);
   const { data: groups, loading, refresh } = useFetch<readonly Group[]>(token, "/api/groups");
   const [mode, setMode] = useState<"list" | "create" | "join">("list");
   const [name, setName] = useState("");
@@ -33,8 +33,6 @@ export function GroupsPage({ token }: GroupsPageProps) {
   const [showInviteCode, setShowInviteCode] = useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
-
-  const { get } = useApi(token);
 
   // Auto-repair orphaned group_members on first empty load
   const repairAttempted = useRef(false);
