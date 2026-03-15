@@ -7,3 +7,5 @@ dist/
 .worktrees/
 *.tsbuildinfo
 .playwright-cli/
+test-results/
+playwright-report/

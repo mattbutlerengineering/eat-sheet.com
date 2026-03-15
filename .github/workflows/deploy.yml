@@ -17,7 +17,16 @@ jobs:
 
       - run: npm ci
 
+      - name: Unit & integration tests
+        run: npm test
+
       - run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: npx playwright test
 
       - name: Deploy Pages Frontend
         run: npx wrangler pages deploy dist --project-name=eat-sheet
