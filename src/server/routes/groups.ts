@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import * as Sentry from "@sentry/cloudflare";
 import type { Env, JwtPayload, Group } from "../types";
 import { authMiddleware } from "../middleware/auth";
 
@@ -54,7 +55,7 @@ groups.post("/", async (c) => {
 
     return c.json({ data: { ...group, is_admin: true, member_count: 1 } }, 201);
   } catch (err) {
-    console.error("Group creation failed:", err);
+    Sentry.captureException(err);
     return c.json({ error: "Failed to create group" }, 500);
   }
 });

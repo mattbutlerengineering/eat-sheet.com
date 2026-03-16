@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { rateLimit } from "../middleware/rate-limit";
+
+const uploadLimit = rateLimit({ max: 30, windowMs: 60_000 });
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB server-side limit
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -17,7 +20,7 @@ const photos = new Hono<{
 }>();
 
 // Upload — auth required
-photos.post("/upload", authMiddleware, async (c) => {
+photos.post("/upload", uploadLimit, authMiddleware, async (c) => {
   const payload = c.get("jwtPayload");
   const body = await c.req.parseBody();
   const file = body.file;

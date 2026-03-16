@@ -4,8 +4,12 @@ import { getCookie, setCookie } from "hono/cookie";
 import * as arctic from "arctic";
 import type { Env, Member, Group, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { rateLimit } from "../middleware/rate-limit";
 import { getProvider, isValidProvider } from "../utils/oauth-providers";
 import { visiblePeersCte } from "../utils/visible-peers";
+
+const joinLimit = rateLimit({ max: 10, windowMs: 60_000 });
+const oauthLimit = rateLimit({ max: 20, windowMs: 60_000 });
 
 const auth = new Hono<{
   Bindings: Env;
@@ -24,7 +28,7 @@ async function signSessionToken(memberId: string, name: string, secret: string):
 }
 
 // Join/register — invite_code is optional (solo signup if omitted)
-auth.post("/join", async (c) => {
+auth.post("/join", joinLimit, async (c) => {
   const body = await c.req.json<{ invite_code?: string; registration_token: string }>();
 
   if (!body.registration_token) {
@@ -274,7 +278,7 @@ auth.get("/:provider/callback", async (c) => {
   return c.redirect(`${base}/?register=true&token=${encodeURIComponent(tempToken)}`);
 });
 
-auth.get("/:provider", async (c) => {
+auth.get("/:provider", oauthLimit, async (c) => {
   const providerName = c.req.param("provider");
 
   if (!isValidProvider(providerName)) {

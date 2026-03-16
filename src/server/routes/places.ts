@@ -1,6 +1,8 @@
 import { Hono } from "hono";
+import * as Sentry from "@sentry/cloudflare";
 import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
+import { mapTypeToCuisine } from "../utils/cuisine-types";
 
 const places = new Hono<{
   Bindings: Env;
@@ -10,35 +12,6 @@ const places = new Hono<{
 places.use("*", authMiddleware);
 
 const GOOGLE_API_BASE = "https://places.googleapis.com/v1";
-
-// Maps Google place types to our cuisine categories
-const TYPE_TO_CUISINE: Record<string, string> = {
-  italian_restaurant: "Italian",
-  pizza_restaurant: "Pizza",
-  japanese_restaurant: "Japanese",
-  chinese_restaurant: "Chinese",
-  mexican_restaurant: "Mexican",
-  indian_restaurant: "Indian",
-  thai_restaurant: "Thai",
-  french_restaurant: "French",
-  korean_restaurant: "Korean",
-  vietnamese_restaurant: "Vietnamese",
-  greek_restaurant: "Greek",
-  mediterranean_restaurant: "Mediterranean",
-  brazilian_restaurant: "Brazilian",
-  middle_eastern_restaurant: "Middle Eastern",
-  barbecue_restaurant: "Barbecue",
-  seafood_restaurant: "Seafood",
-  american_restaurant: "American",
-};
-
-function mapTypeToCuisine(types: readonly string[]): string | null {
-  for (const t of types) {
-    const cuisine = TYPE_TO_CUISINE[t];
-    if (cuisine) return cuisine;
-  }
-  return null;
-}
 
 // POST /api/places/nearby — discover popular restaurants near a location
 places.post("/nearby", async (c) => {
@@ -80,8 +53,7 @@ places.post("/nearby", async (c) => {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("[Places nearby]", res.status, text);
+    Sentry.captureMessage(`[Places nearby] ${res.status}`, { level: "error" });
     return c.json({ error: "Places API error" }, 502);
   }
 
@@ -194,8 +166,7 @@ places.post("/autocomplete", async (c) => {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("[Places autocomplete]", res.status, text);
+    Sentry.captureMessage(`[Places autocomplete] ${res.status}`, { level: "error" });
     return c.json({ error: "Places API error" }, 502);
   }
 
@@ -250,8 +221,7 @@ places.get("/:placeId", async (c) => {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("[Places detail]", res.status, text);
+    Sentry.captureMessage(`[Places detail] ${res.status}`, { level: "error" });
     return c.json({ error: "Places API error" }, 502);
   }
 

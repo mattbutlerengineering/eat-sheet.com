@@ -147,6 +147,7 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
               value={search}
               onChange={(e) => { setSearch(e.target.value); trackSearch(e.target.value); }}
               placeholder="Search restaurants..."
+              aria-label="Search restaurants"
               className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
             />
             {hasFilters && (

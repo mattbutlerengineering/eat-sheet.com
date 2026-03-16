@@ -305,6 +305,7 @@ function NearbyContent({ token }: { readonly token: string }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search nearby..."
+                aria-label="Search nearby restaurants"
                 className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
               />
               {hasFilters && (

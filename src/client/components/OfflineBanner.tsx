@@ -21,7 +21,7 @@ export function OfflineBanner() {
   if (!offline) return null;
 
   return (
-    <div className="bg-amber-600 text-white text-center text-sm py-2 px-4 animate-slide-down">
+    <div role="alert" className="bg-amber-600 text-white text-center text-sm py-2 px-4 animate-slide-down">
       {message}
     </div>
   );

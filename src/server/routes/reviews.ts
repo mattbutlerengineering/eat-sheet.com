@@ -4,6 +4,7 @@ import { authMiddleware } from "../middleware/auth";
 import { visiblePeersCte } from "../utils/visible-peers";
 
 const MAX_PHOTOS = 5;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const reviews = new Hono<{
   Bindings: Env;
@@ -81,8 +82,8 @@ reviews.post("/:restaurantId", async (c) => {
     return c.json({ error: "You already have a review for this restaurant. Use PUT to update." }, 409);
   }
 
-  if (body.visited_at && isNaN(Date.parse(body.visited_at))) {
-    return c.json({ error: "visited_at must be a valid date" }, 400);
+  if (body.visited_at && !DATE_RE.test(body.visited_at)) {
+    return c.json({ error: "visited_at must be a valid date (YYYY-MM-DD)" }, 400);
   }
 
   const photoUrls = body.photo_urls ?? (body.photo_url ? [body.photo_url] : []);
@@ -158,8 +159,8 @@ reviews.put("/:id", async (c) => {
     return c.json({ error: "Review not found or not yours" }, 404);
   }
 
-  if (body.visited_at && isNaN(Date.parse(body.visited_at))) {
-    return c.json({ error: "visited_at must be a valid date" }, 400);
+  if (body.visited_at && !DATE_RE.test(body.visited_at)) {
+    return c.json({ error: "visited_at must be a valid date (YYYY-MM-DD)" }, 400);
   }
 
   const photoUrls = body.photo_urls ?? (body.photo_url != null ? [body.photo_url] : []);

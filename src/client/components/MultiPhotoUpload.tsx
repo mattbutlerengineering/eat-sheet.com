@@ -73,6 +73,7 @@ export function MultiPhotoUpload({ token, photoUrls, onPhotosChanged, maxPhotos 
         accept="image/jpeg,image/png,image/webp,image/heic"
         multiple
         onChange={handleFiles}
+        aria-label="Upload photos"
         className="hidden"
       />
 
@@ -118,7 +119,7 @@ export function MultiPhotoUpload({ token, photoUrls, onPhotosChanged, maxPhotos 
         </p>
       )}
 
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p role="alert" className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
   );
 }

@@ -65,6 +65,7 @@ export function PhotoUpload({ token, onUploaded, existingUrl }: PhotoUploadProps
         type="file"
         accept="image/jpeg,image/png,image/webp,image/heic"
         onChange={handleFile}
+        aria-label="Upload photo"
         className="hidden"
       />
 

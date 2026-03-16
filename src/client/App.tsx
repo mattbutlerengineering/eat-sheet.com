@@ -46,7 +46,7 @@ const InviteHandler = lazy(() =>
 
 function PageLoader() {
   return (
-    <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3" role="status">
+    <div className="min-h-dvh bg-stone-950 flex flex-col items-center justify-center gap-3" role="status" aria-label="Loading page">
       <Monster variant="party" size={40} />
       <p className="text-stone-500 text-sm italic">{randomLoadingMessage()}</p>
     </div>

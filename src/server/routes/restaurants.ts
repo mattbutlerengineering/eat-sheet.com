@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 import { visiblePeersCte } from "../utils/visible-peers";
+import { mapTypeToCuisine } from "../utils/cuisine-types";
 
 const restaurants = new Hono<{
   Bindings: Env;
@@ -313,20 +314,7 @@ restaurants.post("/", async (c) => {
             const place = data.places?.[0];
             if (!place?.location) return;
 
-            const TYPE_TO_CUISINE: Record<string, string> = {
-              italian_restaurant: "Italian", pizza_restaurant: "Pizza",
-              japanese_restaurant: "Japanese", chinese_restaurant: "Chinese",
-              mexican_restaurant: "Mexican", indian_restaurant: "Indian",
-              thai_restaurant: "Thai", french_restaurant: "French",
-              korean_restaurant: "Korean", vietnamese_restaurant: "Vietnamese",
-              greek_restaurant: "Greek", mediterranean_restaurant: "Mediterranean",
-              brazilian_restaurant: "Brazilian", middle_eastern_restaurant: "Middle Eastern",
-              barbecue_restaurant: "Barbecue", seafood_restaurant: "Seafood",
-              american_restaurant: "American",
-            };
-            const cuisine = (place.types ?? []).reduce<string | null>(
-              (acc, t) => acc ?? TYPE_TO_CUISINE[t] ?? null, null
-            );
+            const cuisine = mapTypeToCuisine(place.types ?? []);
 
             await db
               .prepare(

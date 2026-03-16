@@ -69,6 +69,7 @@ export function BottomNav() {
               key={tab.key}
               role="tab"
               aria-selected={active}
+              aria-current={active ? "page" : undefined}
               aria-label={tab.label}
               onClick={() => { track("nav_tab_clicked", { tab: tab.key }); navigate(tab.path); }}
               className={`flex flex-col items-center gap-0.5 px-4 py-1 transition-colors ${

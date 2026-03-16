@@ -160,7 +160,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
       />
 
       {error && (
-        <p className="text-red-500 text-sm text-center">{error}</p>
+        <p role="alert" className="text-red-500 text-sm text-center">{error}</p>
       )}
 
       <div className="flex gap-3">

@@ -103,5 +103,6 @@ CREATE INDEX IF NOT EXISTS idx_bookmarks_member ON bookmarks(member_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_restaurant ON bookmarks(restaurant_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_members_oauth ON members(oauth_provider, oauth_id);
 CREATE INDEX IF NOT EXISTS idx_restaurants_google_place_id ON restaurants(google_place_id);
+CREATE INDEX IF NOT EXISTS idx_restaurants_created_by ON restaurants(created_by);
 CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_member ON group_members(member_id);

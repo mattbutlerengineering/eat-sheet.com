@@ -140,7 +140,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
 
       <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+          <div role="alert" className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
             <p className="text-red-400 text-sm">{error}</p>
           </div>
         )}
@@ -172,6 +172,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Group name"
+              aria-label="Group name"
               maxLength={50}
               autoFocus
               className={INPUT_CLASS}
@@ -204,6 +205,7 @@ export function GroupsPage({ token }: GroupsPageProps) {
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
               placeholder="Enter invite code"
+              aria-label="Invite code"
               autoComplete="off"
               autoFocus
               className={INPUT_CLASS}

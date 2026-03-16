@@ -151,6 +151,7 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
                       type="text"
                       value={nameInput}
                       onChange={(e) => setNameInput(e.target.value)}
+                      aria-label="Display name"
                       maxLength={50}
                       className="flex-1 bg-stone-800 text-stone-50 text-sm px-3 py-2 rounded-lg border border-stone-700 focus:border-coral-500 focus:outline-none"
                       autoFocus

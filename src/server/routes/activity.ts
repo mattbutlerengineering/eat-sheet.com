@@ -14,6 +14,17 @@ activity.get("/", async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
+  const cursor = c.req.query("cursor");
+  const rawLimit = Number(c.req.query("limit") ?? 30);
+  const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 30, 1), 100);
+
+  const cursorClause = cursor ? "WHERE timestamp < ?" : "";
+  const binds: (string | number)[] = [payload.member_id, payload.member_id];
+  if (cursor) {
+    binds.push(cursor);
+  }
+  binds.push(limit);
+
   const { results } = await db
     .prepare(
       `${visiblePeersCte()}
@@ -45,13 +56,17 @@ activity.get("/", async (c) => {
         JOIN restaurants rest ON rest.id = rv.restaurant_id
         WHERE rest.created_by IN (SELECT member_id FROM visible_peers)
       )
+      ${cursorClause}
       ORDER BY timestamp DESC
-      LIMIT 30`
+      LIMIT ?`
     )
-    .bind(payload.member_id, payload.member_id)
+    .bind(...binds)
     .all();
 
-  return c.json({ data: results });
+  const lastItem = results[results.length - 1] as { timestamp: string } | undefined;
+  const next_cursor = lastItem?.timestamp ?? null;
+
+  return c.json({ data: results, next_cursor });
 });
 
 export { activity as activityRoutes };
