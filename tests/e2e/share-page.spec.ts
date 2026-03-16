@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { json } from "./fixtures/api-mock";
 import { TEST_SHARED_RESTAURANT } from "./helpers/test-data";
 
 // Share pages are public — no auth needed
@@ -6,11 +7,7 @@ import { TEST_SHARED_RESTAURANT } from "./helpers/test-data";
 test.describe("Share Page", () => {
   test("displays shared restaurant details", async ({ page }) => {
     await page.route("**/api/share/restaurant/valid-token", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ data: TEST_SHARED_RESTAURANT }),
-      }),
+      route.fulfill(json(TEST_SHARED_RESTAURANT)),
     );
 
     await page.goto("/share/restaurant/valid-token");
@@ -32,11 +29,7 @@ test.describe("Share Page", () => {
     };
 
     await page.route("**/api/share/review/review-token", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ data: sharedReview }),
-      }),
+      route.fulfill(json(sharedReview)),
     );
 
     await page.goto("/share/review/review-token");

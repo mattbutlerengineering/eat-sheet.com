@@ -8,7 +8,7 @@ import {
   TEST_BOOKMARKS,
 } from "../helpers/test-data";
 
-function json(data: unknown) {
+export function json(data: unknown) {
   return {
     status: 200,
     contentType: "application/json",

@@ -1,6 +1,5 @@
 import { test, expect } from "./fixtures/auth";
-import { mockApi } from "./fixtures/api-mock";
-import { TEST_RESTAURANTS } from "./helpers/test-data";
+import { mockApi, json } from "./fixtures/api-mock";
 
 test.describe("Restaurant List (Home)", () => {
   test.beforeEach(async ({ page }) => {
@@ -16,7 +15,13 @@ test.describe("Restaurant List (Home)", () => {
   });
 
   test("shows empty state when no restaurants", async ({ page }) => {
-    await mockApi(page, { restaurants: [] });
+    // Override just the restaurants route (beforeEach already set up other mocks)
+    await page.route("**/api/restaurants", (route) => {
+      if (route.request().method() === "GET") {
+        return route.fulfill(json([]));
+      }
+      return route.continue();
+    });
     await page.goto("/");
 
     // Empty state should show some call-to-action or message

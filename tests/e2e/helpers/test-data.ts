@@ -153,12 +153,7 @@ export const TEST_STATS = {
 } as const;
 
 export const TEST_SHARED_RESTAURANT = {
-  id: "rest-001",
-  name: "Taco Palace",
-  cuisine: "Mexican",
-  address: "123 Main St",
-  avg_score: 8.5,
-  review_count: 3,
+  ...TEST_RESTAURANTS[0],
   reviews: TEST_REVIEWS,
 } as const;
 

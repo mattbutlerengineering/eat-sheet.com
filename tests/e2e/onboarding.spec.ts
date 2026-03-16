@@ -1,20 +1,6 @@
-import { test as base, expect } from "@playwright/test";
-import { TEST_AUTH } from "./helpers/test-data";
+import { expect } from "@playwright/test";
+import { testNotOnboarded as test } from "./fixtures/auth";
 import { mockApi } from "./fixtures/api-mock";
-
-// Auth but NOT onboarded — should redirect to /onboarding
-const test = base.extend<{ authedNotOnboarded: void }>({
-  authedNotOnboarded: [
-    async ({ page }, use) => {
-      await page.addInitScript((auth) => {
-        localStorage.setItem("eat-sheet-auth", JSON.stringify(auth));
-        // Do NOT set eat-sheet-onboarded — triggers onboarding
-      }, TEST_AUTH);
-      await use();
-    },
-    { auto: true },
-  ],
-});
 
 test.describe("Onboarding Flow", () => {
   test.beforeEach(async ({ page }) => {

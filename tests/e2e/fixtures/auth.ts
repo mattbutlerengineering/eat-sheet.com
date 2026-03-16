@@ -14,4 +14,16 @@ export const test = base.extend<{ authenticatedPage: void }>({
   ],
 });
 
+export const testNotOnboarded = base.extend<{ authedNotOnboarded: void }>({
+  authedNotOnboarded: [
+    async ({ page }, use) => {
+      await page.addInitScript((auth) => {
+        localStorage.setItem("eat-sheet-auth", JSON.stringify(auth));
+      }, TEST_AUTH);
+      await use();
+    },
+    { auto: true },
+  ],
+});
+
 export { expect } from "@playwright/test";
