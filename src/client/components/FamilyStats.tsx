@@ -237,6 +237,42 @@ export function FamilyStats({ token }: FamilyStatsProps) {
             </div>
           </div>
         )}
+        {/* Score Distribution */}
+        {stats.score_distribution && stats.score_distribution.length > 0 && (
+          <div className="animate-fade-up" style={{ animationDelay: "0.25s" }}>
+            <h2 className="font-display font-bold text-base text-stone-300 mb-3 uppercase tracking-wider">
+              Score Distribution
+            </h2>
+            <div className="bg-stone-900 border border-stone-800/50 rounded-xl p-4">
+              <div className="flex items-end gap-1 h-28">
+                {Array.from({ length: 10 }, (_, i) => {
+                  const score = i + 1;
+                  const entry = stats.score_distribution.find((d) => d.score === score);
+                  const count = entry?.count ?? 0;
+                  const maxCount = Math.max(...stats.score_distribution.map((d) => d.count), 1);
+                  const pct = (count / maxCount) * 100;
+                  return (
+                    <div key={score} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="w-full flex flex-col items-center justify-end h-20">
+                        {count > 0 && (
+                          <span className="text-stone-500 text-[10px] mb-0.5">{count}</span>
+                        )}
+                        <div
+                          className="w-full rounded-t animate-bar-fill"
+                          style={{
+                            height: `${Math.max(pct, count > 0 ? 8 : 0)}%`,
+                            background: score <= 3 ? "#ef4444" : score <= 6 ? "#f59e0b" : "#22c55e",
+                          }}
+                        />
+                      </div>
+                      <span className="text-stone-500 text-xs">{score}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

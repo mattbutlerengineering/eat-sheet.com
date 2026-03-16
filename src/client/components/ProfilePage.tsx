@@ -43,6 +43,11 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
   const { put, post } = useApi(token);
   const { data: me, loading } = useFetch<MemberInfo>(token, "/api/auth/me");
   const { data: stats } = useFetch<FamilyStatsData>(token, "/api/stats");
+  const { data: achievementData } = useFetch<{
+    badges: readonly { id: string; name: string; description: string; icon: string; earned: boolean; progress?: string }[];
+    earned_count: number;
+    total_count: number;
+  }>(token, "/api/achievements");
   const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
@@ -231,6 +236,35 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
           </div>
         </section>
 
+        {/* Achievements Section */}
+        {achievementData && achievementData.badges.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-stone-400 uppercase tracking-wider">Achievements</h2>
+              <span className="text-xs text-stone-500">
+                {achievementData.earned_count}/{achievementData.total_count}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {achievementData.badges.map((badge) => (
+                <div
+                  key={badge.id}
+                  className={`bg-stone-900 rounded-2xl p-3 text-center transition-opacity ${
+                    badge.earned ? "" : "opacity-40"
+                  }`}
+                >
+                  <p className="text-2xl">{badge.icon}</p>
+                  <p className="text-stone-200 text-sm font-bold mt-1">{badge.name}</p>
+                  <p className="text-stone-500 text-xs mt-0.5">{badge.description}</p>
+                  {badge.progress && !badge.earned && (
+                    <p className="text-coral-500 text-xs font-bold mt-1">{badge.progress}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Admin Section — only visible to admins */}
         {isAdmin && enrichStatus != null && (
           <section>
@@ -320,6 +354,28 @@ export function ProfilePage({ token, member, onLogout, onNameChange }: ProfilePa
               <span className="text-stone-300 text-sm">Version</span>
               <span className="text-stone-500 text-sm">1.0.0</span>
             </div>
+            <button
+              onClick={() => {
+                const a = document.createElement("a");
+                a.href = `/api/export?format=csv`;
+                a.download = "eat-sheet-reviews.csv";
+                // Use fetch with auth header for CSV download
+                fetch("/api/export?format=csv", {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+                  .then((r) => r.blob())
+                  .then((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    a.href = url;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  })
+                  .catch(() => {});
+              }}
+              className="w-full px-4 py-3 text-left text-stone-300 text-sm hover:text-coral-500 transition-colors"
+            >
+              Export My Reviews (CSV)
+            </button>
             <button
               onClick={handleClearCache}
               className="w-full px-4 py-3 text-left text-stone-300 text-sm hover:text-coral-500 transition-colors"

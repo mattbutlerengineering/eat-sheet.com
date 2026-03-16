@@ -101,6 +101,7 @@ export interface FamilyStatsData {
     readonly ambiance: number | null;
     readonly value: number | null;
   };
+  readonly score_distribution: readonly { readonly score: number; readonly count: number }[];
 }
 
 export interface ApiResponse<T> {

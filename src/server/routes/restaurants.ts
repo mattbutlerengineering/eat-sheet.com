@@ -3,6 +3,7 @@ import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 import { visiblePeersCte } from "../utils/visible-peers";
 import { mapTypeToCuisine } from "../utils/cuisine-types";
+import * as Sentry from "@sentry/cloudflare";
 
 const restaurants = new Hono<{
   Bindings: Env;
@@ -335,8 +336,8 @@ restaurants.post("/", async (c) => {
                 restaurantId
               )
               .run();
-          } catch {
-            // Best-effort enrichment — don't fail the create
+          } catch (err) {
+            Sentry.captureException(err);
           }
         })()
       );

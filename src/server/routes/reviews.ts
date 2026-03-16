@@ -88,30 +88,39 @@ reviews.post("/:restaurantId", async (c) => {
 
   const photoUrls = body.photo_urls ?? (body.photo_url ? [body.photo_url] : []);
 
-  const review = await db
-    .prepare(
-      `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, visited_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-       RETURNING *`
-    )
-    .bind(
-      restaurantId,
-      payload.member_id,
-      body.overall_score,
-      body.food_score ?? null,
-      body.service_score ?? null,
-      body.ambiance_score ?? null,
-      body.value_score ?? null,
-      body.notes?.trim() || null,
-      body.visited_at || null
-    )
-    .first();
+  let review;
+  try {
+    review = await db
+      .prepare(
+        `INSERT INTO reviews (restaurant_id, member_id, overall_score, food_score, service_score, ambiance_score, value_score, notes, visited_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         RETURNING *`
+      )
+      .bind(
+        restaurantId,
+        payload.member_id,
+        body.overall_score,
+        body.food_score ?? null,
+        body.service_score ?? null,
+        body.ambiance_score ?? null,
+        body.value_score ?? null,
+        body.notes?.trim() || null,
+        body.visited_at || null
+      )
+      .first();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("UNIQUE constraint failed")) {
+      return c.json({ error: "You already have a review for this restaurant. Use PUT to update." }, 409);
+    }
+    throw err;
+  }
 
   // Save multi-photo records
   if (review && photoUrls.length > 0) {
     const validUrls = photoUrls
       .map((u) => u.trim())
-      .filter((u) => u.startsWith("/api/photos/"));
+      .filter((u) => u.startsWith(`/api/photos/${payload.member_id}/`));
     await saveReviewPhotos(db, review.id as string, validUrls);
   }
 
@@ -189,7 +198,7 @@ reviews.put("/:id", async (c) => {
   if (review) {
     const validUrls = photoUrls
       .map((u) => u.trim())
-      .filter((u) => u.startsWith("/api/photos/"));
+      .filter((u) => u.startsWith(`/api/photos/${payload.member_id}/`));
     await saveReviewPhotos(db, id, validUrls);
   }
 

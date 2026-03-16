@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import type { Env, JwtPayload } from "../types";
 import { authMiddleware } from "../middleware/auth";
 import { visiblePeersCte } from "../utils/visible-peers";
+import { rateLimit } from "../middleware/rate-limit";
+
+const shareLimit = rateLimit({ max: 30, windowMs: 60_000 });
 
 const share = new Hono<{
   Bindings: Env;
@@ -65,7 +68,7 @@ share.post("/review/:id", authMiddleware, async (c) => {
 });
 
 // Public: Get shared restaurant (no auth)
-share.get("/restaurant/:token", async (c) => {
+share.get("/restaurant/:token", shareLimit, async (c) => {
   const token = c.req.param("token");
   const db = c.env.DB;
 
@@ -88,7 +91,7 @@ share.get("/restaurant/:token", async (c) => {
 });
 
 // Public: Get shared review (no auth)
-share.get("/review/:token", async (c) => {
+share.get("/review/:token", shareLimit, async (c) => {
   const token = c.req.param("token");
   const db = c.env.DB;
 

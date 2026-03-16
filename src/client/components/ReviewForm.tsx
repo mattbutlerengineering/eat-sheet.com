@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ScoreSlider } from "./ScoreSlider";
 import { MultiPhotoUpload } from "./MultiPhotoUpload";
 import type { Review } from "../types";
 
 interface ReviewFormProps {
   readonly token: string;
+  readonly restaurantId?: string;
   readonly existingReview?: Review;
   readonly onSubmit: (data: ReviewData) => Promise<void>;
   readonly onCancel: () => void;
@@ -50,21 +51,68 @@ function getExistingPhotoUrls(review?: Review): readonly string[] {
   return [];
 }
 
-export function ReviewForm({ token, existingReview, onSubmit, onCancel }: ReviewFormProps) {
-  const [overall, setOverall] = useState<number | null>(existingReview?.overall_score ?? 5);
-  const [food, setFood] = useState<number | null>(existingReview?.food_score ?? null);
-  const [service, setService] = useState<number | null>(existingReview?.service_score ?? null);
-  const [ambiance, setAmbiance] = useState<number | null>(existingReview?.ambiance_score ?? null);
-  const [value, setValue] = useState<number | null>(existingReview?.value_score ?? null);
-  const [notes, setNotes] = useState(existingReview?.notes ?? "");
+interface Draft {
+  readonly overall: number | null;
+  readonly food: number | null;
+  readonly service: number | null;
+  readonly ambiance: number | null;
+  readonly value: number | null;
+  readonly notes: string;
+  readonly visitedAt: string;
+}
+
+function draftKey(restaurantId?: string): string | null {
+  return restaurantId ? `eat-sheet-draft-${restaurantId}` : null;
+}
+
+function loadDraft(restaurantId?: string): Draft | null {
+  const key = draftKey(restaurantId);
+  if (!key) return null;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as Draft) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft(restaurantId?: string): void {
+  const key = draftKey(restaurantId);
+  if (key) localStorage.removeItem(key);
+}
+
+export function ReviewForm({ token, restaurantId, existingReview, onSubmit, onCancel }: ReviewFormProps) {
+  const draft = existingReview ? null : loadDraft(restaurantId);
+  const [overall, setOverall] = useState<number | null>(existingReview?.overall_score ?? draft?.overall ?? 5);
+  const [food, setFood] = useState<number | null>(existingReview?.food_score ?? draft?.food ?? null);
+  const [service, setService] = useState<number | null>(existingReview?.service_score ?? draft?.service ?? null);
+  const [ambiance, setAmbiance] = useState<number | null>(existingReview?.ambiance_score ?? draft?.ambiance ?? null);
+  const [value, setValue] = useState<number | null>(existingReview?.value_score ?? draft?.value ?? null);
+  const [notes, setNotes] = useState(existingReview?.notes ?? draft?.notes ?? "");
   const [visitedAt, setVisitedAt] = useState(
-    existingReview?.visited_at ?? toDateString(new Date())
+    existingReview?.visited_at ?? draft?.visitedAt ?? toDateString(new Date())
   );
   const [photoUrls, setPhotoUrls] = useState<readonly string[]>(
     getExistingPhotoUrls(existingReview)
   );
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [restoredDraft, setRestoredDraft] = useState(draft !== null);
+
+  // Auto-save draft (debounced) — only for new reviews
+  const saveDraft = useCallback(() => {
+    const key = draftKey(restaurantId);
+    if (!key || existingReview) return;
+    const data: Draft = { overall, food, service, ambiance, value, notes, visitedAt };
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch { /* quota exceeded — ignore */ }
+  }, [restaurantId, existingReview, overall, food, service, ambiance, value, notes, visitedAt]);
+
+  useEffect(() => {
+    const timer = setTimeout(saveDraft, 1000);
+    return () => clearTimeout(timer);
+  }, [saveDraft]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +132,7 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
         photo_urls: photoUrls,
         visited_at: visitedAt,
       });
+      clearDraft(restaurantId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save review");
       setSubmitting(false);
@@ -98,6 +147,29 @@ export function ReviewForm({ token, existingReview, onSubmit, onCancel }: Review
       <h3 className="font-display font-bold text-lg text-stone-50">
         {existingReview ? "Edit Your Review" : "Add Your Review"}
       </h3>
+
+      {restoredDraft && (
+        <div className="flex items-center justify-between bg-stone-800/50 border border-stone-700 rounded-lg px-3 py-2 text-xs text-stone-400">
+          <span>Draft restored</span>
+          <button
+            type="button"
+            onClick={() => {
+              clearDraft(restaurantId);
+              setOverall(5);
+              setFood(null);
+              setService(null);
+              setAmbiance(null);
+              setValue(null);
+              setNotes("");
+              setVisitedAt(toDateString(new Date()));
+              setRestoredDraft(false);
+            }}
+            className="text-coral-500 hover:text-coral-400 font-medium"
+          >
+            Discard
+          </button>
+        </div>
+      )}
 
       <ScoreSlider label="Overall" value={overall} onChange={setOverall} required />
 

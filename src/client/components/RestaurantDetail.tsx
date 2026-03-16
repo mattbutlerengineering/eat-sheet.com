@@ -308,6 +308,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
           <div className="mb-6 bg-stone-900 border border-stone-800 rounded-xl p-4">
             <ReviewForm
               token={token}
+              restaurantId={id}
               existingReview={myReview}
               onSubmit={handleSubmitReview}
               onCancel={() => setShowForm(false)}

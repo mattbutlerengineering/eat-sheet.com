@@ -68,6 +68,15 @@ export function RandomPicker({ restaurants, onClose }: RandomPickerProps) {
     const pickedWinner = restaurants[winnerIdx];
     if (!pickedWinner) return;
 
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setDisplayIndex(winnerIdx);
+      setWinner(pickedWinner);
+      setPhase("result");
+      return;
+    }
+
     let tick = 0;
     const totalTicks = 15 + Math.floor(Math.random() * 10);
 

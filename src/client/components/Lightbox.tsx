@@ -88,6 +88,9 @@ export function Lightbox({ photoUrls, initialIndex, onClose }: LightboxProps) {
   return (
     <div
       ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ backgroundColor: `rgba(0,0,0,${opacity * 0.95})` }}
       onTouchStart={handleTouchStart}

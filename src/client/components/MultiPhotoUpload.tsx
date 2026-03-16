@@ -27,23 +27,27 @@ export function MultiPhotoUpload({ token, photoUrls, onPhotosChanged, maxPhotos 
     const newUrls: string[] = [];
 
     try {
-      for (const file of filesToUpload) {
-        const compressed = await compressImage(file);
-        const formData = new FormData();
-        formData.append("file", compressed, "photo.jpg");
+      for (let i = 0; i < filesToUpload.length; i += 3) {
+        const batch = filesToUpload.slice(i, i + 3);
+        const batchResults = await Promise.all(batch.map(async (file) => {
+          const compressed = await compressImage(file);
+          const formData = new FormData();
+          formData.append("file", compressed, "photo.jpg");
 
-        const res = await fetch("/api/photos/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
+          const res = await fetch("/api/photos/upload", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          });
 
-        const json = (await res.json()) as { data?: { photoUrl: string }; error?: string };
-        if (!res.ok || json.error) {
-          throw new Error(json.error || "Upload failed");
-        }
+          const json = (await res.json()) as { data?: { photoUrl: string }; error?: string };
+          if (!res.ok || json.error) {
+            throw new Error(json.error || "Upload failed");
+          }
 
-        newUrls.push(json.data!.photoUrl);
+          return json.data!.photoUrl;
+        }));
+        newUrls.push(...batchResults);
       }
 
       onPhotosChanged([...photoUrls, ...newUrls]);
