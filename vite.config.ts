@@ -29,6 +29,15 @@ export default defineConfig({
               expiration: { maxEntries: 200, maxAgeSeconds: 2592000 },
             },
           },
+          {
+            urlPattern: /^\/api\/(activity|stats|achievements)/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-dynamic",
+              expiration: { maxEntries: 20, maxAgeSeconds: 300 },
+              networkTimeoutSeconds: 3,
+            },
+          },
         ],
       },
       manifest: {
