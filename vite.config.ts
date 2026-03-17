@@ -74,6 +74,15 @@ export default defineConfig({
   publicDir: "public",
   build: {
     outDir: "dist",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-sentry": ["@sentry/react"],
+          "vendor-posthog": ["posthog-js"],
+        },
+      },
+    },
   },
   server: {
     proxy: {
