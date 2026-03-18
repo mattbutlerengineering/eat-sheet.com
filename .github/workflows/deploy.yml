@@ -5,15 +5,19 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - run: npm ci
 
@@ -22,11 +26,41 @@ jobs:
 
       - run: npm run build
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
       - name: E2E tests
         run: npx playwright test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+      - run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
       - name: Deploy Pages Frontend
         run: npx wrangler pages deploy dist --project-name=eat-sheet
