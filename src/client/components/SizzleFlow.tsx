@@ -278,7 +278,7 @@ export function SizzleFlow({ restaurants, token, bookmarkedIds, onClose }: Sizzl
 
             {/* Remaining count */}
             <p className="text-center text-stone-500 text-xs mt-3">
-              {stack.length - index - 1} remaining
+              {index + 1} of {stack.length} &middot; {stack.length - index - 1} remaining
             </p>
           </div>
 

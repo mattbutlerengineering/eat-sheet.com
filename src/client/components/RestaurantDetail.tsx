@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { track } from "../utils/analytics";
 import { useFetch, useApi } from "../hooks/useApi";
@@ -64,6 +64,13 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
   const isPerfect = restaurant?.avg_score === 10;
 
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [refreshingAfterDelete, setRefreshingAfterDelete] = useState(false);
+
+  useEffect(() => {
+    if (refreshingAfterDelete && !loading) {
+      setRefreshingAfterDelete(false);
+    }
+  }, [refreshingAfterDelete, loading]);
 
   const handleDeleteRestaurant = async () => {
     try {
@@ -78,6 +85,7 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
     try {
       await del(`/api/reviews/${reviewId}`);
       setConfirmDelete(null);
+      setRefreshingAfterDelete(true);
       refresh();
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : "Failed to delete");
@@ -313,6 +321,15 @@ export function RestaurantDetail({ token, member }: RestaurantDetailProps) {
               onSubmit={handleSubmitReview}
               onCancel={() => setShowForm(false)}
             />
+          </div>
+        )}
+
+        {refreshingAfterDelete && (
+          <div className="flex items-center justify-center gap-2 py-3 mb-4 text-stone-500 text-sm">
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
+            </svg>
+            Updating...
           </div>
         )}
 

@@ -56,6 +56,17 @@ bookmarks.get("/", async (c) => {
   const payload = c.get("jwtPayload");
   const db = c.env.DB;
 
+  const rawLimit = Number(c.req.query("limit") ?? 50);
+  const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 50, 1), 100);
+  const cursor = c.req.query("cursor");
+
+  const cursorClause = cursor ? "AND b.created_at < ?" : "";
+  const binds: (string | number)[] = [payload.member_id, payload.member_id, payload.member_id];
+  if (cursor) {
+    binds.push(cursor);
+  }
+  binds.push(limit + 1);
+
   const { results } = await db
     .prepare(
       `${visiblePeersCte()}
@@ -69,13 +80,20 @@ bookmarks.get("/", async (c) => {
        LEFT JOIN reviews rv ON rv.restaurant_id = r.id
        LEFT JOIN members m ON m.id = r.created_by
        WHERE b.member_id = ? AND r.created_by IN (SELECT member_id FROM visible_peers)
+       ${cursorClause}
        GROUP BY r.id
-       ORDER BY b.created_at DESC`
+       ORDER BY b.created_at DESC
+       LIMIT ?`
     )
-    .bind(payload.member_id, payload.member_id, payload.member_id)
+    .bind(...binds)
     .all();
 
-  return c.json({ data: results });
+  const hasMore = results.length > limit;
+  const bookmarksList = hasMore ? results.slice(0, limit) : results;
+  const lastItem = bookmarksList[bookmarksList.length - 1] as { bookmarked_at: string } | undefined;
+  const nextCursor = hasMore && lastItem ? lastItem.bookmarked_at : null;
+
+  return c.json({ data: bookmarksList, hasMore, nextCursor });
 });
 
 export { bookmarks as bookmarkRoutes };

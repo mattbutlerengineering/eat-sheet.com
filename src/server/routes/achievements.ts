@@ -128,6 +128,7 @@ achievements.get("/", async (c) => {
     },
   ];
 
+  c.header("Cache-Control", "private, max-age=120");
   return c.json({
     data: {
       badges,

@@ -62,19 +62,21 @@ recommendations.get("/", async (c) => {
 
     // 4. Cuisines the group has tried but this member hasn't reviewed
     db.prepare(
-      `${visiblePeersCte()}
+      `${visiblePeersCte()},
+       my_cuisines AS (
+         SELECT DISTINCT r2.cuisine
+         FROM reviews rv2
+         JOIN restaurants r2 ON r2.id = rv2.restaurant_id
+         WHERE rv2.member_id = ? AND r2.cuisine IS NOT NULL
+       )
        SELECT r.*, ROUND(AVG(rv.overall_score), 1) as avg_score, COUNT(rv.id) as review_count,
               r.cuisine as new_cuisine
        FROM restaurants r
        JOIN reviews rv ON rv.restaurant_id = r.id
        WHERE r.created_by IN (SELECT member_id FROM visible_peers) AND r.cuisine IS NOT NULL
-         AND r.cuisine NOT IN (
-           SELECT DISTINCT r2.cuisine FROM reviews rv2
-           JOIN restaurants r2 ON r2.id = rv2.restaurant_id
-           WHERE rv2.member_id = ? AND r2.cuisine IS NOT NULL
-         )
+         AND r.cuisine NOT IN (SELECT cuisine FROM my_cuisines)
        GROUP BY r.cuisine
-       ORDER BY AVG(rv.overall_score) DESC
+       ORDER BY avg_score DESC
        LIMIT ?`
     ).bind(mid, mid, mid, MAX_PER_CATEGORY),
   ]);

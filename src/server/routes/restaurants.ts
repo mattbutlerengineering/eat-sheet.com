@@ -35,6 +35,7 @@ restaurants.get("/", async (c) => {
     .bind(payload.member_id, payload.member_id)
     .all();
 
+  c.header("Cache-Control", "private, max-age=30");
   return c.json({ data: results });
 });
 
@@ -178,6 +179,9 @@ restaurants.post("/import", async (c) => {
     if (gpid && existingMap.has(gpid)) {
       results.push({ name: item.name.trim(), id: existingMap.get(gpid)!, status: "duplicate" });
     } else {
+      const lat = item.latitude != null && item.latitude >= -90 && item.latitude <= 90 ? item.latitude : null;
+      const lng = item.longitude != null && item.longitude >= -180 && item.longitude <= 180 ? item.longitude : null;
+
       results.push({ name: item.name.trim(), id: null, status: "created" });
       insertStmts.push(
         db
@@ -191,8 +195,8 @@ restaurants.post("/import", async (c) => {
             item.name.trim(),
             item.cuisine?.trim() || null,
             item.address?.trim() || null,
-            item.latitude ?? null,
-            item.longitude ?? null,
+            lat,
+            lng,
             gpid,
             payload.member_id
           )
@@ -258,6 +262,9 @@ restaurants.post("/", async (c) => {
     }
   }
 
+  const lat = body.latitude != null && body.latitude >= -90 && body.latitude <= 90 ? body.latitude : null;
+  const lng = body.longitude != null && body.longitude >= -180 && body.longitude <= 180 ? body.longitude : null;
+
   // Use a placeholder family_id for the legacy column
   const restaurant = await db
     .prepare(
@@ -271,8 +278,8 @@ restaurants.post("/", async (c) => {
       body.cuisine?.trim() || null,
       body.address?.trim() || null,
       body.photo_url?.trim() || null,
-      body.latitude ?? null,
-      body.longitude ?? null,
+      lat,
+      lng,
       googlePlaceId,
       payload.member_id
     )

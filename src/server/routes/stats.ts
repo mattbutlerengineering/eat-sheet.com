@@ -66,6 +66,7 @@ stats.get("/", async (c) => {
   const totals = totalsResult?.results[0] as { total_restaurants: number; total_reviews: number } | undefined;
   const categoryAvgs = categoryResult?.results[0] as { food: number | null; service: number | null; ambiance: number | null; value: number | null } | undefined;
 
+  c.header("Cache-Control", "private, max-age=60");
   return c.json({
     data: {
       total_restaurants: totals?.total_restaurants ?? 0,

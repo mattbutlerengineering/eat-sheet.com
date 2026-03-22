@@ -97,6 +97,7 @@ describe("Bookmarks API", () => {
       const body: any = await res.json();
       expect(body.data).toHaveLength(1);
       expect(body.data[0].name).toBe("Pizza Place");
+      expect(body.hasMore).toBe(false);
     });
 
     it("should return empty array when no bookmarks", async () => {
@@ -112,6 +113,7 @@ describe("Bookmarks API", () => {
       expect(res.status).toBe(200);
       const body: any = await res.json();
       expect(body.data).toHaveLength(0);
+      expect(body.hasMore).toBe(false);
     });
   });
 });

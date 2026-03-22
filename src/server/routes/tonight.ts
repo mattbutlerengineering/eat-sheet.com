@@ -72,6 +72,7 @@ tonight.get("/", async (c) => {
       .bind(mid, mid, mid, MIN_SCORE, mid, LIMIT)
       .all();
 
+    c.header("Cache-Control", "private, max-age=300");
     return c.json({ data: toSuggestions(result) });
   }
 
@@ -93,6 +94,7 @@ tonight.get("/", async (c) => {
     .bind(mid, mid, mid, mid, mid, LIMIT)
     .all();
 
+  c.header("Cache-Control", "private, max-age=300");
   return c.json({ data: toSuggestions(result) });
 });
 

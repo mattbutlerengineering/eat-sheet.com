@@ -4,6 +4,7 @@ import { track } from "../utils/analytics";
 import { useApi, useFetch } from "../hooks/useApi";
 import { ActivityFeed } from "./ActivityFeed";
 import { cuisineLabel } from "../utils/cuisines";
+import { SearchFilterBar } from "./SearchFilterBar";
 import type { NearbyPlace, Restaurant } from "../types";
 
 interface DiscoverPageProps {
@@ -174,6 +175,8 @@ function NearbyContent({ token }: { readonly token: string }) {
   const [addedIds, setAddedIds] = useState<ReadonlyMap<string, string>>(new Map());
   const [addingId, setAddingId] = useState<string | null>(null);
   const [dismissedIds, setDismissedIds] = useState<ReadonlySet<string>>(new Set());
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetchedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
@@ -209,10 +212,11 @@ function NearbyContent({ token }: { readonly token: string }) {
     });
   }, [places, search, cuisineFilter, dismissedIds]);
 
-  // Request geolocation when Nearby content mounts
   useEffect(() => {
-    request();
-  }, [request]);
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (geo.status !== "ready" || fetchedRef.current) return;
@@ -253,6 +257,9 @@ function NearbyContent({ token }: { readonly token: string }) {
         });
         track("nearby_place_added", { google_place_id: place.google_place_id });
         setAddedIds((prev) => new Map([...prev, [place.google_place_id, restaurant.id]]));
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        setToast("Added to your restaurants");
+        toastTimerRef.current = setTimeout(() => setToast(null), 2500);
       } catch (err) {
         if (err instanceof Error && err.message.includes("already in your list")) {
           setAddedIds((prev) => new Map([...prev, [place.google_place_id, ""]]));
@@ -275,6 +282,12 @@ function NearbyContent({ token }: { readonly token: string }) {
 
   return (
     <>
+      {toast && (
+        <div className="mb-3 px-4 py-2.5 bg-green-500/20 border border-green-500/30 text-green-400 text-sm font-medium rounded-xl text-center animate-fade-up">
+          {toast}
+        </div>
+      )}
+
       {/* Refresh button */}
       {places && (
         <div className="flex justify-end mb-2">
@@ -293,64 +306,40 @@ function NearbyContent({ token }: { readonly token: string }) {
 
       {/* Search + Cuisine Chips */}
       {places && places.length > 0 && (
-        <>
-          <div className="pb-2">
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search nearby..."
-                aria-label="Search nearby restaurants"
-                className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
-              />
-              {hasFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 text-xs"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
+        <SearchFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          placeholder="Search nearby..."
+          searchAriaLabel="Search nearby restaurants"
+          cuisines={cuisines}
+          cuisineFilter={cuisineFilter}
+          onCuisineChange={setCuisineFilter}
+          allActive={cuisineFilter === null}
+          onAllClick={() => setCuisineFilter(null)}
+          hasFilters={hasFilters}
+          onClearFilters={clearFilters}
+        />
+      )}
 
-          {cuisines.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-none">
-              <button
-                onClick={() => setCuisineFilter(null)}
-                className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                  cuisineFilter === null
-                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
-                    : "bg-stone-800 text-stone-400 border border-stone-700"
-                }`}
-              >
-                All
-              </button>
-              {cuisines.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCuisineFilter(cuisineFilter === c ? null : c)}
-                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                    cuisineFilter === c
-                      ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
-                      : "bg-stone-800 text-stone-400 border border-stone-700"
-                  }`}
-                >
-                  {cuisineLabel(c)}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
+      {/* Find Nearby button — user must opt in to geolocation */}
+      {geo.status === "idle" && (
+        <div className="flex flex-col items-center gap-3 py-16">
+          <button
+            onClick={request}
+            className="flex items-center gap-2 px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm rounded-xl active:scale-95 transition-all"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Find Nearby
+          </button>
+          <p className="text-stone-500 text-xs">Uses your location to discover restaurants</p>
+        </div>
       )}
 
       {/* Geolocation requesting */}
-      {(geo.status === "idle" || geo.status === "requesting") && (
+      {geo.status === "requesting" && (
         <div className="flex flex-col items-center gap-3 py-16 text-stone-500">
           <svg className="animate-spin w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />

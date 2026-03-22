@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, lazy, Suspense, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "../utils/analytics";
 import type { Restaurant, Member } from "../types";
@@ -12,6 +12,7 @@ import { CHOMPS_QUOTES, randomLoadingMessage, avatarColor } from "../utils/perso
 import { relativeTime } from "../utils/time";
 import { RecommendationCards } from "./RecommendationCards";
 import { cuisineLabel } from "../utils/cuisines";
+import { SearchFilterBar } from "./SearchFilterBar";
 
 const MapView = lazy(() =>
   import("./MapView").then((m) => ({ default: m.MapView }))
@@ -26,6 +27,77 @@ type SortMode = "recent" | "score";
 type ViewMode = "list" | "map";
 
 import { scoreBadgeColor, scoreDisplay } from "../utils/score";
+
+interface RestaurantCardProps {
+  readonly restaurant: Restaurant;
+  readonly memberId: string;
+  readonly animationDelay: string;
+}
+
+const RestaurantCard = memo(function RestaurantCard({ restaurant, memberId, animationDelay }: RestaurantCardProps) {
+  return (
+    <Link
+      to={`/restaurant/${restaurant.id}`}
+      className="block animate-fade-up"
+      style={{ animationDelay }}
+    >
+      <div className="card-warm bg-stone-900 border border-stone-800/50 rounded-xl p-5">
+        <div className="flex items-start justify-between gap-3">
+          {restaurant.photo_url && (
+            <img
+              src={restaurant.photo_url}
+              alt=""
+              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display font-bold text-lg text-stone-50 truncate">
+              {restaurant.name}
+            </h3>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {restaurant.cuisine && (
+                <span className={`text-xs px-2 py-0.5 rounded-md font-medium text-white/90 ${avatarColor(restaurant.cuisine)}`}>
+                  {cuisineLabel(restaurant.cuisine)}
+                </span>
+              )}
+              <span className="text-sm text-stone-500">
+                {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-1 text-xs text-stone-500">
+              {restaurant.creator_name && (
+                <span>Added by {restaurant.created_by === memberId ? "You" : restaurant.creator_name}</span>
+              )}
+              {restaurant.last_visited_at && (
+                <>
+                  <span>·</span>
+                  <span>Visited {relativeTime(restaurant.last_visited_at)}</span>
+                </>
+              )}
+              {(restaurant.bookmark_count ?? 0) > 0 && (
+                <>
+                  <span>·</span>
+                  <span className="text-coral-500/70">
+                    🔖 {restaurant.bookmark_count} {restaurant.bookmark_count === 1 ? "wants" : "want"} to try
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <div
+            className={`px-2.5 py-1 rounded-lg font-display font-black text-lg ${scoreBadgeColor(restaurant.avg_score)} ${
+              restaurant.avg_score !== null && restaurant.avg_score >= 8
+                ? "animate-glow-pulse"
+                : ""
+            }`}
+          >
+            {scoreDisplay(restaurant.avg_score)}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+});
 
 export function RestaurantList({ token, member }: RestaurantListProps) {
   const navigate = useNavigate();
@@ -135,75 +207,37 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {/* Recommendations — only in list view */}
         {viewMode === "list" && <RecommendationCards token={token} />}
 
-        {/* Search */}
-        <div className="pt-4 pb-2">
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); trackSearch(e.target.value); }}
-              placeholder="Search restaurants..."
-              aria-label="Search restaurants"
-              className="w-full pl-9 pr-4 py-2.5 bg-stone-800/50 border border-stone-800 rounded-xl text-stone-50 text-sm placeholder:text-stone-500 focus:outline-none focus:border-coral-500/50 transition-colors"
-            />
-            {hasFilters && (
-              <button
-                onClick={clearFilters}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 text-xs"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+        {/* Search + Cuisine Chips */}
+        <div className="pt-4">
+          <SearchFilterBar
+            search={search}
+            onSearchChange={(v) => { setSearch(v); trackSearch(v); }}
+            cuisines={cuisines}
+            cuisineFilter={cuisineFilter}
+            onCuisineChange={(next) => { setCuisineFilter(next); if (next) track("cuisine_filter_applied", { cuisine: next }); }}
+            allActive={cuisineFilter === null && !showWantToTry}
+            onAllClick={() => { setCuisineFilter(null); setShowWantToTry(false); }}
+            hasFilters={hasFilters}
+            onClearFilters={clearFilters}
+            extraChips={
+              bookmarkedIds.size > 0 ? (
+                <button
+                  onClick={() => setShowWantToTry(!showWantToTry)}
+                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
+                    showWantToTry
+                      ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
+                      : "bg-stone-800 text-stone-400 border border-stone-700"
+                  }`}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill={showWantToTry ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                  </svg>
+                  Want to Try ({bookmarkedIds.size})
+                </button>
+              ) : undefined
+            }
+          />
         </div>
-
-        {/* Cuisine Chips + Want to Try */}
-        {(cuisines.length > 0 || bookmarkedIds.size > 0) && (
-          <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-none">
-            <button
-              onClick={() => { setCuisineFilter(null); setShowWantToTry(false); }}
-              className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                cuisineFilter === null && !showWantToTry
-                  ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
-                  : "bg-stone-800 text-stone-400 border border-stone-700"
-              }`}
-            >
-              All
-            </button>
-            {bookmarkedIds.size > 0 && (
-              <button
-                onClick={() => setShowWantToTry(!showWantToTry)}
-                className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${
-                  showWantToTry
-                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
-                    : "bg-stone-800 text-stone-400 border border-stone-700"
-                }`}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill={showWantToTry ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-                </svg>
-                Want to Try ({bookmarkedIds.size})
-              </button>
-            )}
-            {cuisines.map((c) => (
-              <button
-                key={c}
-                onClick={() => { const next = cuisineFilter === c ? null : c; setCuisineFilter(next); if (next) track("cuisine_filter_applied", { cuisine: next }); }}
-                className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                  cuisineFilter === c
-                    ? "bg-coral-500/20 text-coral-500 border border-coral-500/30"
-                    : "bg-stone-800 text-stone-400 border border-stone-700"
-                }`}
-              >
-                {cuisineLabel(c)}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Sort, View & Pick */}
         <div className="flex items-center justify-between py-2 gap-2 overflow-x-auto scrollbar-none -mx-4 px-4">
@@ -386,67 +420,12 @@ export function RestaurantList({ token, member }: RestaurantListProps) {
         {viewMode === "list" && (
         <div className="space-y-3 mt-2">
           {filtered.map((restaurant, i) => (
-            <Link
+            <RestaurantCard
               key={restaurant.id}
-              to={`/restaurant/${restaurant.id}`}
-              className="block animate-fade-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <div className="card-warm bg-stone-900 border border-stone-800/50 rounded-xl p-5">
-                <div className="flex items-start justify-between gap-3">
-                  {restaurant.photo_url && (
-                    <img
-                      src={restaurant.photo_url}
-                      alt=""
-                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                    />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-display font-bold text-lg text-stone-50 truncate">
-                      {restaurant.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {restaurant.cuisine && (
-                        <span className={`text-xs px-2 py-0.5 rounded-md font-medium text-white/90 ${avatarColor(restaurant.cuisine)}`}>
-                          {cuisineLabel(restaurant.cuisine)}
-                        </span>
-                      )}
-                      <span className="text-sm text-stone-500">
-                        {restaurant.review_count} {restaurant.review_count === 1 ? "review" : "reviews"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-stone-500">
-                      {restaurant.creator_name && (
-                        <span>Added by {restaurant.created_by === member.id ? "You" : restaurant.creator_name}</span>
-                      )}
-                      {restaurant.last_visited_at && (
-                        <>
-                          <span>·</span>
-                          <span>Visited {relativeTime(restaurant.last_visited_at)}</span>
-                        </>
-                      )}
-                      {(restaurant.bookmark_count ?? 0) > 0 && (
-                        <>
-                          <span>·</span>
-                          <span className="text-coral-500/70">
-                            🔖 {restaurant.bookmark_count} {restaurant.bookmark_count === 1 ? "wants" : "want"} to try
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div
-                    className={`px-2.5 py-1 rounded-lg font-display font-black text-lg ${scoreBadgeColor(restaurant.avg_score)} ${
-                      restaurant.avg_score !== null && restaurant.avg_score >= 8
-                        ? "animate-glow-pulse"
-                        : ""
-                    }`}
-                  >
-                    {scoreDisplay(restaurant.avg_score)}
-                  </div>
-                </div>
-              </div>
-            </Link>
+              restaurant={restaurant}
+              memberId={member.id}
+              animationDelay={`${i * 0.05}s`}
+            />
           ))}
         </div>
         )}

@@ -90,7 +90,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
 
       {/* Phase: Loading */}
       {phase === "loading" && (
-        <div className="flex flex-col items-center gap-4">
+        <div role="status" aria-live="polite" className="flex flex-col items-center gap-4">
           <Monster variant="party" size={56} />
           <p className="text-stone-500 text-sm italic">{loadingMessage}</p>
           <BounceDots />
@@ -99,7 +99,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
 
       {/* Phase: Suggestion */}
       {phase === "suggestion" && current && (
-        <div className="w-full max-w-sm animate-fade-up">
+        <div role="status" aria-live="polite" className="w-full max-w-sm animate-fade-up">
           <p className="text-center text-stone-500 text-sm mb-4">
             {currentIndex + 1} of {suggestions.length}
           </p>
@@ -167,7 +167,7 @@ export function TonightFlow({ token, onClose }: TonightFlowProps) {
 
       {/* Phase: Empty / Exhausted */}
       {phase === "empty" && (
-        <div className="flex flex-col items-center gap-4 animate-fade-up">
+        <div role="status" aria-live="polite" className="flex flex-col items-center gap-4 animate-fade-up">
           <Monster variant="bored" size={56} />
           <p className="text-stone-300 font-display font-bold text-lg text-center">
             {suggestions.length > 0 ? "That's all we've got!" : CHOMPS_QUOTES.empty}

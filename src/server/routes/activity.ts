@@ -55,6 +55,7 @@ activity.get("/", async (c) => {
         JOIN members m ON m.id = rv.member_id
         JOIN restaurants rest ON rest.id = rv.restaurant_id
         WHERE rest.created_by IN (SELECT member_id FROM visible_peers)
+          AND rv.member_id IN (SELECT member_id FROM visible_peers)
       )
       ${cursorClause}
       ORDER BY timestamp DESC
