@@ -41,9 +41,9 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: "Eat Sheet and Dine",
-        short_name: "Eat Sheet",
-        description: "Family restaurant rating app",
+        name: "Hospitality Platform",
+        short_name: "Hospitality",
+        description: "Restaurant front-of-house management",
         theme_color: "#E8836E",
         background_color: "#0c0a09",
         display: "standalone",
