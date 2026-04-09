@@ -9,7 +9,7 @@ interface DashboardData {
   readonly tables: Record<string, number>;
 }
 
-function buildDashboardSpec(roleId: string, data: DashboardData) {
+function buildDashboardSpec(_roleId: string, data: DashboardData) {
   const elements: Record<string, object> = {};
   const rootChildren: string[] = [];
 

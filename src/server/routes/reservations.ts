@@ -31,7 +31,7 @@ const updateReservationSchema = z.object({
 
 const statusSchema = z.object({
   status: z.enum(['seated', 'completed', 'no_show', 'cancelled'], {
-    errorMap: () => ({ message: "status must be one of 'seated', 'completed', 'no_show', 'cancelled'" }),
+    error: "status must be one of 'seated', 'completed', 'no_show', 'cancelled'",
   }),
 });
 
