@@ -16,6 +16,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@json-render/react": "^0.16.0",
     "@sentry/cloudflare": "^10.42.0",
     "@sentry/react": "^10.42.0",
     "arctic": "^3.7.0",
@@ -25,7 +26,8 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.1",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "zod": "^4.3.6"
   },
   "overrides": {
     "serialize-javascript": ">=7.0.3",
