@@ -1,15 +1,19 @@
 export default function Login() {
+  const handleLogin = () => {
+    window.location.href = '/api/auth/google';
+  };
+
   return (
-    <div className="flex items-center justify-center h-screen bg-stone-50">
-      <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-sm text-center">
-        <h1 className="text-2xl font-bold text-stone-800 mb-2">Sign in</h1>
-        <p className="text-stone-500 mb-6 text-sm">Welcome to Eat Sheet</p>
-        <a
-          href="/api/auth/google"
-          className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-700 transition-colors"
+    <div className="flex items-center justify-center min-h-screen bg-stone-900">
+      <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+        <h1 className="text-3xl font-bold text-stone-900 text-center">Hospitality</h1>
+        <p className="text-stone-500 text-center mt-2 mb-8">Restaurant management platform</p>
+        <button
+          onClick={handleLogin}
+          className="w-full flex items-center justify-center gap-3 bg-stone-900 text-white rounded-lg px-4 py-3 font-medium hover:bg-stone-800 transition-colors"
         >
-          Continue with Google
-        </a>
+          Sign in with Google
+        </button>
       </div>
     </div>
   );
