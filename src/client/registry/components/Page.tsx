@@ -1,7 +1,7 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 interface PageProps {
-  readonly children?: React.ReactNode;
+  readonly children?: ReactNode;
 }
 
 export function Page({ children }: PageProps) {

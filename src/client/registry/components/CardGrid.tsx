@@ -1,8 +1,8 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 interface CardGridProps {
   readonly columns?: number;
-  readonly children?: React.ReactNode;
+  readonly children?: ReactNode;
 }
 
 export function CardGrid({ columns = 3, children }: CardGridProps) {
