@@ -1,7 +1,8 @@
 export default function Login() {
   const handleLogin = async () => {
     const res = await fetch('/api/auth/google', { method: 'POST' });
-    const { data } = await res.json();
+    const body = await res.json() as { data?: { url?: string } };
+    const data = body.data;
     if (data?.url) {
       window.location.href = data.url;
     }
