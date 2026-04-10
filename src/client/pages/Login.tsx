@@ -1,9 +1,11 @@
 export default function Login() {
   const handleLogin = async () => {
     const res = await fetch('/api/auth/google', { method: 'POST' });
-    const body = await res.json() as { data?: { url?: string } };
+    const body = await res.json() as { data?: { url?: string; state?: string; codeVerifier?: string } };
     const data = body.data;
-    if (data?.url) {
+    if (data?.url && data.state && data.codeVerifier) {
+      sessionStorage.setItem('oauth_state', data.state);
+      sessionStorage.setItem('oauth_code_verifier', data.codeVerifier);
       window.location.href = data.url;
     }
   };

@@ -44,7 +44,7 @@ authRoutes.post('/google', async (c) => {
   const google = new Google(
     c.env.GOOGLE_OAUTH_CLIENT_ID,
     c.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    `${c.env.OAUTH_REDIRECT_BASE}/api/auth/google/callback`
+    `${c.env.OAUTH_REDIRECT_BASE}/auth/callback`
   );
 
   const state = crypto.randomUUID();
@@ -55,12 +55,12 @@ authRoutes.post('/google', async (c) => {
   return c.json({ success: true, data: { url: url.toString(), state, codeVerifier } }, 200);
 });
 
-// GET /google/callback — OAuth callback
-authRoutes.get('/google/callback', async (c) => {
-  const code = c.req.query('code');
-  const state = c.req.query('state');
-  // codeVerifier must be passed by the client (e.g. stored in sessionStorage and sent as query param)
-  const codeVerifier = c.req.query('code_verifier');
+// POST /google/callback — OAuth callback (client sends code + code_verifier from sessionStorage)
+authRoutes.post('/google/callback', async (c) => {
+  const body = await c.req.json().catch(() => null) as { code?: string; state?: string; code_verifier?: string } | null;
+  const code = body?.code;
+  const state = body?.state;
+  const codeVerifier = body?.code_verifier;
 
   if (!code || !state || !codeVerifier) {
     return c.json({ success: false, error: 'Missing code, state, or code_verifier parameter' }, 400);
@@ -69,7 +69,7 @@ authRoutes.get('/google/callback', async (c) => {
   const google = new Google(
     c.env.GOOGLE_OAUTH_CLIENT_ID,
     c.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    `${c.env.OAUTH_REDIRECT_BASE}/api/auth/google/callback`
+    `${c.env.OAUTH_REDIRECT_BASE}/auth/callback`
   );
 
   let tokens;

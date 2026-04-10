@@ -10,6 +10,7 @@ const Reservations = lazy(() => import('./pages/Reservations'));
 const Waitlist = lazy(() => import('./pages/Waitlist'));
 const Guests = lazy(() => import('./pages/Guests'));
 const Settings = lazy(() => import('./pages/Settings'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             element={
               <ProtectedRoute>
