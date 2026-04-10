@@ -44,7 +44,7 @@ authRoutes.post('/google', async (c) => {
   const google = new Google(
     c.env.GOOGLE_OAUTH_CLIENT_ID,
     c.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    `${c.env.OAUTH_REDIRECT_BASE}/auth/callback`
+    `${c.env.OAUTH_REDIRECT_BASE}/api/auth/google/callback`
   );
 
   const state = crypto.randomUUID();
@@ -55,7 +55,18 @@ authRoutes.post('/google', async (c) => {
   return c.json({ success: true, data: { url: url.toString(), state, codeVerifier } }, 200);
 });
 
-// POST /google/callback — OAuth callback (client sends code + code_verifier from sessionStorage)
+// GET /google/callback — Google redirects here, we forward to client-side callback page
+authRoutes.get('/google/callback', async (c) => {
+  const code = c.req.query('code');
+  const state = c.req.query('state');
+  if (!code || !state) {
+    return c.json({ success: false, error: 'Missing code or state parameter' }, 400);
+  }
+  const params = new URLSearchParams({ code, state });
+  return c.redirect(`/auth/callback?${params.toString()}`);
+});
+
+// POST /google/callback — Token exchange (client sends code + code_verifier from sessionStorage)
 authRoutes.post('/google/callback', async (c) => {
   const body = await c.req.json().catch(() => null) as { code?: string; state?: string; code_verifier?: string } | null;
   const code = body?.code;
@@ -69,7 +80,7 @@ authRoutes.post('/google/callback', async (c) => {
   const google = new Google(
     c.env.GOOGLE_OAUTH_CLIENT_ID,
     c.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    `${c.env.OAUTH_REDIRECT_BASE}/auth/callback`
+    `${c.env.OAUTH_REDIRECT_BASE}/api/auth/google/callback`
   );
 
   let tokens;
