@@ -54,6 +54,56 @@ function makeApp(mockDb: D1Database) {
     });
 }
 
+describe('GET /api/t/:tenantId/reservations/availability', () => {
+  it('returns available time slots (200)', async () => {
+    vi.mocked(getAvailableSlots).mockResolvedValueOnce([
+      { time: '18:00', available: true },
+      { time: '19:00', available: true },
+    ] as Awaited<ReturnType<typeof getAvailableSlots>>);
+
+    const { db } = createMockDb({});
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/availability?date=2026-04-10&party_size=4', {
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: unknown[] };
+    expect(body.success).toBe(true);
+    expect(Array.isArray(body.data)).toBe(true);
+  });
+
+  it('returns 400 when date is missing (400)', async () => {
+    const { db } = createMockDb({});
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/availability?party_size=4', {
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+
+  it('returns 400 when party_size is missing (400)', async () => {
+    const { db } = createMockDb({});
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/availability?date=2026-04-10', {
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
 describe('GET /api/t/:tenantId/reservations', () => {
   it('lists reservations with date filter (200)', async () => {
     const { db } = createMockDb({
@@ -153,6 +203,49 @@ describe('GET /api/t/:tenantId/reservations/:id', () => {
   });
 });
 
+describe('PATCH /api/t/:tenantId/reservations/:id', () => {
+  it('updates reservation details (200)', async () => {
+    const updatedReservation = { ...TEST_RESERVATION, party_size: 6, notes: 'Updated note' };
+    const { db } = createMockDb({
+      first: {
+        'UPDATE reservations SET': updatedReservation,
+      },
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/res-1', {
+      method: 'PATCH',
+      headers: authHeader(token),
+      body: JSON.stringify({ party_size: 6, notes: 'Updated note' }),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: typeof updatedReservation };
+    expect(body.success).toBe(true);
+    expect(body.data.party_size).toBe(6);
+    expect(body.data.notes).toBe('Updated note');
+  });
+
+  it('returns 404 for unknown reservation (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/nonexistent', {
+      method: 'PATCH',
+      headers: authHeader(token),
+      body: JSON.stringify({ party_size: 2 }),
+    });
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
 describe('PATCH /api/t/:tenantId/reservations/:id/status', () => {
   it('transitions confirmed to seated (200)', async () => {
     const { db } = createMockDb({});
@@ -191,6 +284,24 @@ describe('PATCH /api/t/:tenantId/reservations/:id/status', () => {
     expect(body.success).toBe(false);
     expect(body.error).toContain('Cannot transition');
   });
+
+  it('transitions confirmed to cancelled (200)', async () => {
+    const { db } = createMockDb({});
+    vi.mocked(transitionReservation).mockResolvedValueOnce({ success: true });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/res-1/status', {
+      method: 'PATCH',
+      headers: authHeader(token),
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: { id: string; status: string } };
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe('cancelled');
+  });
 });
 
 describe('DELETE /api/t/:tenantId/reservations/:id', () => {
@@ -210,5 +321,22 @@ describe('DELETE /api/t/:tenantId/reservations/:id', () => {
     const body = await res.json() as { success: boolean; data: { deleted: string } };
     expect(body.success).toBe(true);
     expect(body.data.deleted).toBe('res-1');
+  });
+
+  it('returns 404 for unknown reservation (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/reservations/nonexistent', {
+      method: 'DELETE',
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
   });
 });

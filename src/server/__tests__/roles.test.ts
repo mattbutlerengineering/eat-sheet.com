@@ -86,6 +86,45 @@ describe('POST /api/t/:tenantId/roles', () => {
     const body = await res.json() as { success: boolean };
     expect(body.success).toBe(true);
   });
+
+  it('creates custom role with permissions (201)', async () => {
+    const { db } = createMockDb({
+      first: { 'INSERT INTO roles': TEST_CUSTOM_ROLE },
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles', {
+      method: 'POST',
+      headers: authHeader(token),
+      body: JSON.stringify({
+        name: 'Shift Lead',
+        description: 'Leads the shift',
+        permission_ids: ['perm-1', 'perm-2'],
+      }),
+    });
+
+    expect(res.status).toBe(201);
+    const body = await res.json() as { success: boolean; data: typeof TEST_CUSTOM_ROLE };
+    expect(body.success).toBe(true);
+    expect(body.data).toBeTruthy();
+  });
+
+  it('rejects missing name (400)', async () => {
+    const { db } = createMockDb({});
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles', {
+      method: 'POST',
+      headers: authHeader(token),
+      body: JSON.stringify({ description: 'No name given', permission_ids: [] }),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
 });
 
 describe('PATCH /api/t/:tenantId/roles/:id', () => {
@@ -107,6 +146,47 @@ describe('PATCH /api/t/:tenantId/roles/:id', () => {
     expect(body.success).toBe(false);
     expect(body.error).toMatch(/system/i);
   });
+
+  it('updates custom role name (200)', async () => {
+    const updatedRole = { ...TEST_CUSTOM_ROLE, name: 'Senior Lead' };
+    const { db } = createMockDb({
+      first: {
+        'SELECT id, is_system, tenant_id FROM roles': TEST_CUSTOM_ROLE,
+        'UPDATE roles SET': updatedRole,
+      },
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles/role-custom-1', {
+      method: 'PATCH',
+      headers: authHeader(token),
+      body: JSON.stringify({ name: 'Senior Lead' }),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: typeof updatedRole };
+    expect(body.success).toBe(true);
+    expect(body.data.name).toBe('Senior Lead');
+  });
+
+  it('returns 404 for unknown role (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles/nonexistent', {
+      method: 'PATCH',
+      headers: authHeader(token),
+      body: JSON.stringify({ name: 'Ghost' }),
+    });
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
 });
 
 describe('DELETE /api/t/:tenantId/roles/:id', () => {
@@ -126,5 +206,64 @@ describe('DELETE /api/t/:tenantId/roles/:id', () => {
     const body = await res.json() as { success: boolean; error: string };
     expect(body.success).toBe(false);
     expect(body.error).toMatch(/system/i);
+  });
+
+  it('rejects deleting role with members assigned (400)', async () => {
+    const { db } = createMockDb({
+      first: {
+        'SELECT id, is_system, tenant_id FROM roles': TEST_CUSTOM_ROLE,
+        'COUNT(*) as total': { total: 2 },
+      },
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles/role-custom-1', {
+      method: 'DELETE',
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+    expect(body.error).toMatch(/member/i);
+  });
+
+  it('deletes custom role with no members assigned (200)', async () => {
+    const { db } = createMockDb({
+      first: {
+        'SELECT id, is_system, tenant_id FROM roles': TEST_CUSTOM_ROLE,
+        'COUNT(*) as total': { total: 0 },
+      },
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles/role-custom-1', {
+      method: 'DELETE',
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: { deleted: string } };
+    expect(body.success).toBe(true);
+    expect(body.data.deleted).toBe('role-custom-1');
+  });
+
+  it('returns 404 for unknown role (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const request = makeApp(db);
+    const token = await makeToken({ tenantId: 'tenant-1' });
+
+    const res = await request('/api/t/tenant-1/roles/nonexistent', {
+      method: 'DELETE',
+      headers: authHeader(token),
+    });
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
   });
 });

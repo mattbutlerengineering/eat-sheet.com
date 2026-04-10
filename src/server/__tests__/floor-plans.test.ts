@@ -281,6 +281,272 @@ describe('PATCH /api/t/:tenantId/tables/:id/status', () => {
   });
 });
 
+// ---- PATCH /floor-plans/:id ----
+
+describe('PATCH /api/t/:tenantId/floor-plans/:id', () => {
+  it('sets is_active=1 and deactivates others (200)', async () => {
+    const activatedPlan = { ...TEST_FLOOR_PLAN, is_active: 1 };
+    const { db } = createMockDb({
+      first: {
+        'SELECT * FROM floor_plans WHERE id': activatedPlan,
+      },
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/fp-1`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: 1 }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: typeof activatedPlan };
+    expect(body.success).toBe(true);
+    expect(body.data.is_active).toBe(1);
+  });
+
+  it('returns 404 for unknown floor plan (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/nonexistent`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ name: 'Updated Name' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
+// ---- POST /floor-plans/:id/sections ----
+
+describe('POST /api/t/:tenantId/floor-plans/:id/sections', () => {
+  it('creates a section (201)', async () => {
+    const TEST_SECTION = {
+      id: 'sec-1',
+      floor_plan_id: 'fp-1',
+      tenant_id: TEST_TENANT.id,
+      name: 'Bar Area',
+      sort_order: 0,
+      created_at: '2026-01-01T00:00:00Z',
+    };
+    const { db } = createMockDb({
+      first: {
+        'SELECT * FROM floor_plans WHERE id': TEST_FLOOR_PLAN,
+        'SELECT * FROM sections WHERE id': TEST_SECTION,
+      },
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/fp-1/sections`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ name: 'Bar Area' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(201);
+    const body = await res.json() as { success: boolean; data: typeof TEST_SECTION };
+    expect(body.success).toBe(true);
+    expect(body.data).toBeTruthy();
+  });
+
+  it('returns 404 if floor plan not found (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/nonexistent/sections`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ name: 'Bar Area' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
+// ---- PATCH /floor-plans/sections/:id ----
+
+describe('PATCH /api/t/:tenantId/floor-plans/sections/:id', () => {
+  it('updates a section name (200)', async () => {
+    const TEST_SECTION = {
+      id: 'sec-1',
+      floor_plan_id: 'fp-1',
+      tenant_id: TEST_TENANT.id,
+      name: 'Updated Bar',
+      sort_order: 1,
+      created_at: '2026-01-01T00:00:00Z',
+    };
+    const { db } = createMockDb({
+      first: {
+        'SELECT * FROM sections WHERE id': TEST_SECTION,
+      },
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/sections/sec-1`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ name: 'Updated Bar' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: typeof TEST_SECTION };
+    expect(body.success).toBe(true);
+    expect(body.data.name).toBe('Updated Bar');
+  });
+
+  it('returns 404 for unknown section (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/floor-plans/sections/nonexistent`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ name: 'Nowhere' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
+// ---- PATCH /tables/:id ----
+
+describe('PATCH /api/t/:tenantId/tables/:id', () => {
+  it('updates table label and capacity (200)', async () => {
+    const updatedTable = { ...TEST_TABLE, label: 'T2', max_capacity: 6 };
+    const { db } = createMockDb({
+      first: {
+        'SELECT * FROM tables WHERE id': updatedTable,
+      },
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/tables/table-1`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ label: 'T2', max_capacity: 6 }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean; data: typeof updatedTable };
+    expect(body.success).toBe(true);
+    expect(body.data.label).toBe('T2');
+    expect(body.data.max_capacity).toBe(6);
+  });
+
+  it('returns 404 for unknown table (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/tables/nonexistent`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ label: 'TX' }),
+        headers: authHeader(token),
+      },
+      bindings
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
+// ---- DELETE /tables/:id ----
+
+describe('DELETE /api/t/:tenantId/tables/:id', () => {
+  it('deletes a table (200)', async () => {
+    const { db } = createMockDb({
+      first: {
+        'SELECT * FROM tables WHERE id': TEST_TABLE,
+      },
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/tables/table-1`,
+      { method: 'DELETE', headers: authHeader(token) },
+      bindings
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { success: boolean };
+    expect(body.success).toBe(true);
+  });
+
+  it('returns 404 for unknown table (404)', async () => {
+    const { db } = createMockDb({
+      first: {},
+    });
+    const { app, bindings } = makeApp(db);
+
+    const token = await makeToken({ tenantId: TEST_TENANT.id });
+    const res = await app.request(
+      `/api/t/${TEST_TENANT.id}/tables/nonexistent`,
+      { method: 'DELETE', headers: authHeader(token) },
+      bindings
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json() as { success: boolean; error: string };
+    expect(body.success).toBe(false);
+  });
+});
+
 // ---- DELETE /floor-plans/:id ----
 
 describe('DELETE /api/t/:tenantId/floor-plans/:id', () => {
