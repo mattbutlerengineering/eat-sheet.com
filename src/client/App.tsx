@@ -11,6 +11,7 @@ const Waitlist = lazy(() => import('./pages/Waitlist'));
 const Guests = lazy(() => import('./pages/Guests'));
 const Settings = lazy(() => import('./pages/Settings'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const Setup = lazy(() => import('./pages/Setup'));
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/setup" element={<Setup />} />
           <Route
             element={
               <ProtectedRoute>
