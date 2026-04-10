@@ -43,7 +43,10 @@ app.use('/api/*', async (c, next) => {
   }
 });
 
-// Public + auth routes
+// Auth routes — public endpoints (google, callback) + authenticated endpoints (refresh, me, switch-tenant)
+app.use('/api/auth/refresh', authMiddleware);
+app.use('/api/auth/me', authMiddleware);
+app.use('/api/auth/switch-tenant', authMiddleware);
 app.route('/api/auth', authRoutes);
 
 // Authenticated (no tenant scope) — creating tenants
