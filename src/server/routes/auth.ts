@@ -240,6 +240,9 @@ authRoutes.post('/switch-tenant', async (c) => {
 
   const { tenant_id } = parsed.data;
   const userId = c.get('userId');
+  if (!userId) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401);
+  }
   const db = c.env.DB;
 
   // Verify user is a member of the target tenant

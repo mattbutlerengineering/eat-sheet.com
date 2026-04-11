@@ -48,7 +48,7 @@ waitlistRoutes.get('/', requirePermission('waitlist.view'), async (c) => {
 
   const { results } = await db
     .prepare(
-      `SELECT * FROM waitlist
+      `SELECT * FROM waitlist_entries
        WHERE tenant_id = ? AND status IN ('waiting', 'notified')
        ORDER BY position ASC`
     )
@@ -107,7 +107,7 @@ waitlistRoutes.post('/', requirePermission('waitlist.create'), async (c) => {
   // Auto-assign position (MAX(position) + 1 for this tenant's waiting entries)
   const maxResult = await db
     .prepare(
-      `SELECT MAX(position) as max_position FROM waitlist
+      `SELECT MAX(position) as max_position FROM waitlist_entries
        WHERE tenant_id = ? AND status = 'waiting'`
     )
     .bind(tenantId)
@@ -123,7 +123,7 @@ waitlistRoutes.post('/', requirePermission('waitlist.create'), async (c) => {
 
   const entry = await db
     .prepare(
-      `INSERT INTO waitlist
+      `INSERT INTO waitlist_entries
          (id, tenant_id, guest_id, guest_name, party_size, phone, quoted_wait, position, status, notes, checked_in_at, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'waiting', ?, ?, ?)
        RETURNING *`
@@ -177,7 +177,7 @@ waitlistRoutes.patch('/:id', requirePermission('waitlist.update'), async (c) => 
 
   const entry = await db
     .prepare(
-      `UPDATE waitlist SET ${setClauses} WHERE id = ? AND tenant_id = ? RETURNING *`
+      `UPDATE waitlist_entries SET ${setClauses} WHERE id = ? AND tenant_id = ? RETURNING *`
     )
     .bind(...values, id, tenantId)
     .first<WaitlistEntry>();
@@ -212,7 +212,7 @@ waitlistRoutes.patch('/:id/status', requirePermission('waitlist.update'), async 
 
   // Fetch current entry to validate transition
   const current = await db
-    .prepare('SELECT * FROM waitlist WHERE id = ? AND tenant_id = ?')
+    .prepare('SELECT * FROM waitlist_entries WHERE id = ? AND tenant_id = ?')
     .bind(id, tenantId)
     .first<WaitlistEntry>();
 
@@ -239,7 +239,7 @@ waitlistRoutes.patch('/:id/status', requirePermission('waitlist.update'), async 
 
   const updated = await db
     .prepare(
-      `UPDATE waitlist SET ${setClauses} WHERE id = ? AND tenant_id = ? RETURNING *`
+      `UPDATE waitlist_entries SET ${setClauses} WHERE id = ? AND tenant_id = ? RETURNING *`
     )
     .bind(...bindValues)
     .first<WaitlistEntry>();
@@ -263,7 +263,7 @@ waitlistRoutes.delete('/:id', requirePermission('waitlist.delete'), async (c) =>
   const id = c.req.param('id');
 
   const existing = await db
-    .prepare('SELECT * FROM waitlist WHERE id = ? AND tenant_id = ?')
+    .prepare('SELECT * FROM waitlist_entries WHERE id = ? AND tenant_id = ?')
     .bind(id, tenantId)
     .first<WaitlistEntry>();
 
@@ -272,7 +272,7 @@ waitlistRoutes.delete('/:id', requirePermission('waitlist.delete'), async (c) =>
   }
 
   await db
-    .prepare('DELETE FROM waitlist WHERE id = ? AND tenant_id = ?')
+    .prepare('DELETE FROM waitlist_entries WHERE id = ? AND tenant_id = ?')
     .bind(id, tenantId)
     .run();
 
@@ -303,7 +303,7 @@ waitlistRoutes.post('/reorder', requirePermission('waitlist.manage'), async (c) 
 
   for (const { id, position } of entries) {
     await db
-      .prepare('UPDATE waitlist SET position = ? WHERE id = ? AND tenant_id = ?')
+      .prepare('UPDATE waitlist_entries SET position = ? WHERE id = ? AND tenant_id = ?')
       .bind(position, id, tenantId)
       .run();
   }

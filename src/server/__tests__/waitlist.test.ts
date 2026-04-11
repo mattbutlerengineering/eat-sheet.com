@@ -46,7 +46,7 @@ function makeApp(mockDb: D1Database) {
 describe('GET /api/t/:tenantId/waitlist', () => {
   it('lists waitlist ordered by position (200)', async () => {
     const { db } = createMockDb({
-      all: { 'FROM waitlist': [TEST_WAITLIST_ENTRY] },
+      all: { 'FROM waitlist_entries': [TEST_WAITLIST_ENTRY] },
     });
     const request = makeApp(db);
     const token = await makeToken({ tenantId: 'tenant-1' });
@@ -67,7 +67,7 @@ describe('POST /api/t/:tenantId/waitlist', () => {
     const { db } = createMockDb({
       first: {
         'MAX(position)': { max_position: 0 },
-        'INSERT INTO waitlist': TEST_WAITLIST_ENTRY,
+        'INSERT INTO waitlist_entries': TEST_WAITLIST_ENTRY,
         'FROM service_periods': null,
         'FROM tables': null,
         'COUNT(*)': { count: 0 },
@@ -109,8 +109,8 @@ describe('PATCH /api/t/:tenantId/waitlist/:id/status', () => {
     const notifiedEntry = { ...TEST_WAITLIST_ENTRY, status: 'notified' };
     const { db } = createMockDb({
       first: {
-        'SELECT * FROM waitlist WHERE id': TEST_WAITLIST_ENTRY,
-        'UPDATE waitlist': notifiedEntry,
+        'SELECT * FROM waitlist_entries WHERE id': TEST_WAITLIST_ENTRY,
+        'UPDATE waitlist_entries': notifiedEntry,
       },
     });
     const request = makeApp(db);
@@ -132,7 +132,7 @@ describe('PATCH /api/t/:tenantId/waitlist/:id/status', () => {
     // waiting → seated is not a valid transition
     const { db } = createMockDb({
       first: {
-        'SELECT * FROM waitlist WHERE id': TEST_WAITLIST_ENTRY,
+        'SELECT * FROM waitlist_entries WHERE id': TEST_WAITLIST_ENTRY,
       },
     });
     const request = makeApp(db);
@@ -156,7 +156,7 @@ describe('PATCH /api/t/:tenantId/waitlist/:id', () => {
     const updatedEntry = { ...TEST_WAITLIST_ENTRY, guest_name: 'Jane Updated', party_size: 3 };
     const { db } = createMockDb({
       first: {
-        'UPDATE waitlist SET': updatedEntry,
+        'UPDATE waitlist_entries SET': updatedEntry,
       },
     });
     const request = makeApp(db);
@@ -200,8 +200,8 @@ describe('PATCH /api/t/:tenantId/waitlist/:id/status (seated from notified)', ()
     const seatedEntry = { ...notifiedEntry, status: 'seated', seated_at: '2026-04-09T19:30:00Z' };
     const { db } = createMockDb({
       first: {
-        'SELECT * FROM waitlist WHERE id': notifiedEntry,
-        'UPDATE waitlist SET': seatedEntry,
+        'SELECT * FROM waitlist_entries WHERE id': notifiedEntry,
+        'UPDATE waitlist_entries SET': seatedEntry,
       },
     });
     const request = makeApp(db);
@@ -303,10 +303,10 @@ describe('DELETE /api/t/:tenantId/waitlist/:id', () => {
   it('removes entry and returns success (200)', async () => {
     const { db } = createMockDb({
       first: {
-        'SELECT * FROM waitlist WHERE id': TEST_WAITLIST_ENTRY,
+        'SELECT * FROM waitlist_entries WHERE id': TEST_WAITLIST_ENTRY,
       },
       all: {
-        'FROM waitlist WHERE tenant_id': [TEST_WAITLIST_ENTRY],
+        'FROM waitlist_entries WHERE tenant_id': [TEST_WAITLIST_ENTRY],
       },
     });
     const request = makeApp(db);

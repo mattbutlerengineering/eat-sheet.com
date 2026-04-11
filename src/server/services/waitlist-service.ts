@@ -17,7 +17,7 @@ export async function estimateWait(
   // 1. Count waiting entries ahead (status='waiting') with party_size <= partySize
   const aheadResult = await db
     .prepare(
-      `SELECT COUNT(*) as count FROM waitlist
+      `SELECT COUNT(*) as count FROM waitlist_entries
        WHERE tenant_id = ? AND status = 'waiting' AND party_size <= ?`
     )
     .bind(tenantId, partySize)
@@ -71,7 +71,7 @@ export async function rebalancePositions(
 ): Promise<void> {
   const { results } = await db
     .prepare(
-      `SELECT id FROM waitlist
+      `SELECT id FROM waitlist_entries
        WHERE tenant_id = ? AND status = 'waiting'
        ORDER BY position ASC`
     )
@@ -82,7 +82,7 @@ export async function rebalancePositions(
     const entry = results[i];
     if (!entry) continue;
     await db
-      .prepare(`UPDATE waitlist SET position = ? WHERE id = ? AND tenant_id = ?`)
+      .prepare(`UPDATE waitlist_entries SET position = ? WHERE id = ? AND tenant_id = ?`)
       .bind(i + 1, entry.id, tenantId)
       .run();
   }
