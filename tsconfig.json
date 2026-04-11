@@ -18,7 +18,8 @@
     "types": ["@cloudflare/workers-types"],
     "paths": {
       "@server/*": ["./src/server/*"],
-      "@client/*": ["./src/client/*"]
+      "@client/*": ["./src/client/*"],
+      "@features/*": ["./src/features/*"]
     }
   },
   "include": ["src"],
