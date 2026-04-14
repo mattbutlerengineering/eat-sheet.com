@@ -1,0 +1,20 @@
+- generic [ref=e39]:
+  - banner [ref=e40]:
+    - generic [ref=e41]:
+      - button "← Back" [ref=e42]
+      - heading "Add Restaurant" [level=1] [ref=e43]
+  - generic [ref=e44]:
+    - generic [ref=e45]:
+      - generic [ref=e46]: Name *
+      - textbox "Name *" [active] [ref=e47]:
+        - /placeholder: Restaurant name
+    - generic [ref=e48]:
+      - generic [ref=e49]: Cuisine
+      - textbox "Cuisine" [ref=e50]:
+        - /placeholder: Italian, Japanese, Mexican...
+    - generic [ref=e51]:
+      - generic [ref=e52]: Address
+      - textbox "Address" [ref=e53]:
+        - /placeholder: Where is it?
+    - button "Add Photo" [ref=e55]
+    - button "Add Restaurant" [disabled] [ref=e56]

@@ -1,0 +1,19 @@
+- generic [ref=e19]:
+  - banner [ref=e20]:
+    - generic [ref=e21]:
+      - heading "eat sheet" [level=1] [ref=e23]
+      - generic [ref=e24]:
+        - generic [ref=e25]: Matt
+        - button "Invite" [ref=e26]
+        - button "Leave" [ref=e27]
+  - generic [ref=e28]:
+    - generic [ref=e30]:
+      - button "Recent" [ref=e31]
+      - button "Top Rated" [ref=e32]
+    - generic [ref=e33]:
+      - paragraph [ref=e34]: 🍽️
+      - paragraph [ref=e35]: No restaurants yet
+      - paragraph [ref=e36]: Add one to get started
+  - link "+" [ref=e37] [cursor=pointer]:
+    - /url: /add
+    - generic [ref=e38]: +

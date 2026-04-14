@@ -1,0 +1,23 @@
+- generic [ref=e3]:
+  - generic: 🍕
+  - generic: 🍣
+  - generic: 🌮
+  - generic: 🍷
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "eat sheet" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Your family's brutally honest restaurant guide
+    - generic [ref=e8]:
+      - img [ref=e9]
+      - paragraph [ref=e26]: Brian said you'd show up eventually.
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: Invite Code
+        - textbox "Invite Code" [ref=e30]:
+          - /placeholder: Enter your family code
+      - generic [ref=e31]:
+        - generic [ref=e32]: Your Name
+        - textbox "Your Name" [ref=e33]:
+          - /placeholder: What should we call you?
+      - button "Join the Sheet" [disabled] [ref=e34]
+    - paragraph [ref=e35]: Ask your family for the invite code

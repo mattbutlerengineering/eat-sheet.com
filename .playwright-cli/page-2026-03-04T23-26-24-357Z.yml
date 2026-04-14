@@ -1,0 +1,22 @@
+- generic [ref=e57]:
+  - banner [ref=e106]:
+    - button "← Back" [ref=e108]
+  - generic [ref=e109]:
+    - generic [ref=e110]:
+      - heading "Olive Garden" [level=2] [ref=e111]
+      - generic [ref=e112]:
+        - generic [ref=e113]: Italian
+        - generic [ref=e114]: 123 Main St
+      - generic [ref=e115]:
+        - generic [ref=e116]: "5.0"
+        - generic [ref=e117]: / 10 from 1 review
+    - button "Delete Restaurant" [ref=e119]
+    - button "Edit Your Review" [ref=e120]
+    - generic [ref=e121]:
+      - heading "Reviews (1)" [level=3] [ref=e122]
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - generic [ref=e126]: MattMar 3, 2026
+          - generic [ref=e127]: "5"
+        - paragraph [ref=e128]: Great breadsticks, decent pasta
+        - button "Delete" [ref=e130]

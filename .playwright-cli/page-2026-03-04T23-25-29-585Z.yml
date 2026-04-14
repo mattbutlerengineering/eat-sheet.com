@@ -1,0 +1,14 @@
+- generic [ref=e57]:
+  - banner [ref=e58]:
+    - button "← Back" [ref=e60]
+  - generic [ref=e61]:
+    - generic [ref=e62]:
+      - heading "Olive Garden" [level=2] [ref=e63]
+      - generic [ref=e64]:
+        - generic [ref=e65]: Italian
+        - generic [ref=e66]: 123 Main St
+    - button "Delete Restaurant" [ref=e68]
+    - button "Add Your Review" [ref=e69]
+    - generic [ref=e70]:
+      - heading "Reviews (0)" [level=3] [ref=e71]
+      - paragraph [ref=e72]: No reviews yet. Be the first!

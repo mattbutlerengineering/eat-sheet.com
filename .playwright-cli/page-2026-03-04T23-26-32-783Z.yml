@@ -1,0 +1,24 @@
+- generic [ref=e131]:
+  - banner [ref=e132]:
+    - generic [ref=e133]:
+      - heading "eat sheet" [level=1] [ref=e135]
+      - generic [ref=e136]:
+        - generic [ref=e137]: Matt
+        - button "Invite" [ref=e138]
+        - button "Leave" [ref=e139]
+  - generic [ref=e140]:
+    - generic [ref=e142]:
+      - button "Recent" [ref=e143]
+      - button "Top Rated" [ref=e144]
+    - link "Olive Garden Italian 1 review 5.0" [ref=e146] [cursor=pointer]:
+      - /url: /restaurant/0ffa5017bc999335
+      - generic [ref=e148]:
+        - generic [ref=e149]:
+          - heading "Olive Garden" [level=3] [ref=e150]
+          - generic [ref=e151]:
+            - generic [ref=e152]: Italian
+            - generic [ref=e153]: 1 review
+        - generic [ref=e154]: "5.0"
+  - link "+" [ref=e155] [cursor=pointer]:
+    - /url: /add
+    - generic [ref=e156]: +
