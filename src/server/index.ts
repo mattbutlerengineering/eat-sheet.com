@@ -25,8 +25,14 @@ app.route("/api/auth", auth);
 app.route("/api/t", venues);
 app.route("/api/onboarding", onboarding);
 
-// SPA fallback: serve index.html for non-API, non-asset routes
+// Serve static assets and SPA fallback
 app.get("*", async (c) => {
+  // Try serving the request as a static asset first
+  const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+  if (assetResponse.status !== 404) {
+    return assetResponse;
+  }
+  // SPA fallback: serve index.html for non-asset routes
   const index = new Request(new URL("/index.html", c.req.url));
   return c.env.ASSETS.fetch(index);
 });
