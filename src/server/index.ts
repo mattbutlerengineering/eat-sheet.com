@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import * as Sentry from "@sentry/cloudflare";
 import type { AppEnv } from "./types";
+import type { Bindings } from "./types";
 import { DomainError } from "./errors";
 import { error } from "./response";
 import { auth } from "./features/auth/routes";
@@ -27,9 +29,16 @@ app.onError((err, c) => {
   if (err instanceof DomainError) {
     return c.json(error(err.message), err.statusCode as 400);
   }
+  Sentry.captureException(err);
   console.error("Unhandled error:", err);
   return c.json(error("Internal server error"), 500);
 });
 
-export default app;
+export default Sentry.withSentry(
+  (env: Bindings) => ({
+    dsn: env.SENTRY_DSN,
+    tracesSampleRate: 1.0,
+  }),
+  app,
+);
 export type AppType = typeof app;

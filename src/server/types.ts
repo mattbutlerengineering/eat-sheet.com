@@ -5,6 +5,7 @@ export interface Bindings {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_REDIRECT_URI: string;
+  SENTRY_DSN: string;
 }
 
 export interface Variables {
