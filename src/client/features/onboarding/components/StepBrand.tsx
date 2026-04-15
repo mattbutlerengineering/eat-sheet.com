@@ -66,7 +66,7 @@ const sectionLabelStyle: React.CSSProperties = {
   fontSize: 11,
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "rgba(232,226,216,0.4)",
+  color: "var(--rialto-text-tertiary)",
   marginBottom: 10,
 };
 
@@ -84,7 +84,7 @@ const colorPickerRowStyle: React.CSSProperties = {
 
 const hexLabelStyle: React.CSSProperties = {
   fontSize: 13,
-  color: "rgba(232,226,216,0.6)",
+  color: "var(--rialto-text-secondary)",
   fontFamily: "var(--rialto-font-mono, monospace)",
   letterSpacing: "0.05em",
 };
@@ -166,7 +166,7 @@ export function StepBrand({
                 height: 40,
                 padding: 2,
                 borderRadius: 8,
-                border: "1px solid rgba(232,226,216,0.2)",
+                border: "1px solid var(--rialto-border)",
                 background: "transparent",
                 cursor: "pointer",
               }}

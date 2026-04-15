@@ -32,21 +32,21 @@ const flipDotWrapperStyle: React.CSSProperties = {
 const shellStyle: React.CSSProperties = {
   height: 300,
   borderRadius: 12,
-  border: "1px solid rgba(232,226,216,0.1)",
+  border: "1px solid var(--rialto-border)",
   overflow: "hidden",
   display: "flex",
-  background: "#1a1714",
+  background: "var(--rialto-surface)",
 };
 
 const sidebarStyle: React.CSSProperties = {
   width: 200,
   flexShrink: 0,
-  borderRight: "1px solid rgba(232,226,216,0.08)",
+  borderRight: "1px solid var(--rialto-border)",
   display: "flex",
   flexDirection: "column",
   padding: "16px 12px",
   gap: 8,
-  background: "#1a1714",
+  background: "var(--rialto-surface)",
 };
 
 const logoRowStyle: React.CSSProperties = {
@@ -65,14 +65,14 @@ const logoBoxStyle: React.CSSProperties = {
   justifyContent: "center",
   fontSize: 13,
   fontWeight: 700,
-  color: "#1a1714",
+  color: "var(--rialto-text-on-accent)",
   flexShrink: 0,
 };
 
 const venueNameStyle: React.CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
-  color: "#e8e2d8",
+  color: "var(--rialto-text-primary)",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -80,7 +80,7 @@ const venueNameStyle: React.CSSProperties = {
 
 const cuisineStyle: React.CSSProperties = {
   fontSize: 10,
-  color: "rgba(232,226,216,0.4)",
+  color: "var(--rialto-text-tertiary)",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -94,14 +94,14 @@ const mainStyle: React.CSSProperties = {
   flexDirection: "column",
   gap: 12,
   padding: 24,
-  background: "#201d1a",
+  background: "var(--rialto-surface-recessed)",
 };
 
 const welcomeHeadingStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
   fontSize: 18,
   fontWeight: 300,
-  color: "#e8e2d8",
+  color: "var(--rialto-text-primary)",
   letterSpacing: "-0.01em",
   margin: 0,
   textAlign: "center",
@@ -109,7 +109,7 @@ const welcomeHeadingStyle: React.CSSProperties = {
 
 const welcomeSubtextStyle: React.CSSProperties = {
   fontSize: 13,
-  color: "rgba(232,226,216,0.5)",
+  color: "var(--rialto-text-secondary)",
   margin: 0,
   textAlign: "center",
 };
@@ -137,7 +137,7 @@ export function StepWelcome({
     borderRadius: 8,
     border: `1px solid ${accent}4d`,
     background: accent,
-    color: "#1a1714",
+    color: "var(--rialto-text-on-accent)",
     fontSize: 14,
     fontWeight: 600,
     letterSpacing: "0.01em",
@@ -151,7 +151,7 @@ export function StepWelcome({
     borderRadius: 6,
     fontSize: 12,
     fontWeight: isActive ? 600 : 400,
-    color: isActive ? accent : "rgba(232,226,216,0.4)",
+    color: isActive ? accent : "var(--rialto-text-tertiary)",
     background: isActive ? `${accent}1a` : "transparent",
     cursor: "default",
     whiteSpace: "nowrap" as const,
@@ -165,7 +165,7 @@ export function StepWelcome({
     borderRadius: 6,
     border: "none",
     background: accent,
-    color: "#1a1714",
+    color: "var(--rialto-text-on-accent)",
     fontSize: 12,
     fontWeight: 600,
     cursor: "default",

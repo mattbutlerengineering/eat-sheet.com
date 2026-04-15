@@ -42,18 +42,18 @@ const previewColumnStyle: React.CSSProperties = {
 };
 
 const previewCardStyle: React.CSSProperties = {
-  background: "rgba(232,226,216,0.04)",
-  borderRadius: 10,
-  border: "1px solid rgba(232,226,216,0.08)",
-  padding: "16px 20px",
+  background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
+  borderRadius: "var(--rialto-radius-soft, 10px)",
+  border: "1px solid var(--rialto-border, rgba(232,226,216,0.08))",
+  padding: "var(--rialto-space-md, 16px) var(--rialto-space-lg, 20px)",
 };
 
 const previewLabelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "rgba(232,226,216,0.35)",
-  marginBottom: 10,
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
+  marginBottom: "var(--rialto-space-sm, 10px)",
 };
 
 const appBarPreviewStyle: React.CSSProperties = {
@@ -74,24 +74,24 @@ const logoSquareStyle: React.CSSProperties = {
 };
 
 const logoLetterStyle: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 700,
-  color: "#1a1714",
+  fontSize: "var(--rialto-text-sm, 13px)",
+  fontWeight: "var(--rialto-weight-demi, 700)" as React.CSSProperties["fontWeight"],
+  color: "var(--rialto-text-on-accent, #1a1714)",
   fontFamily: "var(--rialto-font-display, system-ui)",
-  lineHeight: 1,
+  lineHeight: "var(--rialto-leading-tight, 1)",
 };
 
 const venueNamePreviewStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
-  fontSize: 15,
-  fontWeight: 400,
-  color: "#e8e2d8",
+  fontSize: "var(--rialto-text-base, 15px)",
+  fontWeight: "var(--rialto-weight-regular, 400)" as React.CSSProperties["fontWeight"],
+  color: "var(--rialto-text-primary, #e8e2d8)",
   letterSpacing: "-0.01em",
 };
 
 const placeholderNameStyle: React.CSSProperties = {
   ...venueNamePreviewStyle,
-  color: "rgba(232,226,216,0.25)",
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.25))",
   fontStyle: "italic",
 };
 
@@ -103,9 +103,9 @@ const tagRowStyle: React.CSSProperties = {
 };
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: 12,
-  color: "rgba(232,226,216,0.4)",
-  marginBottom: 4,
+  fontSize: "var(--rialto-text-xs, 12px)",
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
+  marginBottom: "var(--rialto-space-xs, 4px)",
 };
 
 export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
@@ -223,7 +223,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
               {firstLetter ? (
                 <span style={logoLetterStyle}>{firstLetter}</span>
               ) : (
-                <span style={{ ...logoLetterStyle, color: "rgba(26,23,20,0.5)" }}>
+                <span style={{ ...logoLetterStyle, color: "var(--rialto-text-on-accent, rgba(26,23,20,0.5))", opacity: 0.5 }}>
                   V
                 </span>
               )}
@@ -241,7 +241,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
             <div style={previewLabelStyle}>Venue type</div>
             <span
               style={{
-                fontSize: 14,
+                fontSize: "var(--rialto-text-sm, 14px)",
                 color: "var(--rialto-accent, #c49a2a)",
               }}
             >
@@ -253,7 +253,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
         {cuisines.length > 0 && (
           <div style={previewCardStyle}>
             <div style={previewLabelStyle}>Cuisines ({cuisines.length})</div>
-            <div style={{ fontSize: 13, color: "rgba(232,226,216,0.6)", lineHeight: 1.6 }}>
+            <div style={{ fontSize: "var(--rialto-text-sm, 13px)", color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", lineHeight: "var(--rialto-leading-normal, 1.6)" }}>
               {cuisines.join(" · ")}
             </div>
           </div>

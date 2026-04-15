@@ -29,7 +29,7 @@ function resolveDefaultTimezone(): string {
 
 const columnStyle: React.CSSProperties = {
   display: "flex",
-  gap: 32,
+  gap: "var(--rialto-space-2xl, 32px)",
   alignItems: "flex-start",
 };
 
@@ -37,58 +37,58 @@ const formColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 16,
+  gap: "var(--rialto-space-xl, 16px)",
 };
 
 const previewColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 12,
+  gap: "var(--rialto-space-lg, 12px)",
 };
 
 const cityStateZipStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 80px 100px",
-  gap: 10,
+  gap: "var(--rialto-space-md, 10px)",
 };
 
 const previewCardStyle: React.CSSProperties = {
-  background: "rgba(232,226,216,0.04)",
-  borderRadius: 10,
-  border: "1px solid rgba(232,226,216,0.08)",
-  padding: "16px 20px",
+  background: "var(--rialto-surface-recessed, rgba(0,0,0,0.15))",
+  borderRadius: "var(--rialto-radius-soft, 10px)",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.08))",
+  padding: "var(--rialto-space-xl, 16px) var(--rialto-space-2xl, 20px)",
 };
 
 const previewLabelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "rgba(232,226,216,0.35)",
-  marginBottom: 10,
+  color: "var(--rialto-text-tertiary, rgba(255,255,255,0.35))",
+  marginBottom: "var(--rialto-space-md, 10px)",
 };
 
 const addressLineStyle: React.CSSProperties = {
-  fontSize: 14,
-  color: "#e8e2d8",
-  lineHeight: 1.6,
+  fontSize: "var(--rialto-text-sm, 14px)",
+  color: "var(--rialto-text-primary, #e8e2d8)",
+  lineHeight: "var(--rialto-leading-normal, 1.6)",
 };
 
 const mutedStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: "rgba(232,226,216,0.5)",
-  marginTop: 4,
+  fontSize: "var(--rialto-text-xs, 13px)",
+  color: "var(--rialto-text-secondary, rgba(255,255,255,0.5))",
+  marginTop: "var(--rialto-space-xs, 4px)",
 };
 
 const accentStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: "var(--rialto-text-xs, 13px)",
   color: "var(--rialto-accent, #c49a2a)",
-  marginTop: 2,
+  marginTop: "var(--rialto-space-xs, 2px)",
 };
 
 const emptyPreviewStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: "rgba(232,226,216,0.2)",
+  fontSize: "var(--rialto-text-xs, 13px)",
+  color: "var(--rialto-text-tertiary, rgba(255,255,255,0.2))",
   fontStyle: "italic",
 };
 
@@ -250,7 +250,7 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
         {loc.timezone && (
           <div style={previewCardStyle}>
             <div style={previewLabelStyle}>Timezone</div>
-            <div style={{ fontSize: 13, color: "rgba(232,226,216,0.7)" }}>
+            <div style={{ fontSize: "var(--rialto-text-xs, 13px)", color: "var(--rialto-text-secondary, rgba(255,255,255,0.7))" }}>
               {TIMEZONE_OPTIONS.find((t) => t.value === loc.timezone)?.label ??
                 loc.timezone}
             </div>

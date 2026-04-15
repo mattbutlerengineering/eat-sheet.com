@@ -9,13 +9,12 @@ interface StepLogoProps {
   onUpload: (file: File) => Promise<void>;
 }
 
-const GOLD = "#c49a2a";
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml"];
 
 const columnStyle: React.CSSProperties = {
   display: "flex",
-  gap: 32,
+  gap: "var(--rialto-space-2xl, 32px)",
   alignItems: "flex-start",
 };
 
@@ -23,21 +22,21 @@ const leftColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 16,
+  gap: "var(--rialto-space-lg, 16px)",
 };
 
 const rightColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 12,
+  gap: "var(--rialto-space-md, 12px)",
 };
 
 const previewCardStyle: React.CSSProperties = {
-  background: "rgba(232,226,216,0.04)",
-  borderRadius: 10,
-  border: "1px solid rgba(232,226,216,0.08)",
-  padding: "16px 20px",
+  background: "var(--rialto-surface-elevated, rgba(232,226,216,0.04))",
+  borderRadius: "var(--rialto-radius-soft, 10px)",
+  border: "1px solid var(--rialto-border, rgba(232,226,216,0.08))",
+  padding: "var(--rialto-space-lg, 16px) var(--rialto-space-xl, 20px)",
   minHeight: 140,
   display: "flex",
   alignItems: "center",
@@ -45,16 +44,16 @@ const previewCardStyle: React.CSSProperties = {
 };
 
 const previewLabelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "rgba(232,226,216,0.35)",
-  marginBottom: 10,
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
+  marginBottom: "var(--rialto-space-sm, 10px)",
 };
 
 const emptyPreviewStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: "rgba(232,226,216,0.2)",
+  fontSize: "var(--rialto-text-sm, 13px)",
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.2))",
   fontStyle: "italic",
   textAlign: "center",
 };
@@ -62,8 +61,8 @@ const emptyPreviewStyle: React.CSSProperties = {
 const swatchRowStyle: React.CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
-  gap: 10,
-  marginTop: 4,
+  gap: "var(--rialto-space-sm, 10px)",
+  marginTop: "var(--rialto-space-xs, 4px)",
 };
 
 export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
@@ -121,17 +120,17 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
   }
 
   const dropZoneStyle: React.CSSProperties = {
-    padding: "48px 32px",
-    borderRadius: 10,
-    border: `2px dashed ${isDragOver ? GOLD : "rgba(232,226,216,0.2)"}`,
-    background: isDragOver ? "rgba(196,154,42,0.04)" : "transparent",
+    padding: "48px var(--rialto-space-2xl, 32px)",
+    borderRadius: "var(--rialto-radius-soft, 10px)",
+    border: `2px dashed ${isDragOver ? "var(--rialto-accent, #c49a2a)" : "var(--rialto-border-strong, rgba(232,226,216,0.2))"}`,
+    background: isDragOver ? "color-mix(in srgb, var(--rialto-accent, #c49a2a) 4%, transparent)" : "transparent",
     textAlign: "center",
     cursor: "pointer",
     transition: "border-color 0.2s ease, background 0.2s ease",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 8,
+    gap: "var(--rialto-space-xs, 8px)",
   };
 
   return (
@@ -162,13 +161,13 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
           />
 
           {isUploading ? (
-            <div style={{ color: "rgba(232,226,216,0.6)", fontSize: 14 }}>
+            <div style={{ color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", fontSize: "var(--rialto-text-sm, 14px)" }}>
               <div
                 style={{
                   width: 32,
                   height: 32,
-                  border: `2px solid rgba(232,226,216,0.2)`,
-                  borderTop: `2px solid ${GOLD}`,
+                  border: "2px solid var(--rialto-border-strong, rgba(232,226,216,0.2))",
+                  borderTop: "2px solid var(--rialto-accent, #c49a2a)",
                   borderRadius: "50%",
                   animation: "spin 0.8s linear infinite",
                   margin: "0 auto 10px",
@@ -180,17 +179,17 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
             <>
               <div
                 style={{
-                  fontSize: 15,
-                  color: isDragOver ? GOLD : "rgba(232,226,216,0.7)",
-                  fontWeight: 500,
+                  fontSize: "var(--rialto-text-md, 15px)",
+                  color: isDragOver ? "var(--rialto-accent, #c49a2a)" : "var(--rialto-text-secondary, rgba(232,226,216,0.7))",
+                  fontWeight: "var(--rialto-weight-medium, 500)" as React.CSSProperties["fontWeight"],
                 }}
               >
                 Drag your logo here
               </div>
-              <div style={{ fontSize: 13, color: "rgba(232,226,216,0.4)" }}>
+              <div style={{ fontSize: "var(--rialto-text-sm, 13px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))" }}>
                 or click to browse
               </div>
-              <div style={{ fontSize: 12, color: "rgba(232,226,216,0.25)", marginTop: 4 }}>
+              <div style={{ fontSize: "var(--rialto-text-xs, 12px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.25))", marginTop: "var(--rialto-space-xs, 4px)" }}>
                 PNG, JPG, or SVG · Max 2MB
               </div>
             </>
@@ -200,12 +199,12 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
         {(validationError || uploadError) && (
           <div
             style={{
-              fontSize: 13,
-              color: "#e07070",
-              padding: "8px 12px",
-              borderRadius: 6,
-              background: "rgba(224,112,112,0.08)",
-              border: "1px solid rgba(224,112,112,0.2)",
+              fontSize: "var(--rialto-text-sm, 13px)",
+              color: "var(--rialto-error, #e07070)",
+              padding: "var(--rialto-space-xs, 8px) var(--rialto-space-sm, 12px)",
+              borderRadius: "var(--rialto-radius-default, 6px)",
+              background: "var(--rialto-error-muted, rgba(224,112,112,0.08))",
+              border: "1px solid var(--rialto-error, rgba(224,112,112,0.2))",
             }}
           >
             {validationError ?? uploadError}
