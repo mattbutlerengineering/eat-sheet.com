@@ -3,6 +3,11 @@ main = "src/server/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+  { pattern = "eat-sheet.com/*", zone_name = "eat-sheet.com" },
+  { pattern = "www.eat-sheet.com/*", zone_name = "eat-sheet.com" },
+]
+
 [assets]
 directory = "dist/client"
 not_found_handling = "single-page-application"
