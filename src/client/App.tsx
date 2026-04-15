@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { VenueThemeProvider } from "./providers/VenueTheme";
 import { useAuth } from "./hooks/useAuth";
 import { Login } from "./pages/Login";
+import { Onboarding } from "./pages/Onboarding";
 import "@mattbutlerengineering/rialto/styles";
 
 function AppRoutes() {
@@ -11,10 +12,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/onboarding"
-        element={user ? <div>Onboarding</div> : <Navigate to="/login" />}
-      />
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route
         path="/"
         element={
