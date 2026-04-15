@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input, Select } from "@mattbutlerengineering/rialto";
 import type { VenueLocationInput } from "@shared/schemas";
 
@@ -131,6 +131,14 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
     website: data?.website ?? "",
   });
 
+  // Emit initial state on mount so parent has the default timezone
+  useEffect(() => {
+    if (!data) {
+      onChange(stateToInput(loc));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function update(patch: Partial<LocationState>) {
     const next = { ...loc, ...patch };
     setLoc(next);
@@ -221,7 +229,8 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
               )}
               {(loc.city || loc.state || loc.zip) && (
                 <div style={addressLineStyle}>
-                  {[loc.city, loc.state, loc.zip].filter(Boolean).join(", ")}
+                  {[loc.city, loc.state].filter(Boolean).join(", ")}
+                  {loc.zip ? ` ${loc.zip}` : ""}
                 </div>
               )}
               {loc.phone && (
