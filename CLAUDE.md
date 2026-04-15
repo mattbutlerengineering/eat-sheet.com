@@ -64,6 +64,20 @@ src/
 - `pnpm db:migrate` — Run D1 migrations locally
 - `pnpm db:seed` — Seed system roles
 
+## Deployment
+
+- `pnpm build && npx wrangler deploy` — Build client + deploy Worker + assets
+- Worker name: `eat-sheet`, routes: `eat-sheet.com/*`, `www.eat-sheet.com/*`
+- Secrets (set via `wrangler secret put`): `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `SENTRY_DSN`
+- D1 schema: `npx wrangler d1 execute eat-sheet-db --remote --file=src/server/db/schema.sql`
+- D1 seed: `npx wrangler d1 execute eat-sheet-db --remote --file=src/server/db/seed.sql`
+
+## Workers + Assets Routing
+
+- `[assets]` in `wrangler.toml` with `not_found_handling = "single-page-application"` intercepts ALL paths (including `/api/*`) BEFORE the Worker runs — never use it with a Worker that has API routes
+- Instead: set `not_found_handling = "none"` and `binding = "ASSETS"`, then handle SPA fallback in the Hono app via a catch-all `app.get("*")` that serves `index.html` through `c.env.ASSETS.fetch()`
+- The `ASSETS` binding must be declared in `Bindings` type as `ASSETS: Fetcher`
+
 ## API Response Envelope
 
 ```ts
@@ -75,6 +89,11 @@ src/
 ## Per-Venue Theming
 
 Venues override Rialto CSS tokens via `VenueThemeProvider`. The `venue_themes` table stores accent/surface colors. Applied to `document.documentElement.style` as `--rialto-accent`, `--rialto-accent-hover`, etc.
+
+## Rialto Dark Theme
+
+- Pages with dark backgrounds MUST set `data-theme="dark"` on their container to activate Rialto's dark token set
+- Without it, labels use light-theme colors (`--rialto-input-label-text: #6b6660`) which are invisible on dark backgrounds
 
 ## Rialto Import Aliases
 
@@ -100,3 +119,6 @@ TypeScript path aliases in `tsconfig.json` point to the corresponding `.d.ts` fi
 - Domain errors in services, HTTP mapping in routes
 - `verify(token, secret, "HS256")` — must pass algorithm explicitly
 - Cast JWT verify result: `as unknown as JwtPayload`
+- All React hooks MUST be before any early returns — `useCallback`/`useEffect` after `if (loading) return null` crashes in production (React error #310)
+- SQLite `TEXT PRIMARY KEY` does NOT auto-generate — always provide `nanoid()` for id columns
+- `exactOptionalPropertyTypes` is enabled — use `prop?: string | undefined` to allow passing `undefined` explicitly
