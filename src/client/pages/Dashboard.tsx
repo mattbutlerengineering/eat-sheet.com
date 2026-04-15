@@ -20,43 +20,44 @@ const STAT_CARDS = [
 const pageStyle: React.CSSProperties = {
   display: "flex",
   minHeight: "100vh",
-  background: "#1a1714",
+  background: "var(--rialto-surface, #1e1c1a)",
 };
 
 const sidebarStyle: React.CSSProperties = {
   width: 240,
   flexShrink: 0,
-  borderRight: "1px solid rgba(232,226,216,0.08)",
+  borderRight: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   display: "flex",
   flexDirection: "column",
-  padding: "20px 16px",
-  gap: 4,
+  padding: "var(--rialto-space-xl, 20px) var(--rialto-space-lg, 16px)",
+  gap: "var(--rialto-space-xs, 4px)",
 };
 
 const logoRowStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 10,
-  marginBottom: 20,
+  gap: "var(--rialto-space-sm, 10px)",
+  marginBottom: "var(--rialto-space-xl, 20px)",
 };
 
 const logoBoxStyle: React.CSSProperties = {
   width: 32,
   height: 32,
-  borderRadius: 8,
+  borderRadius: "var(--rialto-radius-default, 8px)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: 13,
+  fontSize: "var(--rialto-text-sm, 13px)",
   fontWeight: 700,
-  color: "#1a1714",
+  color: "var(--rialto-text-on-accent, #1a1918)",
   flexShrink: 0,
 };
 
 const venueNameStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-sm, 13px)",
   fontWeight: 600,
-  color: "#e8e2d8",
+  color: "var(--rialto-text-primary, #e8e2d8)",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
@@ -66,72 +67,69 @@ const mainStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  padding: "32px 40px",
-  gap: 32,
+  padding: "var(--rialto-space-3xl, 32px) var(--rialto-space-4xl, 40px)",
+  gap: "var(--rialto-space-3xl, 32px)",
 };
 
 const headingStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
-  fontSize: 28,
+  fontSize: "var(--rialto-text-2xl, 28px)",
   fontWeight: 300,
-  color: "#e8e2d8",
+  color: "var(--rialto-text-primary, #e8e2d8)",
   letterSpacing: "-0.01em",
+  lineHeight: "var(--rialto-leading-tight, 1.2)",
   margin: 0,
 };
 
 const statsRowStyle: React.CSSProperties = {
   display: "flex",
-  gap: 20,
+  gap: "var(--rialto-space-xl, 20px)",
 };
 
 const statCardStyle: React.CSSProperties = {
   flex: 1,
-  padding: "24px",
-  borderRadius: 12,
-  background: "rgba(232,226,216,0.04)",
-  border: "1px solid rgba(232,226,216,0.08)",
+  padding: "var(--rialto-space-lg, 24px)",
+  borderRadius: "var(--rialto-radius-soft, 12px)",
+  background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  gap: "var(--rialto-space-sm, 8px)",
 };
 
 const statValueStyle: React.CSSProperties = {
-  fontSize: 36,
+  fontSize: "var(--rialto-text-4xl, 36px)",
   fontWeight: 300,
-  color: "#e8e2d8",
+  color: "var(--rialto-text-primary, #e8e2d8)",
   fontFamily: "var(--rialto-font-display, system-ui)",
   letterSpacing: "-0.02em",
 };
 
 const statLabelStyle: React.CSSProperties = {
-  fontSize: 12,
+  fontSize: "var(--rialto-text-xs, 12px)",
   textTransform: "uppercase" as const,
   letterSpacing: "0.1em",
-  color: "rgba(232,226,216,0.4)",
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
 };
 
 const DEFAULT_ACCENT = "#c49a2a";
-
-function buildLogoSrc(logoUrl: string): string {
-  const path = logoUrl.replace(/^logos\//, "");
-  return `/api/onboarding/logos/${path}`;
-}
 
 function NavItem({
   label,
   active,
   accent,
 }: {
-  label: string;
-  active: boolean;
-  accent: string;
+  readonly label: string;
+  readonly active: boolean;
+  readonly accent: string;
 }) {
   const style: React.CSSProperties = {
     padding: "8px 10px",
-    borderRadius: 6,
-    fontSize: 12,
+    borderRadius: "var(--rialto-radius-sharp, 6px)",
+    fontFamily: "var(--rialto-font-sans, system-ui)",
+    fontSize: "var(--rialto-text-xs, 12px)",
     fontWeight: active ? 600 : 400,
-    color: active ? accent : "rgba(232,226,216,0.4)",
+    color: active ? accent : "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
     background: active ? `${accent}1a` : "transparent",
     cursor: "pointer",
     whiteSpace: "nowrap" as const,
@@ -141,20 +139,20 @@ function NavItem({
   return <div style={style}>{label}</div>;
 }
 
-function DashboardContent({ data }: { data: VenueWithTheme }) {
+function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
   const { venue, theme } = data;
   const accent = theme.accent ?? DEFAULT_ACCENT;
   const initial = venue.name.charAt(0).toUpperCase();
 
   return (
     <VenueThemeProvider theme={theme}>
-      <div style={pageStyle}>
+      <div style={pageStyle} data-theme="dark">
         {/* Sidebar */}
         <div style={sidebarStyle}>
           <div style={logoRowStyle}>
             {venue.logoUrl ? (
               <img
-                src={buildLogoSrc(venue.logoUrl)}
+                src={venue.logoUrl}
                 alt={venue.name}
                 style={{ ...logoBoxStyle, objectFit: "cover" }}
               />
@@ -222,14 +220,15 @@ export function Dashboard() {
   if (error) {
     return (
       <div
+        data-theme="dark"
         style={{
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#1a1714",
-          color: "rgba(232,226,216,0.5)",
-          fontSize: 14,
+          background: "var(--rialto-surface, #1e1c1a)",
+          color: "var(--rialto-text-secondary, rgba(232,226,216,0.5))",
+          fontSize: "var(--rialto-text-sm, 14px)",
         }}
       >
         {error}
@@ -239,30 +238,30 @@ export function Dashboard() {
 
   if (!data) {
     return (
-      <div style={pageStyle}>
+      <div style={pageStyle} data-theme="dark">
         <div style={sidebarStyle}>
           <div style={logoRowStyle}>
-            <div style={{ ...logoBoxStyle, background: "rgba(232,226,216,0.08)" }} />
-            <div style={{ flex: 1, height: 14, borderRadius: 4, background: "rgba(232,226,216,0.06)" }} />
+            <div style={{ ...logoBoxStyle, background: "var(--rialto-surface-matte, rgba(232,226,216,0.08))" }} />
+            <div style={{ flex: 1, height: 14, borderRadius: 4, background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
           </div>
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
               style={{
                 height: 32,
-                borderRadius: 6,
-                background: "rgba(232,226,216,0.04)",
+                borderRadius: "var(--rialto-radius-sharp, 6px)",
+                background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
               }}
             />
           ))}
         </div>
         <div style={mainStyle}>
-          <div style={{ width: 180, height: 28, borderRadius: 6, background: "rgba(232,226,216,0.06)" }} />
+          <div style={{ width: 180, height: 28, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
           <div style={statsRowStyle}>
             {[1, 2, 3].map((i) => (
               <div key={i} style={{ ...statCardStyle, minHeight: 100 }}>
-                <div style={{ width: 48, height: 36, borderRadius: 6, background: "rgba(232,226,216,0.06)" }} />
-                <div style={{ width: 80, height: 12, borderRadius: 4, background: "rgba(232,226,216,0.04)" }} />
+                <div style={{ width: 48, height: 36, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
+                <div style={{ width: 80, height: 12, borderRadius: 4, background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))" }} />
               </div>
             ))}
           </div>
