@@ -1,6 +1,7 @@
 export interface Bindings {
   DB: D1Database;
   LOGOS: R2Bucket;
+  ASSETS: Fetcher;
   JWT_SECRET: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;

@@ -25,6 +25,12 @@ app.route("/api/auth", auth);
 app.route("/api/t", venues);
 app.route("/api/onboarding", onboarding);
 
+// SPA fallback: serve index.html for non-API, non-asset routes
+app.get("*", async (c) => {
+  const index = new Request(new URL("/index.html", c.req.url));
+  return c.env.ASSETS.fetch(index);
+});
+
 app.onError((err, c) => {
   if (err instanceof DomainError) {
     return c.json(error(err.message), err.statusCode as 400);
