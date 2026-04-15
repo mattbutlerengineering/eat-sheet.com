@@ -149,7 +149,14 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
     loc.addressLine1 || loc.city || loc.state || loc.zip;
 
   return (
-    <div style={columnStyle}>
+    <div style={columnStyle} className="step-location">
+      <style>{`
+        @media (max-width: 640px) {
+          .step-location { flex-direction: column; }
+          .step-location .location-preview { display: none; }
+          .step-location .city-state-zip { grid-template-columns: 1fr; }
+        }
+      `}</style>
       {/* Left: Form */}
       <div style={formColumnStyle}>
         <Input
@@ -167,7 +174,7 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
           onChange={(e) => update({ addressLine2: e.target.value })}
         />
 
-        <div style={cityStateZipStyle}>
+        <div style={cityStateZipStyle} className="city-state-zip">
           <Input
             label="City"
             placeholder="San Francisco"
@@ -215,7 +222,7 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
       </div>
 
       {/* Right: Preview */}
-      <div style={previewColumnStyle}>
+      <div style={previewColumnStyle} className="location-preview">
         <div style={previewCardStyle}>
           <div style={previewLabelStyle}>Address preview</div>
 

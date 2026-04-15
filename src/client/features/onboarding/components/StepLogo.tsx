@@ -134,7 +134,7 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
   };
 
   return (
-    <div style={columnStyle}>
+    <div className="step-logo" style={columnStyle}>
       {/* Left: Drop zone */}
       <div style={leftColumnStyle}>
         <div
@@ -266,6 +266,11 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
         </div>
       </div>
 
+      <style>{`
+        @media (max-width: 640px) {
+          .step-logo { flex-direction: column; }
+        }
+      `}</style>
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

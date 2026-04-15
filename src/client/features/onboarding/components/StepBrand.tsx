@@ -132,7 +132,7 @@ export function StepBrand({
   }
 
   return (
-    <div style={columnStyle}>
+    <div className="step-brand" style={columnStyle}>
       {/* Left: Color picker */}
       <div style={leftColumnStyle}>
         <div>
@@ -184,6 +184,11 @@ export function StepBrand({
           venueName={venueName}
         />
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .step-brand { flex-direction: column; }
+        }
+      `}</style>
     </div>
   );
 }

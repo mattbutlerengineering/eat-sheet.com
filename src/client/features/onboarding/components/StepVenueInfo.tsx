@@ -158,7 +158,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
   const firstLetter = name.trim().charAt(0).toUpperCase();
 
   return (
-    <div style={columnStyle}>
+    <div style={columnStyle} className="step-venue-info">
       {/* Left: Form */}
       <div style={formColumnStyle}>
         <Input
@@ -215,7 +215,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
       </div>
 
       {/* Right: Preview */}
-      <div style={previewColumnStyle}>
+      <div style={previewColumnStyle} className="preview-col">
         <div style={previewCardStyle}>
           <div style={previewLabelStyle}>Live preview</div>
           <div style={appBarPreviewStyle}>
@@ -259,6 +259,12 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
           </div>
         )}
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .step-venue-info { flex-direction: column; }
+          .step-venue-info .preview-col { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
