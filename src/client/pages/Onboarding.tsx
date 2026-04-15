@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
 import { useOnboarding } from "../features/onboarding/hooks/useOnboarding";
@@ -24,7 +24,7 @@ const pageStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "linear-gradient(135deg, #1a1714 0%, #2a2520 100%)",
+  background: `linear-gradient(135deg, var(--rialto-surface-recessed, #141312) 0%, var(--rialto-surface, #1e1c1a) 100%)`,
   position: "relative",
   overflow: "hidden",
 };
@@ -32,28 +32,30 @@ const pageStyle: React.CSSProperties = {
 const contentStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: 800,
-  padding: "0 24px",
+  padding: "0 var(--rialto-space-lg, 24px)",
   display: "flex",
   flexDirection: "column",
-  gap: 24,
+  gap: "var(--rialto-space-lg, 24px)",
   position: "relative",
   zIndex: 1,
 };
 
 const stepLabelStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.1em",
-  color: "rgba(232,226,216,0.4)",
-  marginTop: 12,
+  letterSpacing: "0.12em",
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
+  marginTop: "var(--rialto-space-sm, 12px)",
 };
 
 const stepTitleStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
-  fontSize: 28,
-  fontWeight: 300,
-  color: "#e8e2d8",
+  fontSize: "var(--rialto-text-2xl, 28px)",
+  fontWeight: "var(--rialto-weight-light, 300)" as unknown as number,
+  color: "var(--rialto-text-primary, #e8e2d8)",
   letterSpacing: "-0.01em",
+  lineHeight: "var(--rialto-leading-tight, 1.2)",
   margin: 0,
 };
 
@@ -67,23 +69,25 @@ const navStyle: React.CSSProperties = {
 
 const ghostButtonStyle: React.CSSProperties = {
   padding: "10px 20px",
-  borderRadius: 8,
-  border: "1px solid rgba(232,226,216,0.2)",
+  borderRadius: "var(--rialto-radius-default, 8px)",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   background: "transparent",
-  color: "rgba(232,226,216,0.7)",
-  fontSize: 14,
-  fontWeight: 500,
+  color: "var(--rialto-text-secondary, rgba(232,226,216,0.7))",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-sm, 14px)",
+  fontWeight: "var(--rialto-weight-medium, 500)" as unknown as number,
   letterSpacing: "0.01em",
   cursor: "pointer",
 };
 
 const primaryButtonBase: React.CSSProperties = {
   padding: "10px 24px",
-  borderRadius: 8,
+  borderRadius: "var(--rialto-radius-default, 8px)",
   border: "none",
-  color: "#1a1714",
-  fontSize: 14,
-  fontWeight: 600,
+  color: "var(--rialto-text-on-accent, #1a1918)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-sm, 14px)",
+  fontWeight: "var(--rialto-weight-demi, 600)" as unknown as number,
   letterSpacing: "0.01em",
   cursor: "pointer",
   transition: "background 0.4s ease, box-shadow 0.4s ease",
@@ -311,25 +315,32 @@ export function Onboarding() {
 
         <div style={navStyle}>
           {currentStep > 1 && (
-            <button style={ghostButtonStyle} onClick={back} type="button">
+            <motion.button
+              style={ghostButtonStyle as MotionStyle}
+              onClick={back}
+              type="button"
+              whileHover={{ borderColor: "var(--rialto-border-strong, rgba(255,255,255,0.2))" }}
+              whileTap={{ scale: 0.97 }}
+            >
               Back
-            </button>
+            </motion.button>
           )}
           {!isLastStep && (
-            <button
+            <motion.button
               style={{
                 ...primaryButtonBase,
                 background: glowColor,
                 boxShadow: `0 2px 12px ${glowColor}40`,
                 opacity: canAdvance ? 1 : 0.4,
                 cursor: canAdvance ? "pointer" : "not-allowed",
-              }}
+              } as MotionStyle}
               onClick={canAdvance ? next : undefined}
               disabled={!canAdvance}
               type="button"
+              {...(canAdvance ? { whileHover: { boxShadow: `0 4px 24px ${glowColor}60` }, whileTap: { scale: 0.97 } } : {})}
             >
               {currentStep === 3 && !state.logoResult ? "Skip" : "Continue"}
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
