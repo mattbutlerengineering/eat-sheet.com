@@ -1,17 +1,30 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
+import type { AppEnv } from "./types";
+import { DomainError } from "./errors";
+import { error } from "./response";
 
-type Bindings = {
-  DB: D1Database;
-  LOGOS: R2Bucket;
-  JWT_SECRET: string;
-};
+const app = new Hono<AppEnv>();
 
-const app = new Hono<{ Bindings: Bindings }>();
+app.use(
+  "/api/*",
+  cors({
+    origin: ["http://localhost:5173", "https://eat-sheet.com"],
+    credentials: true,
+  }),
+);
 
-app.get("/api/health", (c) => {
-  return c.json({ status: "ok", timestamp: new Date().toISOString() });
+app.get("/api/health", (c) => c.json({ ok: true }));
+
+// Feature routes will be mounted here in later tasks
+
+app.onError((err, c) => {
+  if (err instanceof DomainError) {
+    return c.json(error(err.message), err.statusCode as 400);
+  }
+  console.error("Unhandled error:", err);
+  return c.json(error("Internal server error"), 500);
 });
 
-export type AppType = typeof app;
-
 export default app;
+export type AppType = typeof app;
