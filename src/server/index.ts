@@ -5,6 +5,7 @@ import { DomainError } from "./errors";
 import { error } from "./response";
 import { auth } from "./features/auth/routes";
 import { venues } from "./features/venues/routes";
+import { onboarding } from "./features/onboarding/routes";
 
 const app = new Hono<AppEnv>();
 
@@ -20,6 +21,7 @@ app.get("/api/health", (c) => c.json({ ok: true }));
 
 app.route("/api/auth", auth);
 app.route("/api/t", venues);
+app.route("/api/onboarding", onboarding);
 
 app.onError((err, c) => {
   if (err instanceof DomainError) {
