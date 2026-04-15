@@ -9,6 +9,12 @@ export default defineConfig({
       "@server": resolve(__dirname, "src/server"),
       "@client": resolve(__dirname, "src/client"),
       "@shared": resolve(__dirname, "src/shared"),
+      // Rialto was published with incorrect exports map (src/ instead of dist/).
+      // Alias the styles import directly to the compiled CSS file.
+      "@mattbutlerengineering/rialto/styles": resolve(
+        __dirname,
+        "node_modules/@mattbutlerengineering/rialto/dist/lib/styles.css",
+      ),
     },
   },
   server: {

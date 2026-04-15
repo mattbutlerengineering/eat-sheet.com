@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@mattbutlerengineering/rialto':
+        specifier: ^0.1.0
+        version: 0.1.0(framer-motion@11.18.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       arctic:
         specifier: ^2.0.0
         version: 2.3.4
@@ -771,6 +774,14 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@mattbutlerengineering/rialto@0.1.0':
+    resolution: {integrity: sha512-aNO1aUNo4WKhJpfBLpcuY2mSGBbRlGzmPZdWqR7J441XXRjMNEvXPXTS3WDxyLc3wMXbw8MYZtKfoNbjOh+KRw==, tarball: https://npm.pkg.github.com/download/@mattbutlerengineering/rialto/0.1.0/25087c2db9797abff43c4a94c16cd054c497e97b}
+    peerDependencies:
+      framer-motion: ^12.0.0
+      lucide-react: '>=0.400.0'
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   '@oslojs/asn1@1.0.0':
     resolution: {integrity: sha512-zw/wn0sj0j0QKbIXfIlnEcTviaCzYOY3V5rAyjR6YtOByFtJiT574+8p9Wlach0lZH9fddD4yb9laEAIl4vXQA==}
@@ -2028,6 +2039,13 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@mattbutlerengineering/rialto@0.1.0(framer-motion@11.18.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      framer-motion: 11.18.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      lucide-react: 0.468.0(react@19.2.5)
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
 
   '@oslojs/asn1@1.0.0':
     dependencies:

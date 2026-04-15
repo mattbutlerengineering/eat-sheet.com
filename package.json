@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mattbutlerengineering/rialto": "^0.1.0",
     "arctic": "^2.0.0",
     "framer-motion": "^11.0.0",
     "hono": "^4.0.0",
