@@ -30,11 +30,13 @@ const pageStyle: React.CSSProperties = {
 
 const contentStyle: React.CSSProperties = {
   width: "100%",
-  maxWidth: 640,
+  maxWidth: 800,
   padding: "0 24px",
   display: "flex",
   flexDirection: "column",
   gap: 24,
+  position: "relative",
+  zIndex: 1,
 };
 
 const stepLabelStyle: React.CSSProperties = {
@@ -169,8 +171,44 @@ export function Onboarding() {
   const title = STEP_TITLES[currentStep - 1] ?? "";
   const isLastStep = currentStep === 5;
 
+  // Determine if Continue should be enabled
+  const canAdvance = (() => {
+    switch (currentStep) {
+      case 1:
+        return Boolean(state.venueInfo?.name && state.venueInfo?.type && state.venueInfo?.cuisines?.length);
+      case 2:
+        return Boolean(state.location?.timezone);
+      case 3:
+        return true; // Logo is optional
+      case 4:
+        return Boolean(state.brand?.accent);
+      default:
+        return true;
+    }
+  })();
+
+  // Ambient glow color shifts as user progresses
+  const glowColor = state.brand?.accent ?? "#c49a2a";
+  const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
+
   return (
     <div style={pageStyle}>
+      {/* Ambient glow that shifts with accent color */}
+      <div
+        style={{
+          position: "absolute",
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${glowColor}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, transparent 70%)`,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          pointerEvents: "none",
+          transition: "background 0.8s ease",
+        }}
+      />
+
       <div style={contentStyle}>
         <ProgressBar currentStep={currentStep} />
 
@@ -228,6 +266,21 @@ export function Onboarding() {
           </motion.div>
         </AnimatePresence>
 
+        {state.error && (
+          <div
+            style={{
+              padding: "10px 16px",
+              borderRadius: 8,
+              background: "rgba(224,112,112,0.08)",
+              border: "1px solid rgba(224,112,112,0.2)",
+              color: "#e07070",
+              fontSize: 13,
+            }}
+          >
+            {state.error}
+          </div>
+        )}
+
         <div style={navStyle}>
           {currentStep > 1 && (
             <button style={ghostButtonStyle} onClick={back} type="button">
@@ -235,7 +288,16 @@ export function Onboarding() {
             </button>
           )}
           {!isLastStep && (
-            <button style={primaryButtonStyle} onClick={next} type="button">
+            <button
+              style={{
+                ...primaryButtonStyle,
+                opacity: canAdvance ? 1 : 0.4,
+                cursor: canAdvance ? "pointer" : "not-allowed",
+              }}
+              onClick={canAdvance ? next : undefined}
+              disabled={!canAdvance}
+              type="button"
+            >
               Continue
             </button>
           )}
