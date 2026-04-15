@@ -11,6 +11,16 @@ import { onboarding } from "./features/onboarding/routes";
 
 const app = new Hono<AppEnv>();
 
+// Redirect www to non-www to prevent cookie/OAuth domain mismatches
+app.use("*", async (c, next) => {
+  const url = new URL(c.req.url);
+  if (url.hostname === "www.eat-sheet.com") {
+    url.hostname = "eat-sheet.com";
+    return c.redirect(url.toString(), 301);
+  }
+  return next();
+});
+
 app.use(
   "/api/*",
   cors({
