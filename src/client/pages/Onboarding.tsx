@@ -4,6 +4,8 @@ import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
 import { useOnboarding } from "../features/onboarding/hooks/useOnboarding";
 import { ProgressBar } from "../features/onboarding/components/ProgressBar";
+import { StepVenueInfo } from "../features/onboarding/components/StepVenueInfo";
+import { StepLocation } from "../features/onboarding/components/StepLocation";
 
 const STEP_TITLES = [
   "What's your venue called?",
@@ -112,7 +114,7 @@ const slideVariants = {
 
 export function Onboarding() {
   const { user, loading } = useAuth();
-  const { state, next, back } = useOnboarding();
+  const { state, next, back, setVenueInfo, setLocation } = useOnboarding();
 
   if (loading) return null;
   if (!user) return <Navigate to="/login" />;
@@ -141,7 +143,21 @@ export function Onboarding() {
             exit="exit"
             transition={spring}
           >
-            <div style={placeholderCardStyle}>Step {currentStep} content</div>
+            {currentStep === 1 && (
+              <StepVenueInfo
+                data={state.venueInfo}
+                onChange={setVenueInfo}
+              />
+            )}
+            {currentStep === 2 && (
+              <StepLocation
+                data={state.location}
+                onChange={setLocation}
+              />
+            )}
+            {currentStep > 2 && (
+              <div style={placeholderCardStyle}>Step {currentStep} content</div>
+            )}
           </motion.div>
         </AnimatePresence>
 
