@@ -104,7 +104,7 @@ describe("handleLogoUpload", () => {
     const result = await handleLogoUpload(r2, file, "user-1");
 
     // The R2 key should end with .svg
-    const putCall = (r2.put as ReturnType<typeof vi.fn>).mock.calls[0];
+    const putCall = (r2.put as ReturnType<typeof vi.fn>).mock.calls[0]!;
     expect(putCall[0]).toMatch(/\.svg$/);
     expect(result.logoUrl).toBeDefined();
   });
