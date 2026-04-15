@@ -1,4 +1,8 @@
 import { FlipDot, textToMatrix } from "@mattbutlerengineering/rialto";
+import { motion, type MotionStyle } from "framer-motion";
+import { spring } from "@mattbutlerengineering/rialto/motion";
+
+const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
 
 interface StepWelcomeProps {
   venueName: string;
@@ -20,18 +24,18 @@ const NAV_ITEMS = [
 const wrapperStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 28,
+  gap: "var(--rialto-space-2xl, 28px)",
 };
 
 const flipDotWrapperStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "center",
-  padding: "8px 0",
+  padding: "var(--rialto-space-xs, 8px) 0",
 };
 
 const shellStyle: React.CSSProperties = {
   height: 300,
-  borderRadius: 12,
+  borderRadius: "var(--rialto-radius-soft, 12px)",
   border: "1px solid var(--rialto-border)",
   overflow: "hidden",
   display: "flex",
@@ -44,34 +48,35 @@ const sidebarStyle: React.CSSProperties = {
   borderRight: "1px solid var(--rialto-border)",
   display: "flex",
   flexDirection: "column",
-  padding: "16px 12px",
-  gap: 8,
+  padding: "var(--rialto-space-md, 16px) var(--rialto-space-sm, 12px)",
+  gap: "var(--rialto-space-xs, 8px)",
   background: "var(--rialto-surface)",
 };
 
 const logoRowStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 10,
-  marginBottom: 12,
+  gap: "var(--rialto-space-sm, 10px)",
+  marginBottom: "var(--rialto-space-md, 12px)",
 };
 
 const logoBoxStyle: React.CSSProperties = {
   width: 32,
   height: 32,
-  borderRadius: 8,
+  borderRadius: "var(--rialto-radius-default, 8px)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: 13,
-  fontWeight: 700,
+  fontSize: "var(--rialto-text-sm, 13px)",
+  fontWeight: "var(--rialto-weight-demi, 700)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-on-accent)",
   flexShrink: 0,
 };
 
 const venueNameStyle: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 600,
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-sm, 13px)",
+  fontWeight: "var(--rialto-weight-demi, 600)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-primary)",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -79,7 +84,8 @@ const venueNameStyle: React.CSSProperties = {
 };
 
 const cuisineStyle: React.CSSProperties = {
-  fontSize: 10,
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "10px",
   color: "var(--rialto-text-tertiary)",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -92,23 +98,23 @@ const mainStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   flexDirection: "column",
-  gap: 12,
-  padding: 24,
+  gap: "var(--rialto-space-md, 12px)",
+  padding: "var(--rialto-space-xl, 24px)",
   background: "var(--rialto-surface-recessed)",
 };
 
 const welcomeHeadingStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
-  fontSize: 18,
-  fontWeight: 300,
+  fontSize: "var(--rialto-text-md, 18px)",
+  fontWeight: "var(--rialto-weight-light, 300)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-primary)",
-  letterSpacing: "-0.01em",
+  letterSpacing: "var(--rialto-tracking-tight, -0.01em)",
   margin: 0,
   textAlign: "center",
 };
 
 const welcomeSubtextStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: "var(--rialto-text-sm, 13px)",
   color: "var(--rialto-text-secondary)",
   margin: 0,
   textAlign: "center",
@@ -133,24 +139,26 @@ export function StepWelcome({
   const cuisineLabel = cuisines.slice(0, 3).join(" · ");
 
   const ctaButtonStyle: React.CSSProperties = {
-    padding: "12px 32px",
-    borderRadius: 8,
+    padding: "var(--rialto-space-md, 12px) 32px",
+    borderRadius: "var(--rialto-radius-default, 8px)",
     border: `1px solid ${accent}4d`,
     background: accent,
     color: "var(--rialto-text-on-accent)",
-    fontSize: 14,
-    fontWeight: 600,
-    letterSpacing: "0.01em",
+    fontSize: "var(--rialto-text-sm, 14px)",
+    fontWeight: "var(--rialto-weight-demi, 600)" as React.CSSProperties["fontWeight"],
+    letterSpacing: "var(--rialto-tracking-tight, 0.01em)",
     cursor: isSubmitting ? "not-allowed" : "pointer",
     opacity: isSubmitting ? 0.7 : 1,
     transition: "opacity 150ms ease",
   };
 
   const activeNavItemStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: "8px 10px",
-    borderRadius: 6,
-    fontSize: 12,
-    fontWeight: isActive ? 600 : 400,
+    padding: "var(--rialto-space-xs, 8px) var(--rialto-space-sm, 10px)",
+    borderRadius: "var(--rialto-radius-sharp, 6px)",
+    fontSize: "var(--rialto-text-xs, 12px)",
+    fontWeight: (isActive
+      ? "var(--rialto-weight-demi, 600)"
+      : "var(--rialto-weight-regular, 400)") as React.CSSProperties["fontWeight"],
     color: isActive ? accent : "var(--rialto-text-tertiary)",
     background: isActive ? `${accent}1a` : "transparent",
     cursor: "default",
@@ -160,14 +168,14 @@ export function StepWelcome({
   });
 
   const previewCTAStyle: React.CSSProperties = {
-    marginTop: 8,
+    marginTop: "var(--rialto-space-xs, 8px)",
     padding: "6px 16px",
-    borderRadius: 6,
+    borderRadius: "var(--rialto-radius-sharp, 6px)",
     border: "none",
     background: accent,
     color: "var(--rialto-text-on-accent)",
-    fontSize: 12,
-    fontWeight: 600,
+    fontSize: "var(--rialto-text-xs, 12px)",
+    fontWeight: "var(--rialto-weight-demi, 600)" as React.CSSProperties["fontWeight"],
     cursor: "default",
   };
 
@@ -187,11 +195,14 @@ export function StepWelcome({
       </div>
 
       {/* Themed app shell preview */}
-      <div
-        style={{
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={spring}
+        style={ms({
           ...shellStyle,
           "--rialto-accent": accent,
-        } as React.CSSProperties}
+        } as React.CSSProperties)}
       >
         {/* Sidebar */}
         <div style={sidebarStyle}>
@@ -238,18 +249,21 @@ export function StepWelcome({
             Get Started
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* CTA button */}
       <div style={ctaWrapperStyle}>
-        <button
+        <motion.button
           type="button"
-          style={ctaButtonStyle}
+          style={ms(ctaButtonStyle)}
           onClick={onEnter}
           disabled={isSubmitting}
+          whileHover={{ scale: 1.03, boxShadow: `0 0 20px ${accent}40` }}
+          whileTap={{ scale: 0.97 }}
+          transition={spring}
         >
           {isSubmitting ? "Setting up…" : `Enter ${venueName} →`}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

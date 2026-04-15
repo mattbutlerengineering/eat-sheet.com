@@ -51,7 +51,7 @@ const previewCardStyle: React.CSSProperties = {
 const previewLabelStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
   marginBottom: "var(--rialto-space-sm, 10px)",
 };

@@ -2,8 +2,8 @@ import { Navigate } from "react-router";
 import { motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
+import { noiseOverlayStyle } from "../styles/noise";
 
-/** Cast CSSProperties to MotionStyle (exactOptionalPropertyTypes workaround) */
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
 
 const fadeUp = {
@@ -44,7 +44,7 @@ const logoStyle: React.CSSProperties = {
 const logoLetterStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
   fontSize: "var(--rialto-text-2xl, 32px)",
-  fontWeight: "var(--rialto-weight-medium, 500)" as unknown as number,
+  fontWeight: "var(--rialto-weight-medium, 500)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-on-accent, #1a1918)",
   lineHeight: 1,
 };
@@ -52,7 +52,7 @@ const logoLetterStyle: React.CSSProperties = {
 const appNameStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
   fontSize: "var(--rialto-text-3xl, 40px)",
-  fontWeight: "var(--rialto-weight-light, 300)" as unknown as number,
+  fontWeight: "var(--rialto-weight-light, 300)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-primary, #e8e2d8)",
   letterSpacing: "-0.03em",
   lineHeight: "var(--rialto-leading-tight, 1.2)",
@@ -63,7 +63,7 @@ const taglineStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.14em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.14em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.5))",
 };
 
@@ -87,8 +87,8 @@ const googleButtonStyle: React.CSSProperties = {
   color: "var(--rialto-text-primary, #e8e2d8)",
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-sm, 14px)",
-  fontWeight: "var(--rialto-weight-medium, 500)" as unknown as number,
-  letterSpacing: "0.01em",
+  fontWeight: "var(--rialto-weight-medium, 500)" as React.CSSProperties["fontWeight"],
+  letterSpacing: "var(--rialto-tracking-tight, 0.01em)",
   cursor: "pointer",
   textDecoration: "none",
   transition: "border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease",
@@ -141,6 +141,8 @@ export function Login() {
           pointerEvents: "none",
         }}
       />
+
+      <div style={noiseOverlayStyle} />
 
       <motion.div
         style={ms(contentStyle)}

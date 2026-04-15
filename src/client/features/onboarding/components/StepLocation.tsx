@@ -3,8 +3,8 @@ import { Input, Select } from "@mattbutlerengineering/rialto";
 import type { VenueLocationInput } from "@shared/schemas";
 
 interface StepLocationProps {
-  data: VenueLocationInput | null;
-  onChange: (data: VenueLocationInput) => void;
+  readonly data: VenueLocationInput | null;
+  readonly onChange: (data: VenueLocationInput) => void;
 }
 
 const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -63,7 +63,7 @@ const previewCardStyle: React.CSSProperties = {
 const previewLabelStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(255,255,255,0.35))",
   marginBottom: "var(--rialto-space-md, 10px)",
 };
@@ -72,24 +72,28 @@ const addressLineStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-sm, 14px)",
   color: "var(--rialto-text-primary, #e8e2d8)",
   lineHeight: "var(--rialto-leading-normal, 1.6)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const mutedStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 13px)",
   color: "var(--rialto-text-secondary, rgba(255,255,255,0.5))",
   marginTop: "var(--rialto-space-xs, 4px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const accentStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 13px)",
   color: "var(--rialto-accent, #c49a2a)",
   marginTop: "var(--rialto-space-xs, 2px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const emptyPreviewStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 13px)",
   color: "var(--rialto-text-tertiary, rgba(255,255,255,0.2))",
   fontStyle: "italic",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 interface LocationState {
@@ -257,7 +261,7 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
         {loc.timezone && (
           <div style={previewCardStyle}>
             <div style={previewLabelStyle}>Timezone</div>
-            <div style={{ fontSize: "var(--rialto-text-xs, 13px)", color: "var(--rialto-text-secondary, rgba(255,255,255,0.7))" }}>
+            <div style={{ fontSize: "var(--rialto-text-xs, 13px)", color: "var(--rialto-text-secondary, rgba(255,255,255,0.7))", fontFamily: "var(--rialto-font-sans, system-ui)" }}>
               {TIMEZONE_OPTIONS.find((t) => t.value === loc.timezone)?.label ??
                 loc.timezone}
             </div>

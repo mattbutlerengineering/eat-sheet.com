@@ -44,7 +44,7 @@ function darken(hex: string, amount: number): string {
 
 const columnStyle: React.CSSProperties = {
   display: "flex",
-  gap: 32,
+  gap: "var(--rialto-space-2xl, 32px)",
   alignItems: "flex-start",
 };
 
@@ -52,38 +52,39 @@ const leftColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 20,
+  gap: "var(--rialto-space-xl, 20px)",
 };
 
 const rightColumnStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: 12,
+  gap: "var(--rialto-space-md, 12px)",
 };
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--rialto-text-xs, 11px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary)",
-  marginBottom: 10,
+  marginBottom: "var(--rialto-space-sm, 10px)",
 };
 
 const swatchRowStyle: React.CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
-  gap: 10,
+  gap: "var(--rialto-space-sm, 10px)",
 };
 
 const colorPickerRowStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 12,
+  gap: "var(--rialto-space-md, 12px)",
 };
 
 const hexLabelStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: "var(--rialto-text-sm, 13px)",
   color: "var(--rialto-text-secondary)",
   fontFamily: "var(--rialto-font-mono, monospace)",
   letterSpacing: "0.05em",
@@ -165,10 +166,11 @@ export function StepBrand({
                 width: 40,
                 height: 40,
                 padding: 2,
-                borderRadius: 8,
+                borderRadius: "var(--rialto-radius-default, 8px)",
                 border: "1px solid var(--rialto-border)",
                 background: "transparent",
                 cursor: "pointer",
+                transition: "border-color 0.3s ease",
               }}
               aria-label="Choose custom accent color"
             />

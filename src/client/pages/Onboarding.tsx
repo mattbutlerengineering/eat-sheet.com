@@ -10,6 +10,7 @@ import { StepLocation } from "../features/onboarding/components/StepLocation";
 import { StepLogo } from "../features/onboarding/components/StepLogo";
 import { StepBrand } from "../features/onboarding/components/StepBrand";
 import { StepWelcome } from "../features/onboarding/components/StepWelcome";
+import { noiseOverlayStyle } from "../styles/noise";
 
 const STEP_TITLES = [
   "What's your venue called?",
@@ -44,7 +45,7 @@ const stepLabelStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
   marginTop: "var(--rialto-space-sm, 12px)",
 };
@@ -52,19 +53,19 @@ const stepLabelStyle: React.CSSProperties = {
 const stepTitleStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-display, system-ui)",
   fontSize: "var(--rialto-text-2xl, 28px)",
-  fontWeight: "var(--rialto-weight-light, 300)" as unknown as number,
+  fontWeight: "var(--rialto-weight-light, 300)" as React.CSSProperties["fontWeight"],
   color: "var(--rialto-text-primary, #e8e2d8)",
-  letterSpacing: "-0.01em",
+  letterSpacing: "var(--rialto-tracking-tight, -0.01em)",
   lineHeight: "var(--rialto-leading-tight, 1.2)",
   margin: 0,
 };
 
 const navStyle: React.CSSProperties = {
   display: "flex",
-  gap: 12,
+  gap: "var(--rialto-space-md, 12px)",
   alignItems: "center",
   justifyContent: "flex-end",
-  paddingTop: 8,
+  paddingTop: "var(--rialto-space-xs, 8px)",
 };
 
 const ghostButtonStyle: React.CSSProperties = {
@@ -75,8 +76,8 @@ const ghostButtonStyle: React.CSSProperties = {
   color: "var(--rialto-text-secondary, rgba(232,226,216,0.7))",
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-sm, 14px)",
-  fontWeight: "var(--rialto-weight-medium, 500)" as unknown as number,
-  letterSpacing: "0.01em",
+  fontWeight: "var(--rialto-weight-medium, 500)" as React.CSSProperties["fontWeight"],
+  letterSpacing: "var(--rialto-tracking-tight, 0.01em)",
   cursor: "pointer",
 };
 
@@ -87,8 +88,8 @@ const primaryButtonBase: React.CSSProperties = {
   color: "var(--rialto-text-on-accent, #1a1918)",
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-sm, 14px)",
-  fontWeight: "var(--rialto-weight-demi, 600)" as unknown as number,
-  letterSpacing: "0.01em",
+  fontWeight: "var(--rialto-weight-demi, 600)" as React.CSSProperties["fontWeight"],
+  letterSpacing: "var(--rialto-tracking-tight, 0.01em)",
   cursor: "pointer",
   transition: "background 0.4s ease, box-shadow 0.4s ease",
 };
@@ -231,6 +232,8 @@ export function Onboarding() {
         }}
       />
 
+      <div style={noiseOverlayStyle} />
+
       <div style={contentStyle}>
         <ProgressBar currentStep={currentStep} accent={state.brand?.accent} />
 
@@ -301,12 +304,13 @@ export function Onboarding() {
         {state.error && (
           <div
             style={{
-              padding: "10px 16px",
-              borderRadius: 8,
-              background: "rgba(224,112,112,0.08)",
-              border: "1px solid rgba(224,112,112,0.2)",
-              color: "#e07070",
-              fontSize: 13,
+              padding: "var(--rialto-space-sm, 10px) var(--rialto-space-md, 16px)",
+              borderRadius: "var(--rialto-radius-default, 8px)",
+              background: "var(--rialto-error-muted, rgba(224,112,112,0.08))",
+              border: "1px solid var(--rialto-error, rgba(224,112,112,0.2))",
+              color: "var(--rialto-error, #e07070)",
+              fontSize: "var(--rialto-text-sm, 13px)",
+              fontFamily: "var(--rialto-font-sans, system-ui)",
             }}
           >
             {state.error}

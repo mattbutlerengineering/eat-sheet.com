@@ -129,3 +129,14 @@ TypeScript path aliases in `tsconfig.json` point to the corresponding `.d.ts` fi
 - All React hooks MUST be before any early returns — `useCallback`/`useEffect` after `if (loading) return null` crashes in production (React error #310)
 - SQLite `TEXT PRIMARY KEY` does NOT auto-generate — always provide `nanoid()` for id columns
 - `exactOptionalPropertyTypes` is enabled — use `prop?: string | undefined` to allow passing `undefined` explicitly
+
+## Rialto Frontend Patterns
+
+- `exactOptionalPropertyTypes` requires a cast for Framer Motion styles: `const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;`
+- Framer Motion `spring` transition: `import { spring } from "@mattbutlerengineering/rialto/motion"`
+- Staggered entrance pattern: parent `motion.div` with `initial="hidden" animate="visible" transition={{ staggerChildren: 0.1 }}`, children use `variants={fadeUp}` where `fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }`
+- `fontWeight` with CSS var requires cast: `fontWeight: "var(--rialto-weight-demi, 600)" as React.CSSProperties["fontWeight"]`
+- Always use Rialto tokens over hardcoded values: `--rialto-space-*` (spacing), `--rialto-text-*` (font size), `--rialto-radius-*` (border radius), `--rialto-tracking-*` (letter spacing), `--rialto-weight-*` (font weight), `--rialto-font-*` (font family), `--rialto-shadow-*` (shadows)
+- Every text element needs explicit `fontFamily: "var(--rialto-font-sans, system-ui)"` or `--rialto-font-display` — don't rely on inheritance
+- Color selection UI uses double-ring `boxShadow` (gap ring + color ring) instead of `border` to avoid layout shift
+- All pages use dark theme: `data-theme="dark"` on outer container

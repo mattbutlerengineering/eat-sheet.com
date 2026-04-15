@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 
 interface ColorSwatchProps {
-  color: string;
-  selected: boolean;
-  onClick: () => void;
+  readonly color: string;
+  readonly selected: boolean;
+  readonly onClick: () => void;
 }
 
 export function ColorSwatch({ color, selected, onClick }: ColorSwatchProps) {
@@ -14,18 +14,18 @@ export function ColorSwatch({ color, selected, onClick }: ColorSwatchProps) {
       onClick={onClick}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
+      animate={{
+        boxShadow: selected
+          ? `0 0 0 2px var(--rialto-surface, #1e1c1a), 0 0 0 4px ${color}`
+          : "0 0 0 2px transparent, 0 0 0 4px transparent",
+      }}
       transition={spring}
       style={{
         width: 40,
         height: 40,
         borderRadius: "50%",
         backgroundColor: color,
-        border: selected
-          ? "2px solid var(--rialto-accent, #c49a2a)"
-          : "2px solid transparent",
-        boxShadow: selected
-          ? "0 0 12px var(--rialto-accent-glow, rgba(196,154,42,0.3))"
-          : "none",
+        border: "none",
         cursor: "pointer",
         padding: 0,
         flexShrink: 0,

@@ -1,7 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, type MotionStyle } from "framer-motion";
+import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
 import { VenueThemeProvider } from "../providers/VenueTheme";
 import type { VenueWithTheme } from "@shared/types";
+
+const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const NAV_ITEMS = [
   { label: "Dashboard", active: true },
@@ -9,13 +18,13 @@ const NAV_ITEMS = [
   { label: "Waitlist", active: false },
   { label: "Floor Plan", active: false },
   { label: "Guests", active: false },
-];
+] as const;
 
 const STAT_CARDS = [
   { label: "Reservations", value: 0 },
   { label: "Waitlist", value: 0 },
   { label: "Tables", value: 0 },
-];
+] as const;
 
 const pageStyle: React.CSSProperties = {
   display: "flex",
@@ -106,9 +115,10 @@ const statValueStyle: React.CSSProperties = {
 };
 
 const statLabelStyle: React.CSSProperties = {
+  fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-xs, 12px)",
   textTransform: "uppercase" as const,
-  letterSpacing: "0.1em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.1em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
 };
 
@@ -118,11 +128,24 @@ function NavItem({
   label,
   active,
   accent,
+  index,
 }: {
   readonly label: string;
   readonly active: boolean;
   readonly accent: string;
+  readonly index: number;
 }) {
+  const [hovered, setHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => setHovered(true), []);
+  const handleMouseLeave = useCallback(() => setHovered(false), []);
+
+  const background = active
+    ? `${accent}1a`
+    : hovered
+      ? "var(--rialto-surface-recessed, rgba(232,226,216,0.04))"
+      : "transparent";
+
   const style: React.CSSProperties = {
     padding: "8px 10px",
     borderRadius: "var(--rialto-radius-sharp, 6px)",
@@ -130,13 +153,37 @@ function NavItem({
     fontSize: "var(--rialto-text-xs, 12px)",
     fontWeight: active ? 600 : 400,
     color: active ? accent : "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
-    background: active ? `${accent}1a` : "transparent",
+    background,
     cursor: "pointer",
     whiteSpace: "nowrap" as const,
     overflow: "hidden",
     textOverflow: "ellipsis",
+    transition: "background 0.2s ease, color 0.2s ease",
+    boxShadow: active ? "var(--rialto-shadow-sm, 0 1px 3px rgba(0,0,0,0.2))" : "none",
   };
-  return <div style={style}>{label}</div>;
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      transition={spring}
+      custom={index}
+      style={ms(style)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {label}
+    </motion.div>
+  );
+}
+
+function SkeletonBlock({ style }: { readonly style: React.CSSProperties }) {
+  return (
+    <motion.div
+      style={ms(style)}
+      animate={{ opacity: [0.4, 0.7, 0.4] }}
+      transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+    />
+  );
 }
 
 function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
@@ -147,9 +194,13 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
   return (
     <VenueThemeProvider theme={theme}>
       <div style={pageStyle} data-theme="dark">
-        {/* Sidebar */}
-        <div style={sidebarStyle}>
-          <div style={logoRowStyle}>
+        <motion.div
+          style={ms(sidebarStyle)}
+          initial="hidden"
+          animate="visible"
+          transition={{ staggerChildren: 0.06, delayChildren: 0.1 }}
+        >
+          <motion.div variants={fadeUp} transition={spring} style={ms(logoRowStyle)}>
             {venue.logoUrl ? (
               <img
                 src={venue.logoUrl}
@@ -164,30 +215,50 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
             <div style={{ overflow: "hidden", flex: 1 }}>
               <div style={venueNameStyle}>{venue.name}</div>
             </div>
-          </div>
+          </motion.div>
 
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.map((item, i) => (
             <NavItem
               key={item.label}
               label={item.label}
               active={item.active}
               accent={accent}
+              index={i}
             />
           ))}
-        </div>
+        </motion.div>
 
-        {/* Main content */}
-        <div style={mainStyle}>
-          <h1 style={headingStyle}>Dashboard</h1>
-          <div style={statsRowStyle}>
+        <motion.div
+          style={ms(mainStyle)}
+          initial="hidden"
+          animate="visible"
+          transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+        >
+          <motion.h1 variants={fadeUp} transition={spring} style={ms(headingStyle)}>
+            Dashboard
+          </motion.h1>
+          <motion.div
+            style={ms(statsRowStyle)}
+            variants={fadeUp}
+            transition={{ ...spring, staggerChildren: 0.1 }}
+          >
             {STAT_CARDS.map((card) => (
-              <div key={card.label} style={statCardStyle}>
+              <motion.div
+                key={card.label}
+                variants={fadeUp}
+                transition={spring}
+                style={ms(statCardStyle)}
+                whileHover={{
+                  scale: 1.02,
+                  borderColor: "var(--rialto-border-strong, rgba(255,255,255,0.15))",
+                }}
+              >
                 <div style={statValueStyle}>{card.value}</div>
                 <div style={statLabelStyle}>{card.label}</div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </VenueThemeProvider>
   );
@@ -241,11 +312,11 @@ export function Dashboard() {
       <div style={pageStyle} data-theme="dark">
         <div style={sidebarStyle}>
           <div style={logoRowStyle}>
-            <div style={{ ...logoBoxStyle, background: "var(--rialto-surface-matte, rgba(232,226,216,0.08))" }} />
-            <div style={{ flex: 1, height: 14, borderRadius: 4, background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
+            <SkeletonBlock style={{ ...logoBoxStyle, background: "var(--rialto-surface-matte, rgba(232,226,216,0.08))" }} />
+            <SkeletonBlock style={{ flex: 1, height: 14, borderRadius: 4, background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
           </div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div
+            <SkeletonBlock
               key={i}
               style={{
                 height: 32,
@@ -256,12 +327,12 @@ export function Dashboard() {
           ))}
         </div>
         <div style={mainStyle}>
-          <div style={{ width: 180, height: 28, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
+          <SkeletonBlock style={{ width: 180, height: 28, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
           <div style={statsRowStyle}>
             {[1, 2, 3].map((i) => (
               <div key={i} style={{ ...statCardStyle, minHeight: 100 }}>
-                <div style={{ width: 48, height: 36, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
-                <div style={{ width: 80, height: 12, borderRadius: 4, background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))" }} />
+                <SkeletonBlock style={{ width: 48, height: 36, borderRadius: "var(--rialto-radius-sharp, 6px)", background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />
+                <SkeletonBlock style={{ width: 80, height: 12, borderRadius: 4, background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))" }} />
               </div>
             ))}
           </div>

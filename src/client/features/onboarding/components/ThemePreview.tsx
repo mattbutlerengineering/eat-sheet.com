@@ -1,6 +1,11 @@
+import { motion, type MotionStyle } from "framer-motion";
+import { spring } from "@mattbutlerengineering/rialto/motion";
+
+const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
+
 interface ThemePreviewProps {
-  accent: string;
-  venueName: string;
+  readonly accent: string;
+  readonly venueName: string;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -16,9 +21,10 @@ const cardStyle: React.CSSProperties = {
 const previewLabelStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
   marginBottom: "var(--rialto-space-2xs, 2px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const venueBadgeStyle: React.CSSProperties = {
@@ -30,7 +36,9 @@ const venueBadgeStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-sm, 13px)",
   fontWeight: 600,
   color: "var(--rialto-text-on-accent, #1a1918)",
-  letterSpacing: "0.01em",
+  letterSpacing: "var(--rialto-tracking-tight, 0.01em)",
+  fontFamily: "var(--rialto-font-display, system-ui)",
+  transition: "background 0.3s ease",
 };
 
 const inputPreviewStyle: React.CSSProperties = {
@@ -60,6 +68,7 @@ const cancelButtonStyle: React.CSSProperties = {
   color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))",
   fontSize: "var(--rialto-text-sm, 13px)",
   cursor: "default",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
@@ -74,13 +83,19 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
     fontWeight: 600,
     cursor: "default",
     boxShadow: `0 2px 8px ${accent}44`,
+    fontFamily: "var(--rialto-font-sans, system-ui)",
+    transition: "background 0.25s ease, box-shadow 0.25s ease",
   };
 
   return (
-    <div style={cardStyle}>
+    <motion.div
+      style={ms(cardStyle)}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={spring}
+    >
       <div style={previewLabelStyle}>Live preview</div>
 
-      {/* Venue name badge */}
       <div
         style={{
           ...venueBadgeStyle,
@@ -90,14 +105,13 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
         {venueName || "Your Venue"}
       </div>
 
-      {/* Sample input */}
       <div>
         <div
           style={{
             fontSize: "var(--rialto-text-xs, 11px)",
             color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
             marginBottom: "var(--rialto-space-xs, 4px)",
-            letterSpacing: "0.08em",
+            letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
           }}
         >
           Sample field
@@ -108,12 +122,12 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
           style={{
             ...inputPreviewStyle,
             borderColor: accent + "66",
+            transition: "border-color 0.3s ease",
           }}
           value="Guest name..."
         />
       </div>
 
-      {/* Confirm / Cancel */}
       <div style={buttonRowStyle}>
         <button type="button" tabIndex={-1} style={cancelButtonStyle}>
           Cancel
@@ -122,6 +136,6 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
           Confirm
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

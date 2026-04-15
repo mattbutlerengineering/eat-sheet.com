@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 
 interface ProgressBarProps {
-  currentStep: number;
-  totalSteps?: number;
-  accent?: string | undefined;
+  readonly currentStep: number;
+  readonly totalSteps?: number;
+  readonly accent?: string | undefined;
 }
 
 const DEFAULT_ACCENT = "#c49a2a";
@@ -23,6 +23,7 @@ export function ProgressBar({
         display: "flex",
         gap: "var(--rialto-space-sm, 8px)",
         alignItems: "center",
+        transition: "gap 0.3s ease",
       }}
     >
       {Array.from({ length: totalSteps }, (_, i) => {
@@ -34,9 +35,10 @@ export function ProgressBar({
             animate={{ backgroundColor: isActive ? activeColor : FUTURE }}
             transition={spring}
             style={{
-              width: 32,
-              height: 3,
+              width: 36,
+              height: 4,
               borderRadius: "var(--rialto-radius-none, 2px)",
+              boxShadow: isActive ? `0 0 6px ${activeColor}40` : "none",
             }}
           />
         );

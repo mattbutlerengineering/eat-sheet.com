@@ -1,12 +1,14 @@
 import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
+
+const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
 import { ColorSwatch } from "./ColorSwatch";
 
 interface StepLogoProps {
-  logoResult: { logoUrl: string; extractedColors: readonly string[] } | null;
-  uploadError: string | null;
-  onUpload: (file: File) => Promise<void>;
+  readonly logoResult: { logoUrl: string; extractedColors: readonly string[] } | null;
+  readonly uploadError: string | null;
+  readonly onUpload: (file: File) => Promise<void>;
 }
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -46,9 +48,10 @@ const previewCardStyle: React.CSSProperties = {
 const previewLabelStyle: React.CSSProperties = {
   fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
   marginBottom: "var(--rialto-space-sm, 10px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const emptyPreviewStyle: React.CSSProperties = {
@@ -56,6 +59,7 @@ const emptyPreviewStyle: React.CSSProperties = {
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.2))",
   fontStyle: "italic",
   textAlign: "center",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
 const swatchRowStyle: React.CSSProperties = {
@@ -137,8 +141,11 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
     <div className="step-logo" style={columnStyle}>
       {/* Left: Drop zone */}
       <div style={leftColumnStyle}>
-        <div
-          style={dropZoneStyle}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={spring}
+          style={ms(dropZoneStyle)}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -182,19 +189,20 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
                   fontSize: "var(--rialto-text-md, 15px)",
                   color: isDragOver ? "var(--rialto-accent, #c49a2a)" : "var(--rialto-text-secondary, rgba(232,226,216,0.7))",
                   fontWeight: "var(--rialto-weight-medium, 500)" as React.CSSProperties["fontWeight"],
+                  fontFamily: "var(--rialto-font-sans, system-ui)",
                 }}
               >
                 Drag your logo here
               </div>
-              <div style={{ fontSize: "var(--rialto-text-sm, 13px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))" }}>
+              <div style={{ fontSize: "var(--rialto-text-sm, 13px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))", fontFamily: "var(--rialto-font-sans, system-ui)" }}>
                 or click to browse
               </div>
-              <div style={{ fontSize: "var(--rialto-text-xs, 12px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.25))", marginTop: "var(--rialto-space-xs, 4px)" }}>
+              <div style={{ fontSize: "var(--rialto-text-xs, 12px)", color: "var(--rialto-text-tertiary, rgba(232,226,216,0.25))", marginTop: "var(--rialto-space-xs, 4px)", fontFamily: "var(--rialto-font-sans, system-ui)" }}>
                 PNG, JPG, or SVG · Max 2MB
               </div>
             </>
           )}
-        </div>
+        </motion.div>
 
         {(validationError || uploadError) && (
           <div
