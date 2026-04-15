@@ -4,43 +4,43 @@ interface ThemePreviewProps {
 }
 
 const cardStyle: React.CSSProperties = {
-  background: "rgba(232,226,216,0.04)",
-  borderRadius: 10,
-  border: "1px solid rgba(232,226,216,0.08)",
-  padding: "16px 20px",
+  background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
+  borderRadius: "var(--rialto-radius-soft, 10px)",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
+  padding: "var(--rialto-space-lg, 16px) var(--rialto-space-xl, 20px)",
   display: "flex",
   flexDirection: "column",
-  gap: 14,
+  gap: "var(--rialto-space-md, 14px)",
 };
 
 const previewLabelStyle: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: "var(--rialto-text-xs, 11px)",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "rgba(232,226,216,0.35)",
-  marginBottom: 2,
+  color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
+  marginBottom: "var(--rialto-space-2xs, 2px)",
 };
 
 const venueBadgeStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  gap: 8,
+  gap: "var(--rialto-space-sm, 8px)",
   padding: "4px 10px",
-  borderRadius: 6,
-  fontSize: 13,
+  borderRadius: "var(--rialto-radius-sharp, 6px)",
+  fontSize: "var(--rialto-text-sm, 13px)",
   fontWeight: 600,
-  color: "#1a1714",
+  color: "var(--rialto-text-on-accent, #1a1918)",
   letterSpacing: "0.01em",
 };
 
 const inputPreviewStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  borderRadius: 6,
-  background: "rgba(232,226,216,0.06)",
-  border: "1px solid rgba(232,226,216,0.15)",
-  color: "rgba(232,226,216,0.5)",
-  fontSize: 13,
+  borderRadius: "var(--rialto-radius-sharp, 6px)",
+  background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
+  color: "var(--rialto-text-secondary, rgba(232,226,216,0.5))",
+  fontSize: "var(--rialto-text-sm, 13px)",
   boxSizing: "border-box",
   cursor: "default",
   outline: "none",
@@ -48,17 +48,17 @@ const inputPreviewStyle: React.CSSProperties = {
 
 const buttonRowStyle: React.CSSProperties = {
   display: "flex",
-  gap: 8,
+  gap: "var(--rialto-space-sm, 8px)",
 };
 
 const cancelButtonStyle: React.CSSProperties = {
   flex: 1,
   padding: "8px 12px",
-  borderRadius: 6,
-  border: "1px solid rgba(232,226,216,0.2)",
+  borderRadius: "var(--rialto-radius-sharp, 6px)",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   background: "transparent",
-  color: "rgba(232,226,216,0.6)",
-  fontSize: 13,
+  color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))",
+  fontSize: "var(--rialto-text-sm, 13px)",
   cursor: "default",
 };
 
@@ -66,11 +66,11 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
   const confirmButtonStyle: React.CSSProperties = {
     flex: 1,
     padding: "8px 12px",
-    borderRadius: 6,
+    borderRadius: "var(--rialto-radius-sharp, 6px)",
     border: "none",
     background: accent,
-    color: "#1a1714",
-    fontSize: 13,
+    color: "var(--rialto-text-on-accent, #1a1918)",
+    fontSize: "var(--rialto-text-sm, 13px)",
     fontWeight: 600,
     cursor: "default",
     boxShadow: `0 2px 8px ${accent}44`,
@@ -94,9 +94,9 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
       <div>
         <div
           style={{
-            fontSize: 11,
-            color: "rgba(232,226,216,0.35)",
-            marginBottom: 4,
+            fontSize: "var(--rialto-text-xs, 11px)",
+            color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
+            marginBottom: "var(--rialto-space-xs, 4px)",
             letterSpacing: "0.08em",
           }}
         >

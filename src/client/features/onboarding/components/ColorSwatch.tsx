@@ -7,8 +7,6 @@ interface ColorSwatchProps {
   onClick: () => void;
 }
 
-const GOLD = "#c49a2a";
-
 export function ColorSwatch({ color, selected, onClick }: ColorSwatchProps) {
   return (
     <motion.button
@@ -23,10 +21,10 @@ export function ColorSwatch({ color, selected, onClick }: ColorSwatchProps) {
         borderRadius: "50%",
         backgroundColor: color,
         border: selected
-          ? `2px solid ${GOLD}`
+          ? "2px solid var(--rialto-accent, #c49a2a)"
           : "2px solid transparent",
         boxShadow: selected
-          ? "0 0 12px rgba(196,154,42,0.3)"
+          ? "0 0 12px var(--rialto-accent-glow, rgba(196,154,42,0.3))"
           : "none",
         cursor: "pointer",
         padding: 0,

@@ -8,11 +8,7 @@ interface ProgressBarProps {
 }
 
 const DEFAULT_ACCENT = "#c49a2a";
-const FUTURE = "rgba(232,226,216,0.15)";
-const BAR_WIDTH = 32;
-const BAR_HEIGHT = 3;
-const BAR_RADIUS = 2;
-const GAP = 8;
+const FUTURE = "var(--rialto-border, rgba(232,226,216,0.15))";
 
 export function ProgressBar({
   currentStep,
@@ -25,7 +21,7 @@ export function ProgressBar({
     <div
       style={{
         display: "flex",
-        gap: GAP,
+        gap: "var(--rialto-space-sm, 8px)",
         alignItems: "center",
       }}
     >
@@ -38,9 +34,9 @@ export function ProgressBar({
             animate={{ backgroundColor: isActive ? activeColor : FUTURE }}
             transition={spring}
             style={{
-              width: BAR_WIDTH,
-              height: BAR_HEIGHT,
-              borderRadius: BAR_RADIUS,
+              width: 32,
+              height: 3,
+              borderRadius: "var(--rialto-radius-none, 2px)",
             }}
           />
         );
