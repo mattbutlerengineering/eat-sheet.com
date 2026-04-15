@@ -159,11 +159,7 @@ export function Onboarding() {
     }
   }
 
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" />;
-
   const { currentStep } = state;
-  const title = STEP_TITLES[currentStep - 1] ?? "";
   const isLastStep = currentStep === 5;
 
   // Determine if Continue should be enabled
@@ -185,7 +181,6 @@ export function Onboarding() {
   // Keyboard navigation: Enter to advance, Escape to go back
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // Don't intercept when user is typing in an input/select/textarea
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
 
@@ -204,6 +199,11 @@ export function Onboarding() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" />;
+
+  const title = STEP_TITLES[currentStep - 1] ?? "";
 
   // Ambient glow color shifts as user progresses
   const glowColor = state.brand?.accent ?? "#c49a2a";
