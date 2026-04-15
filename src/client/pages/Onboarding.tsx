@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
@@ -8,6 +8,7 @@ import { StepVenueInfo } from "../features/onboarding/components/StepVenueInfo";
 import { StepLocation } from "../features/onboarding/components/StepLocation";
 import { StepLogo } from "../features/onboarding/components/StepLogo";
 import { StepBrand } from "../features/onboarding/components/StepBrand";
+import { StepWelcome } from "../features/onboarding/components/StepWelcome";
 
 const STEP_TITLES = [
   "What's your venue called?",
@@ -116,7 +117,36 @@ const slideVariants = {
 
 export function Onboarding() {
   const { user, loading } = useAuth();
-  const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand } = useOnboarding();
+  const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand, submitStart, submitSuccess, submitError } = useOnboarding();
+  const navigate = useNavigate();
+
+  async function handleSubmit() {
+    const { venueInfo, location, brand, logoResult } = state;
+    if (!venueInfo || !location || !brand) return;
+    submitStart();
+    try {
+      const res = await fetch("/api/onboarding/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          venueInfo,
+          location,
+          brand,
+          logoUrl: logoResult?.logoUrl ?? null,
+        }),
+      });
+      const body = await res.json() as { ok: boolean; error?: string };
+      if (body.ok) {
+        submitSuccess();
+        navigate("/");
+      } else {
+        submitError(body.error ?? "Something went wrong");
+      }
+    } catch {
+      submitError("Something went wrong");
+    }
+  }
 
   async function handleLogoUpload(file: File) {
     const formData = new FormData();
@@ -186,7 +216,14 @@ export function Onboarding() {
               />
             )}
             {currentStep === 5 && (
-              <div style={placeholderCardStyle}>Step 5 content</div>
+              <StepWelcome
+                venueName={state.venueInfo?.name ?? "Your Venue"}
+                accent={state.brand?.accent ?? "#c49a2a"}
+                logoUrl={state.logoResult?.logoUrl ?? null}
+                cuisines={state.venueInfo?.cuisines ?? []}
+                isSubmitting={state.isSubmitting}
+                onEnter={handleSubmit}
+              />
             )}
           </motion.div>
         </AnimatePresence>

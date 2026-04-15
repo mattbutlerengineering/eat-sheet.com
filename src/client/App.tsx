@@ -3,6 +3,7 @@ import { VenueThemeProvider } from "./providers/VenueTheme";
 import { useAuth } from "./hooks/useAuth";
 import { Login } from "./pages/Login";
 import { Onboarding } from "./pages/Onboarding";
+import { Dashboard } from "./pages/Dashboard";
 import "@mattbutlerengineering/rialto/styles";
 
 function AppRoutes() {
@@ -17,7 +18,7 @@ function AppRoutes() {
         path="/"
         element={
           user?.tenantId ? (
-            <div>Dashboard</div>
+            <Dashboard />
           ) : user ? (
             <Navigate to="/onboarding" />
           ) : (
