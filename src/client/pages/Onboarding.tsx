@@ -210,7 +210,7 @@ export function Onboarding() {
   const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
 
   return (
-    <div style={pageStyle}>
+    <div style={pageStyle} data-theme="dark">
       {/* Ambient glow that shifts with accent color */}
       <div
         style={{

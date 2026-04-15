@@ -98,7 +98,7 @@ export function Login() {
   };
 
   return (
-    <div style={pageStyle}>
+    <div style={pageStyle} data-theme="dark">
       <div style={glowStyle} />
       <div style={contentStyle}>
         <div style={logoStyle}>
