@@ -1,6 +1,5 @@
 interface ThemePreviewProps {
   accent: string;
-  accentHover: string;
   venueName: string;
 }
 
@@ -63,7 +62,7 @@ const cancelButtonStyle: React.CSSProperties = {
   cursor: "default",
 };
 
-export function ThemePreview({ accent, accentHover: _accentHover, venueName }: ThemePreviewProps) {
+export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
   const confirmButtonStyle: React.CSSProperties = {
     flex: 1,
     padding: "8px 12px",

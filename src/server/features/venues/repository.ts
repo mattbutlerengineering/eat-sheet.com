@@ -35,16 +35,25 @@ export async function findVenueTheme(
 }
 
 export interface CreateVenueData {
-  name: string;
-  slug: string;
-  type: string;
-  cuisines: string;
-  country: string;
-  timezone: string;
-  accent: string;
-  accentHover: string;
-  userId: string;
-  ownerRoleId: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly type: string;
+  readonly cuisines: string;
+  readonly country: string;
+  readonly timezone: string;
+  readonly addressLine1: string;
+  readonly addressLine2: string;
+  readonly city: string;
+  readonly state: string;
+  readonly zip: string;
+  readonly phone: string;
+  readonly website: string;
+  readonly logoUrl: string | null;
+  readonly accent: string;
+  readonly accentHover: string;
+  readonly source: "extracted" | "manual";
+  readonly userId: string;
+  readonly ownerRoleId: string;
 }
 
 export async function createVenueWithTheme(
@@ -53,14 +62,16 @@ export async function createVenueWithTheme(
 ): Promise<{ tenantId: string; themeId: string }> {
   const tenantId = nanoid();
   const themeId = nanoid();
+  const memberId = nanoid();
   const now = new Date().toISOString();
 
   await db.batch([
     db
       .prepare(
         `INSERT INTO tenants
-          (id, name, slug, type, cuisines, country, timezone, onboarding_completed, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+          (id, name, slug, type, cuisines, address_line1, address_line2, city, state, zip,
+           country, timezone, phone, website, logo_url, onboarding_completed, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       )
       .bind(
         tenantId,
@@ -68,8 +79,16 @@ export async function createVenueWithTheme(
         data.slug,
         data.type,
         data.cuisines,
+        data.addressLine1 || null,
+        data.addressLine2 || null,
+        data.city || null,
+        data.state || null,
+        data.zip || null,
         data.country,
         data.timezone,
+        data.phone || null,
+        data.website || null,
+        data.logoUrl,
         now,
         now,
       ),
@@ -77,15 +96,15 @@ export async function createVenueWithTheme(
       .prepare(
         `INSERT INTO venue_themes
           (id, tenant_id, accent, accent_hover, source, created_at, updated_at)
-          VALUES (?, ?, ?, ?, 'manual', ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
       )
-      .bind(themeId, tenantId, data.accent, data.accentHover, now, now),
+      .bind(themeId, tenantId, data.accent, data.accentHover, data.source, now, now),
     db
       .prepare(
-        `INSERT INTO tenant_members (tenant_id, user_id, role_id, created_at)
-          VALUES (?, ?, ?, ?)`,
+        `INSERT INTO tenant_members (id, tenant_id, user_id, role_id, created_at)
+          VALUES (?, ?, ?, ?, ?)`,
       )
-      .bind(tenantId, data.userId, data.ownerRoleId, now),
+      .bind(memberId, tenantId, data.userId, data.ownerRoleId, now),
   ]);
 
   return { tenantId, themeId };

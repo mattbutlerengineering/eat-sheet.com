@@ -139,7 +139,7 @@ describe("completeOnboarding", () => {
     logoUrl: "/api/onboarding/logos/user-1/test.png",
   };
 
-  it("creates venue, returns signed JWT", async () => {
+  it("creates venue with all location, logo, and brand data", async () => {
     const db = mockDb();
 
     const jwt = await completeOnboarding(
@@ -151,7 +151,25 @@ describe("completeOnboarding", () => {
     );
 
     expect(generateSlug).toHaveBeenCalledWith(db, "Verde Kitchen");
-    expect(createVenueWithTheme).toHaveBeenCalledOnce();
+    expect(createVenueWithTheme).toHaveBeenCalledWith(
+      db,
+      expect.objectContaining({
+        name: "Verde Kitchen",
+        slug: "verde-kitchen",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        zip: "94102",
+        phone: "",
+        website: "",
+        logoUrl: "/api/onboarding/logos/user-1/test.png",
+        accent: "#2d4a2d",
+        accentHover: "#1a3a1a",
+        source: "extracted",
+        userId: "user-1",
+        ownerRoleId: "role_owner",
+      }),
+    );
     expect(findUserByEmail).toHaveBeenCalledWith(db, "test@test.com");
     expect(jwt).toBe("signed-jwt-token");
   });

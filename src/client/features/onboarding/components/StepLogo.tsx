@@ -5,6 +5,7 @@ import { ColorSwatch } from "./ColorSwatch";
 
 interface StepLogoProps {
   logoResult: { logoUrl: string; extractedColors: readonly string[] } | null;
+  uploadError: string | null;
   onUpload: (file: File) => Promise<void>;
 }
 
@@ -65,13 +66,7 @@ const swatchRowStyle: React.CSSProperties = {
   marginTop: 4,
 };
 
-function buildLogoSrc(logoUrl: string): string {
-  // Strip "logos/" prefix if present, since the API route handles that
-  const path = logoUrl.replace(/^logos\//, "");
-  return `/api/onboarding/logos/${path}`;
-}
-
-export function StepLogo({ logoResult, onUpload }: StepLogoProps) {
+export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -192,14 +187,17 @@ export function StepLogo({ logoResult, onUpload }: StepLogoProps) {
               >
                 Drag your logo here
               </div>
-              <div style={{ fontSize: 12, color: "rgba(232,226,216,0.35)" }}>
+              <div style={{ fontSize: 13, color: "rgba(232,226,216,0.4)" }}>
+                or click to browse
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(232,226,216,0.25)", marginTop: 4 }}>
                 PNG, JPG, or SVG · Max 2MB
               </div>
             </>
           )}
         </div>
 
-        {validationError && (
+        {(validationError || uploadError) && (
           <div
             style={{
               fontSize: 13,
@@ -210,7 +208,7 @@ export function StepLogo({ logoResult, onUpload }: StepLogoProps) {
               border: "1px solid rgba(224,112,112,0.2)",
             }}
           >
-            {validationError}
+            {validationError ?? uploadError}
           </div>
         )}
 
@@ -251,7 +249,7 @@ export function StepLogo({ logoResult, onUpload }: StepLogoProps) {
           {logoResult ? (
             <motion.img
               key={logoResult.logoUrl}
-              src={buildLogoSrc(logoResult.logoUrl)}
+              src={logoResult.logoUrl}
               alt="Your logo"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { Input, Select, AnimatedTag, TagGroup } from "@mattbutlerengineering/rialto";
-import { CUISINE_OPTIONS, VENUE_TYPES } from "@shared/types";
+import { CUISINE_OPTIONS, VENUE_TYPES, VENUE_TYPE_LABELS } from "@shared/types";
 import type { VenueType } from "@shared/types";
 import type { VenueInfoInput } from "@shared/schemas";
 
@@ -13,7 +13,7 @@ interface StepVenueInfoProps {
 
 const VENUE_TYPE_OPTIONS = VENUE_TYPES.map((t) => ({
   value: t,
-  label: t.replace(/_/g, " "),
+  label: VENUE_TYPE_LABELS[t],
 }));
 
 const CUISINE_SELECT_OPTIONS = CUISINE_OPTIONS.map((c) => ({
@@ -243,10 +243,9 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
               style={{
                 fontSize: 14,
                 color: "var(--rialto-accent, #c49a2a)",
-                textTransform: "capitalize",
               }}
             >
-              {type.replace(/_/g, " ")}
+              {VENUE_TYPE_LABELS[type as VenueType] ?? type}
             </span>
           </div>
         )}

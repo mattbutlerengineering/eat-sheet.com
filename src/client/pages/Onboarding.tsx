@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
@@ -56,19 +57,6 @@ const stepTitleStyle: React.CSSProperties = {
   margin: 0,
 };
 
-const placeholderCardStyle: React.CSSProperties = {
-  padding: 32,
-  borderRadius: 12,
-  background: "rgba(232,226,216,0.05)",
-  border: "1px solid rgba(232,226,216,0.1)",
-  color: "rgba(232,226,216,0.4)",
-  fontSize: 14,
-  minHeight: 160,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
 const navStyle: React.CSSProperties = {
   display: "flex",
   gap: 12,
@@ -89,17 +77,16 @@ const ghostButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const primaryButtonStyle: React.CSSProperties = {
+const primaryButtonBase: React.CSSProperties = {
   padding: "10px 24px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, #c49a2a 0%, #a07d1f 100%)",
   color: "#1a1714",
   fontSize: 14,
   fontWeight: 600,
   letterSpacing: "0.01em",
   cursor: "pointer",
-  boxShadow: "0 2px 12px rgba(196,154,42,0.25)",
+  transition: "background 0.4s ease, box-shadow 0.4s ease",
 };
 
 const slideVariants = {
@@ -121,6 +108,7 @@ export function Onboarding() {
   const { user, loading } = useAuth();
   const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand, submitStart, submitSuccess, submitError } = useOnboarding();
   const navigate = useNavigate();
+  const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
 
   async function handleSubmit() {
     const { venueInfo, location, brand, logoResult } = state;
@@ -151,16 +139,23 @@ export function Onboarding() {
   }
 
   async function handleLogoUpload(file: File) {
+    setLogoUploadError(null);
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/onboarding/logo", {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-    const body = await res.json() as { ok: boolean; data?: { logoUrl: string; extractedColors: readonly string[] } };
-    if (body.ok && body.data) {
-      setLogoResult(body.data);
+    try {
+      const res = await fetch("/api/onboarding/logo", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const body = await res.json() as { ok: boolean; data?: { logoUrl: string; extractedColors: readonly string[] }; error?: string };
+      if (body.ok && body.data) {
+        setLogoResult(body.data);
+      } else {
+        setLogoUploadError(body.error ?? "Failed to upload logo");
+      }
+    } catch {
+      setLogoUploadError("Failed to upload logo. Please try again.");
     }
   }
 
@@ -187,6 +182,29 @@ export function Onboarding() {
     }
   })();
 
+  // Keyboard navigation: Enter to advance, Escape to go back
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Don't intercept when user is typing in an input/select/textarea
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+
+      if (e.key === "Enter" && canAdvance && !isLastStep) {
+        e.preventDefault();
+        next();
+      } else if (e.key === "Escape" && currentStep > 1) {
+        e.preventDefault();
+        back();
+      }
+    },
+    [canAdvance, isLastStep, currentStep, next, back],
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
   // Ambient glow color shifts as user progresses
   const glowColor = state.brand?.accent ?? "#c49a2a";
   const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
@@ -210,17 +228,26 @@ export function Onboarding() {
       />
 
       <div style={contentStyle}>
-        <ProgressBar currentStep={currentStep} />
+        <ProgressBar currentStep={currentStep} accent={state.brand?.accent} />
 
-        <div>
-          <div style={stepLabelStyle}>Step {currentStep} of 5</div>
-          <h1 style={stepTitleStyle}>{title}</h1>
-        </div>
+        <AnimatePresence mode="wait" custom={state.direction}>
+          <motion.div
+            key={`header-${currentStep}`}
+            custom={state.direction}
+            initial={{ opacity: 0, y: state.direction > 0 ? 8 : -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: state.direction > 0 ? -8 : 8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <div style={stepLabelStyle}>Step {currentStep} of 5</div>
+            <h1 style={stepTitleStyle}>{title}</h1>
+          </motion.div>
+        </AnimatePresence>
 
-        <AnimatePresence mode="wait" custom={1}>
+        <AnimatePresence mode="wait" custom={state.direction}>
           <motion.div
             key={currentStep}
-            custom={1}
+            custom={state.direction}
             variants={slideVariants}
             initial="enter"
             animate="center"
@@ -242,6 +269,7 @@ export function Onboarding() {
             {currentStep === 3 && (
               <StepLogo
                 logoResult={state.logoResult}
+                uploadError={logoUploadError}
                 onUpload={handleLogoUpload}
               />
             )}
@@ -290,7 +318,9 @@ export function Onboarding() {
           {!isLastStep && (
             <button
               style={{
-                ...primaryButtonStyle,
+                ...primaryButtonBase,
+                background: glowColor,
+                boxShadow: `0 2px 12px ${glowColor}40`,
                 opacity: canAdvance ? 1 : 0.4,
                 cursor: canAdvance ? "pointer" : "not-allowed",
               }}
@@ -298,7 +328,7 @@ export function Onboarding() {
               disabled={!canAdvance}
               type="button"
             >
-              Continue
+              {currentStep === 3 && !state.logoResult ? "Skip" : "Continue"}
             </button>
           )}
         </div>

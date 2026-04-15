@@ -6,4 +6,4 @@ export type {
   VenueTheme,
   VenueWithTheme,
 } from "./venue";
-export { VENUE_TYPES, CUISINE_OPTIONS } from "./venue";
+export { VENUE_TYPES, VENUE_TYPE_LABELS, CUISINE_OPTIONS } from "./venue";

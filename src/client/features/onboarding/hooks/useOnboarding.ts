@@ -7,6 +7,7 @@ import type {
 
 export interface OnboardingState {
   readonly currentStep: number;
+  readonly direction: 1 | -1;
   readonly venueInfo: VenueInfoInput | null;
   readonly location: VenueLocationInput | null;
   readonly logoResult: {
@@ -34,6 +35,7 @@ type OnboardingAction =
 
 export const initialState: OnboardingState = {
   currentStep: 1,
+  direction: 1,
   venueInfo: null,
   location: null,
   logoResult: null,
@@ -54,11 +56,13 @@ export function onboardingReducer(
       return {
         ...state,
         currentStep: Math.min(state.currentStep + 1, MAX_STEP),
+        direction: 1,
       };
     case "BACK":
       return {
         ...state,
         currentStep: Math.max(state.currentStep - 1, MIN_STEP),
+        direction: -1,
       };
     case "SET_VENUE_INFO":
       return { ...state, venueInfo: action.payload };

@@ -181,7 +181,6 @@ export function StepBrand({
       <div style={rightColumnStyle}>
         <ThemePreview
           accent={accent}
-          accentHover={darken(accent, 0.15)}
           venueName={venueName}
         />
       </div>

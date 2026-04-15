@@ -10,9 +10,10 @@ describe("onboardingReducer", () => {
     expect(initialState.currentStep).toBe(1);
   });
 
-  it("NEXT advances to step 2", () => {
+  it("NEXT advances to step 2 with direction 1", () => {
     const next = onboardingReducer(initialState, { type: "NEXT" });
     expect(next.currentStep).toBe(2);
+    expect(next.direction).toBe(1);
   });
 
   it("does not advance past step 5", () => {
@@ -21,10 +22,11 @@ describe("onboardingReducer", () => {
     expect(result.currentStep).toBe(5);
   });
 
-  it("BACK goes to previous step", () => {
+  it("BACK goes to previous step with direction -1", () => {
     const atStep3 = { ...initialState, currentStep: 3 };
     const result = onboardingReducer(atStep3, { type: "BACK" });
     expect(result.currentStep).toBe(2);
+    expect(result.direction).toBe(-1);
   });
 
   it("does not go before step 1", () => {

@@ -7,6 +7,13 @@ export const VENUE_TYPES: readonly VenueType[] = [
   "cafe",
 ] as const;
 
+export const VENUE_TYPE_LABELS: Record<VenueType, string> = {
+  fine_dining: "Fine Dining",
+  casual: "Casual Dining",
+  bar: "Bar & Lounge",
+  cafe: "Café",
+} as const;
+
 export const CUISINE_OPTIONS = [
   "Italian",
   "French",
