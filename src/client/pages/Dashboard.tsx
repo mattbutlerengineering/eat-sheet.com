@@ -112,6 +112,11 @@ const statLabelStyle: React.CSSProperties = {
 
 const DEFAULT_ACCENT = "#c49a2a";
 
+function buildLogoSrc(logoUrl: string): string {
+  const path = logoUrl.replace(/^logos\//, "");
+  return `/api/onboarding/logos/${path}`;
+}
+
 function NavItem({
   label,
   active,
@@ -149,7 +154,7 @@ function DashboardContent({ data }: { data: VenueWithTheme }) {
           <div style={logoRowStyle}>
             {venue.logoUrl ? (
               <img
-                src={venue.logoUrl}
+                src={buildLogoSrc(venue.logoUrl)}
                 alt={venue.name}
                 style={{ ...logoBoxStyle, objectFit: "cover" }}
               />
@@ -234,12 +239,35 @@ export function Dashboard() {
 
   if (!data) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#1a1714",
-        }}
-      />
+      <div style={pageStyle}>
+        <div style={sidebarStyle}>
+          <div style={logoRowStyle}>
+            <div style={{ ...logoBoxStyle, background: "rgba(232,226,216,0.08)" }} />
+            <div style={{ flex: 1, height: 14, borderRadius: 4, background: "rgba(232,226,216,0.06)" }} />
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: 32,
+                borderRadius: 6,
+                background: "rgba(232,226,216,0.04)",
+              }}
+            />
+          ))}
+        </div>
+        <div style={mainStyle}>
+          <div style={{ width: 180, height: 28, borderRadius: 6, background: "rgba(232,226,216,0.06)" }} />
+          <div style={statsRowStyle}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} style={{ ...statCardStyle, minHeight: 100 }}>
+                <div style={{ width: 48, height: 36, borderRadius: 6, background: "rgba(232,226,216,0.06)" }} />
+                <div style={{ width: 80, height: 12, borderRadius: 4, background: "rgba(232,226,216,0.04)" }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 

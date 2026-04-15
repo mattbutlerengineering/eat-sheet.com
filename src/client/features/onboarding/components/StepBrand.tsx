@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColorSwatch } from "./ColorSwatch";
 import { ThemePreview } from "./ThemePreview";
 import type { VenueBrandInput } from "@shared/schemas";
@@ -110,6 +110,15 @@ export function StepBrand({
 
   const colors =
     extractedColors.length > 0 ? extractedColors : [DEFAULT_ACCENT];
+
+  // Set initial brand data on mount so validation passes without requiring a click
+  useEffect(() => {
+    if (!data) {
+      const source = extractedColors.length > 0 ? "extracted" : "manual";
+      onChange(buildBrand(accent, source));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function selectColor(color: string, source: "extracted" | "manual") {
     setAccent(color);
