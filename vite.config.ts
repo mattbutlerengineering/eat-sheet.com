@@ -9,11 +9,19 @@ export default defineConfig({
       "@server": resolve(__dirname, "src/server"),
       "@client": resolve(__dirname, "src/client"),
       "@shared": resolve(__dirname, "src/shared"),
-      // Rialto was published with incorrect exports map (src/ instead of dist/).
-      // Alias the styles import directly to the compiled CSS file.
+      // Rialto published exports point to src/ which doesn't exist in the tarball.
+      // Alias all entry points to the compiled dist/lib/ files.
       "@mattbutlerengineering/rialto/styles": resolve(
         __dirname,
         "node_modules/@mattbutlerengineering/rialto/dist/lib/styles.css",
+      ),
+      "@mattbutlerengineering/rialto/motion": resolve(
+        __dirname,
+        "node_modules/@mattbutlerengineering/rialto/dist/lib/motion.js",
+      ),
+      "@mattbutlerengineering/rialto": resolve(
+        __dirname,
+        "node_modules/@mattbutlerengineering/rialto/dist/lib/rialto.js",
       ),
     },
   },
