@@ -71,6 +71,13 @@ src/
 - Secrets (set via `wrangler secret put`): `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `SENTRY_DSN`
 - D1 schema: `npx wrangler d1 execute eat-sheet-db --remote --file=src/server/db/schema.sql`
 - D1 seed: `npx wrangler d1 execute eat-sheet-db --remote --file=src/server/db/seed.sql`
+- Google OAuth redirect URI must match: `https://eat-sheet.com/api/auth/callback`
+- `index.html` includes a script to unregister stale v1 service workers — do not remove it
+
+## Monitoring
+
+- Sentry (free tier): `@sentry/react` (client, main.tsx) + `@sentry/cloudflare` (server, withSentry wrapper)
+- Sentry project: `mattbutlerengineering/eat-sheet` on us.sentry.io
 
 ## Workers + Assets Routing
 
