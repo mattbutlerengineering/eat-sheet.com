@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import type { AppEnv } from "./types";
 import { DomainError } from "./errors";
 import { error } from "./response";
+import { auth } from "./features/auth/routes";
 
 const app = new Hono<AppEnv>();
 
@@ -16,7 +17,7 @@ app.use(
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 
-// Feature routes will be mounted here in later tasks
+app.route("/api/auth", auth);
 
 app.onError((err, c) => {
   if (err instanceof DomainError) {
