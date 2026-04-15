@@ -6,6 +6,8 @@ import { useOnboarding } from "../features/onboarding/hooks/useOnboarding";
 import { ProgressBar } from "../features/onboarding/components/ProgressBar";
 import { StepVenueInfo } from "../features/onboarding/components/StepVenueInfo";
 import { StepLocation } from "../features/onboarding/components/StepLocation";
+import { StepLogo } from "../features/onboarding/components/StepLogo";
+import { StepBrand } from "../features/onboarding/components/StepBrand";
 
 const STEP_TITLES = [
   "What's your venue called?",
@@ -114,7 +116,21 @@ const slideVariants = {
 
 export function Onboarding() {
   const { user, loading } = useAuth();
-  const { state, next, back, setVenueInfo, setLocation } = useOnboarding();
+  const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand } = useOnboarding();
+
+  async function handleLogoUpload(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/onboarding/logo", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+    const body = await res.json() as { ok: boolean; data?: { logoUrl: string; extractedColors: readonly string[] } };
+    if (body.ok && body.data) {
+      setLogoResult(body.data);
+    }
+  }
 
   if (loading) return null;
   if (!user) return <Navigate to="/login" />;
@@ -155,8 +171,22 @@ export function Onboarding() {
                 onChange={setLocation}
               />
             )}
-            {currentStep > 2 && (
-              <div style={placeholderCardStyle}>Step {currentStep} content</div>
+            {currentStep === 3 && (
+              <StepLogo
+                logoResult={state.logoResult}
+                onUpload={handleLogoUpload}
+              />
+            )}
+            {currentStep === 4 && (
+              <StepBrand
+                extractedColors={state.logoResult?.extractedColors ?? []}
+                venueName={state.venueInfo?.name ?? ""}
+                data={state.brand}
+                onChange={setBrand}
+              />
+            )}
+            {currentStep === 5 && (
+              <div style={placeholderCardStyle}>Step 5 content</div>
             )}
           </motion.div>
         </AnimatePresence>
