@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "eat-sheet-db"
-database_id = "placeholder-replace-with-real-id"
+database_id = "a606f1f7-605f-4f8e-9c5d-9e3b1a789752"
 
 [[r2_buckets]]
 binding = "LOGOS"
