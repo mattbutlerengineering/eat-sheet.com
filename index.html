@@ -9,6 +9,18 @@
     <title>Eat Sheet</title>
     <style>
       body { margin: 0; background: #1e1c1a; }
+      /* Accessible focus indicators for keyboard navigation */
+      :focus-visible {
+        outline: 2px solid var(--rialto-accent, #c49a2a);
+        outline-offset: 2px;
+      }
+      /* Remove default outline for mouse clicks */
+      :focus:not(:focus-visible) {
+        outline: none;
+      }
+      /* Make Rialto Select labels look clickable */
+      button[role="combobox"] + [role="listbox"],
+      span + button[role="combobox"] { cursor: pointer; }
     </style>
   </head>
   <body>

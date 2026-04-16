@@ -19,6 +19,11 @@ export function ProgressBar({
 
   return (
     <div
+      role="progressbar"
+      aria-valuenow={currentStep}
+      aria-valuemin={1}
+      aria-valuemax={totalSteps}
+      aria-label={`Step ${currentStep} of ${totalSteps}`}
       style={{
         display: "flex",
         gap: "var(--rialto-space-sm, 8px)",
@@ -34,6 +39,7 @@ export function ProgressBar({
             key={stepNumber}
             animate={{ backgroundColor: isActive ? activeColor : FUTURE }}
             transition={spring}
+            aria-hidden="true"
             style={{
               width: 36,
               height: 4,

@@ -215,9 +215,10 @@ export function Onboarding() {
   const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
 
   return (
-    <div style={pageStyle} data-theme="dark">
+    <main style={pageStyle} data-theme="dark" aria-label={`Onboarding step ${currentStep} of 5: ${title}`}>
       {/* Ambient glow that shifts with accent color */}
       <div
+        aria-hidden="true"
         style={{
           position: "absolute",
           width: 500,
@@ -232,7 +233,7 @@ export function Onboarding() {
         }}
       />
 
-      <div style={noiseOverlayStyle} />
+      <div style={noiseOverlayStyle} aria-hidden="true" />
 
       <div style={contentStyle}>
         <ProgressBar currentStep={currentStep} accent={state.brand?.accent} />
@@ -303,6 +304,7 @@ export function Onboarding() {
 
         {state.error && (
           <div
+            role="alert"
             style={{
               padding: "var(--rialto-space-sm, 10px) var(--rialto-space-md, 16px)",
               borderRadius: "var(--rialto-radius-default, 8px)",
@@ -348,6 +350,6 @@ export function Onboarding() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

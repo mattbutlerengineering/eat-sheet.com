@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { VenueThemeProvider } from "./providers/VenueTheme";
 import { useAuth } from "./hooks/useAuth";
+import { useSelectLabelFocus } from "./hooks/useSelectLabelFocus";
 import { Login } from "./pages/Login";
 import "@mattbutlerengineering/rialto/styles";
 
@@ -82,6 +83,8 @@ function AppRoutes() {
 }
 
 export function App() {
+  useSelectLabelFocus();
+
   return (
     <BrowserRouter>
       <VenueThemeProvider theme={null}>

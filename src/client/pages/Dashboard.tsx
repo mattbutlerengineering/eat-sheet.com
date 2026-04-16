@@ -163,16 +163,18 @@ function NavItem({
   };
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
       variants={fadeUp}
       transition={spring}
       custom={index}
       style={ms(style)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      aria-current={active ? "page" : undefined}
     >
       {label}
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -194,7 +196,8 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
   return (
     <VenueThemeProvider theme={theme}>
       <div style={pageStyle} data-theme="dark">
-        <motion.div
+        <motion.nav
+          aria-label="Main navigation"
           style={ms(sidebarStyle)}
           initial="hidden"
           animate="visible"
@@ -204,11 +207,15 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
             {venue.logoUrl ? (
               <img
                 src={venue.logoUrl}
-                alt={venue.name}
+                alt={`${venue.name} logo`}
                 style={{ ...logoBoxStyle, objectFit: "cover" }}
               />
             ) : (
-              <div style={{ ...logoBoxStyle, background: accent }}>
+              <div
+                style={{ ...logoBoxStyle, background: accent }}
+                aria-label={`${venue.name} logo`}
+                role="img"
+              >
                 {initial}
               </div>
             )}
@@ -226,39 +233,39 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
               index={i}
             />
           ))}
-        </motion.div>
+        </motion.nav>
 
-        <motion.div
-          style={ms(mainStyle)}
-          initial="hidden"
-          animate="visible"
-          transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
-        >
-          <motion.h1 variants={fadeUp} transition={spring} style={ms(headingStyle)}>
-            Dashboard
-          </motion.h1>
+        <main>
           <motion.div
-            style={ms(statsRowStyle)}
-            variants={fadeUp}
-            transition={{ ...spring, staggerChildren: 0.1 }}
+            style={ms(mainStyle)}
+            initial="hidden"
+            animate="visible"
+            transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
           >
-            {STAT_CARDS.map((card) => (
-              <motion.div
-                key={card.label}
-                variants={fadeUp}
-                transition={spring}
-                style={ms(statCardStyle)}
-                whileHover={{
-                  scale: 1.02,
-                  borderColor: "var(--rialto-border-strong, rgba(255,255,255,0.15))",
-                }}
-              >
-                <div style={statValueStyle}>{card.value}</div>
-                <div style={statLabelStyle}>{card.label}</div>
-              </motion.div>
-            ))}
+            <motion.h1 variants={fadeUp} transition={spring} style={ms(headingStyle)}>
+              Dashboard
+            </motion.h1>
+            <motion.div
+              style={ms(statsRowStyle)}
+              role="region"
+              aria-label="Venue statistics"
+              variants={fadeUp}
+              transition={{ ...spring, staggerChildren: 0.1 }}
+            >
+              {STAT_CARDS.map((card) => (
+                <motion.div
+                  key={card.label}
+                  variants={fadeUp}
+                  transition={spring}
+                  style={ms(statCardStyle)}
+                >
+                  <div style={statValueStyle} aria-label={`${card.value} ${card.label}`}>{card.value}</div>
+                  <div style={statLabelStyle}>{card.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </main>
       </div>
     </VenueThemeProvider>
   );
@@ -290,7 +297,7 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <div
+      <main
         data-theme="dark"
         style={{
           minHeight: "100vh",
@@ -302,8 +309,8 @@ export function Dashboard() {
           fontSize: "var(--rialto-text-sm, 14px)",
         }}
       >
-        {error}
-      </div>
+        <div role="alert">{error}</div>
+      </main>
     );
   }
 

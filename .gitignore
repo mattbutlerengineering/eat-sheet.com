@@ -7,8 +7,10 @@ dist/
 .worktrees/
 *.tsbuildinfo
 .playwright-cli/
+.playwright-mcp/
 test-results/
 playwright-report/
+e2e/.auth-state.json
 coverage/
 graphify-out/
 .superpowers/

@@ -108,9 +108,10 @@ export function Login() {
   if (user) return <Navigate to="/onboarding" />;
 
   return (
-    <div style={pageStyle} data-theme="dark">
+    <main style={pageStyle} data-theme="dark">
       {/* Primary ambient glow */}
       <motion.div
+        aria-hidden="true"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
@@ -129,6 +130,7 @@ export function Login() {
 
       {/* Secondary warm glow — offset for depth */}
       <div
+        aria-hidden="true"
         style={{
           position: "absolute",
           width: 300,
@@ -142,7 +144,7 @@ export function Login() {
         }}
       />
 
-      <div style={noiseOverlayStyle} />
+      <div style={noiseOverlayStyle} aria-hidden="true" />
 
       <motion.div
         style={ms(contentStyle)}
@@ -155,26 +157,28 @@ export function Login() {
           variants={fadeUp}
           transition={spring}
           style={ms(logoStyle)}
+          aria-hidden="true"
         >
           <span style={logoLetterStyle}>E</span>
         </motion.div>
 
         {/* App name */}
-        <motion.div variants={fadeUp} transition={spring} style={ms(appNameStyle)}>
+        <motion.h1 variants={fadeUp} transition={spring} style={ms(appNameStyle)}>
           eat sheet
-        </motion.div>
+        </motion.h1>
 
         {/* Tagline */}
-        <motion.div variants={fadeUp} transition={spring} style={ms(taglineStyle)}>
+        <motion.p variants={fadeUp} transition={spring} style={ms(taglineStyle)}>
           hospitality, refined
-        </motion.div>
+        </motion.p>
 
         {/* Decorative divider */}
-        <motion.div variants={fadeUp} transition={spring} style={ms(dividerStyle)} />
+        <motion.div variants={fadeUp} transition={spring} style={ms(dividerStyle)} aria-hidden="true" />
 
         {/* Google sign-in */}
         <motion.a
           href="/api/auth/google"
+          aria-label="Sign in with Google"
           variants={fadeUp}
           transition={spring}
           style={ms(googleButtonStyle)}
@@ -184,7 +188,7 @@ export function Login() {
           }}
           whileTap={{ scale: 0.98 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -194,10 +198,10 @@ export function Login() {
         </motion.a>
 
         {/* Subtext */}
-        <motion.div variants={fadeUp} transition={spring} style={ms(subtextStyle)}>
+        <motion.p variants={fadeUp} transition={spring} style={ms(subtextStyle)}>
           No credit card required
-        </motion.div>
+        </motion.p>
       </motion.div>
-    </div>
+    </main>
   );
 }

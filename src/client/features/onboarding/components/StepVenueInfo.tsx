@@ -177,8 +177,8 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
         />
 
         <div>
-          <div style={sectionLabelStyle}>Cuisines</div>
           <Select
+            label="Cuisines"
             options={availableCuisines}
             value={selectedCuisine}
             onChange={handleAddCuisine}

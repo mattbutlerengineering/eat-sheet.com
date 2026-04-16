@@ -206,6 +206,7 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
 
         {(validationError || uploadError) && (
           <div
+            role="alert"
             style={{
               fontSize: "var(--rialto-text-sm, 13px)",
               color: "var(--rialto-error, #e07070)",
