@@ -242,6 +242,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
             <span
               style={{
                 fontSize: "var(--rialto-text-sm, 14px)",
+                fontFamily: "var(--rialto-font-sans, system-ui)",
                 color: "var(--rialto-accent, #c49a2a)",
               }}
             >
@@ -253,7 +254,7 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
         {cuisines.length > 0 && (
           <div style={previewCardStyle}>
             <div style={previewLabelStyle}>Cuisines ({cuisines.length})</div>
-            <div style={{ fontSize: "var(--rialto-text-sm, 13px)", color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", lineHeight: "var(--rialto-leading-normal, 1.6)" }}>
+            <div style={{ fontSize: "var(--rialto-text-sm, 13px)", fontFamily: "var(--rialto-font-sans, system-ui)", color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", lineHeight: "var(--rialto-leading-normal, 1.6)" }}>
               {cuisines.join(" · ")}
             </div>
           </div>

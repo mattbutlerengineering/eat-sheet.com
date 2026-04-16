@@ -57,6 +57,7 @@ const logoBoxStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   fontSize: "var(--rialto-text-sm, 13px)",
+  fontFamily: "var(--rialto-font-display, system-ui)",
   fontWeight: 700,
   color: "var(--rialto-text-on-accent, #1a1918)",
   flexShrink: 0,

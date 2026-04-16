@@ -168,7 +168,7 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
           />
 
           {isUploading ? (
-            <div style={{ color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", fontSize: "var(--rialto-text-sm, 14px)" }}>
+            <div style={{ color: "var(--rialto-text-secondary, rgba(232,226,216,0.6))", fontSize: "var(--rialto-text-sm, 14px)", fontFamily: "var(--rialto-font-sans, system-ui)" }}>
               <div
                 style={{
                   width: 32,

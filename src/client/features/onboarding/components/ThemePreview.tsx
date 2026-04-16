@@ -49,6 +49,7 @@ const inputPreviewStyle: React.CSSProperties = {
   border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   color: "var(--rialto-text-secondary, rgba(232,226,216,0.5))",
   fontSize: "var(--rialto-text-sm, 13px)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
   boxSizing: "border-box",
   cursor: "default",
   outline: "none",
@@ -112,6 +113,7 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
             color: "var(--rialto-text-tertiary, rgba(232,226,216,0.35))",
             marginBottom: "var(--rialto-space-xs, 4px)",
             letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
+            fontFamily: "var(--rialto-font-sans, system-ui)",
           }}
         >
           Sample field
