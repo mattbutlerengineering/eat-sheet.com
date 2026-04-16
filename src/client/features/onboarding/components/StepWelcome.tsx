@@ -191,6 +191,7 @@ export function StepWelcome({
           soundVolume={0.2}
           staggerDelay={12}
           staggerDirection="left-to-right"
+          aria-label={`${venueName} displayed in dot matrix`}
         />
       </div>
 
