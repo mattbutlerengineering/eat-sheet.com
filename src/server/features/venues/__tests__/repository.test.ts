@@ -5,7 +5,14 @@ vi.mock("nanoid", () => ({
   nanoid: vi.fn(),
 }));
 
-import { createVenueWithTheme } from "../repository";
+import {
+  createVenueWithTheme,
+  findTenantById,
+  findTenantBySlug,
+  findVenueTheme,
+  updateTenant,
+  updateVenueTheme,
+} from "../repository";
 
 const mockNanoid = nanoid as ReturnType<typeof vi.fn>;
 
@@ -109,5 +116,150 @@ describe("createVenueWithTheme", () => {
     // Source should be a parameter (?) not hardcoded 'manual'
     expect(themeSql).not.toContain("'manual'");
     expect(themeSql).toContain("source");
+  });
+});
+
+const TENANT_ROW = {
+  id: "t-1",
+  name: "Test Venue",
+  slug: "test-venue",
+  type: "casual",
+  cuisines: '["Italian"]',
+  address_line1: null,
+  address_line2: null,
+  city: null,
+  state: null,
+  zip: null,
+  country: "US",
+  timezone: "America/New_York",
+  phone: null,
+  website: null,
+  logo_url: null,
+  onboarding_completed: 1,
+  created_at: "2026-01-01T00:00:00.000Z",
+  updated_at: "2026-01-01T00:00:00.000Z",
+};
+
+const THEME_ROW = {
+  id: "th-1",
+  tenant_id: "t-1",
+  accent: "#c49a2a",
+  accent_hover: "#a07d1f",
+  surface: null,
+  surface_elevated: null,
+  text_primary: null,
+  source: "manual",
+  created_at: "2026-01-01T00:00:00.000Z",
+  updated_at: "2026-01-01T00:00:00.000Z",
+};
+
+function mockDbWithResult(result: unknown) {
+  const stmt = {
+    bind: vi.fn().mockReturnThis(),
+    first: vi.fn().mockResolvedValue(result),
+    run: vi.fn().mockResolvedValue({ success: true }),
+  };
+  return {
+    prepare: vi.fn(() => stmt),
+    _stmt: stmt,
+  } as unknown as D1Database & { _stmt: typeof stmt };
+}
+
+describe("findTenantById", () => {
+  it("returns the tenant row when found", async () => {
+    const db = mockDbWithResult(TENANT_ROW);
+    const result = await findTenantById(db, "t-1");
+    expect(result).toEqual(TENANT_ROW);
+    expect(db.prepare).toHaveBeenCalledWith(
+      "SELECT * FROM tenants WHERE id = ?",
+    );
+  });
+
+  it("returns null when not found", async () => {
+    const db = mockDbWithResult(null);
+    const result = await findTenantById(db, "nonexistent");
+    expect(result).toBeNull();
+  });
+});
+
+describe("findTenantBySlug", () => {
+  it("returns the tenant row when found", async () => {
+    const db = mockDbWithResult(TENANT_ROW);
+    const result = await findTenantBySlug(db, "test-venue");
+    expect(result).toEqual(TENANT_ROW);
+    expect(db.prepare).toHaveBeenCalledWith(
+      "SELECT * FROM tenants WHERE slug = ?",
+    );
+  });
+
+  it("returns null when not found", async () => {
+    const db = mockDbWithResult(null);
+    const result = await findTenantBySlug(db, "nonexistent");
+    expect(result).toBeNull();
+  });
+});
+
+describe("findVenueTheme", () => {
+  it("returns the theme row when found", async () => {
+    const db = mockDbWithResult(THEME_ROW);
+    const result = await findVenueTheme(db, "t-1");
+    expect(result).toEqual(THEME_ROW);
+    expect(db.prepare).toHaveBeenCalledWith(
+      "SELECT * FROM venue_themes WHERE tenant_id = ?",
+    );
+  });
+
+  it("returns null when not found", async () => {
+    const db = mockDbWithResult(null);
+    const result = await findVenueTheme(db, "nonexistent");
+    expect(result).toBeNull();
+  });
+});
+
+describe("updateTenant", () => {
+  it("builds UPDATE query with provided fields", async () => {
+    const db = mockDbWithResult(null);
+    await updateTenant(db, "t-1", { name: "New Name", city: "LA" });
+
+    const sql = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string;
+    expect(sql).toContain("UPDATE tenants SET");
+    expect(sql).toContain("name = ?");
+    expect(sql).toContain("city = ?");
+    expect(sql).toContain("updated_at = ?");
+    expect(sql).toContain("WHERE id = ?");
+  });
+
+  it("skips update when no fields provided", async () => {
+    const db = mockDbWithResult(null);
+    await updateTenant(db, "t-1", {});
+    expect(db.prepare).not.toHaveBeenCalled();
+  });
+
+  it("filters out undefined values", async () => {
+    const db = mockDbWithResult(null);
+    await updateTenant(db, "t-1", { name: "X", city: undefined });
+
+    const sql = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string;
+    expect(sql).toContain("name = ?");
+    expect(sql).not.toContain("city = ?");
+  });
+});
+
+describe("updateVenueTheme", () => {
+  it("builds UPDATE query with provided fields", async () => {
+    const db = mockDbWithResult(null);
+    await updateVenueTheme(db, "t-1", { accent: "#ff0000" });
+
+    const sql = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string;
+    expect(sql).toContain("UPDATE venue_themes SET");
+    expect(sql).toContain("accent = ?");
+    expect(sql).toContain("updated_at = ?");
+    expect(sql).toContain("WHERE tenant_id = ?");
+  });
+
+  it("skips update when no fields provided", async () => {
+    const db = mockDbWithResult(null);
+    await updateVenueTheme(db, "t-1", {});
+    expect(db.prepare).not.toHaveBeenCalled();
   });
 });
