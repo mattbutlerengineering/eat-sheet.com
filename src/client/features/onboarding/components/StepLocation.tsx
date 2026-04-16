@@ -178,26 +178,41 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
           onChange={(e) => update({ addressLine2: e.target.value })}
         />
 
-        <div style={cityStateZipStyle} className="city-state-zip">
-          <Input
-            label="City"
-            placeholder="San Francisco"
-            value={loc.city}
-            onChange={(e) => update({ city: e.target.value })}
-          />
-          <Input
-            label="State"
-            placeholder="CA"
-            value={loc.state}
-            onChange={(e) => update({ state: e.target.value })}
-          />
-          <Input
-            label="ZIP"
-            placeholder="94102"
-            value={loc.zip}
-            onChange={(e) => update({ zip: e.target.value })}
-          />
-        </div>
+        <fieldset style={{ border: "none", margin: 0, padding: 0 }}>
+          <legend
+            style={{
+              fontSize: "var(--rialto-text-xs, 11px)",
+              fontFamily: "var(--rialto-font-sans, system-ui)",
+              color: "var(--rialto-text-tertiary, rgba(255,255,255,0.35))",
+              textTransform: "uppercase" as const,
+              letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
+              marginBottom: "var(--rialto-space-sm, 8px)",
+              padding: 0,
+            }}
+          >
+            Address details
+          </legend>
+          <div style={cityStateZipStyle} className="city-state-zip">
+            <Input
+              label="City"
+              placeholder="San Francisco"
+              value={loc.city}
+              onChange={(e) => update({ city: e.target.value })}
+            />
+            <Input
+              label="State"
+              placeholder="CA"
+              value={loc.state}
+              onChange={(e) => update({ state: e.target.value })}
+            />
+            <Input
+              label="ZIP"
+              placeholder="94102"
+              value={loc.zip}
+              onChange={(e) => update({ zip: e.target.value })}
+            />
+          </div>
+        </fieldset>
 
         <Select
           label="Timezone"

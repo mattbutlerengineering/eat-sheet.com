@@ -215,7 +215,7 @@ export function Onboarding() {
   const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
 
   return (
-    <main style={pageStyle} data-theme="dark" aria-label={`Onboarding step ${currentStep} of 5: ${title}`}>
+    <main id="main-content" style={pageStyle} data-theme="dark" aria-label={`Onboarding step ${currentStep} of 5: ${title}`}>
       {/* Ambient glow that shifts with accent color */}
       <div
         aria-hidden="true"

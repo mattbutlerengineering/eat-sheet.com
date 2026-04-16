@@ -236,7 +236,7 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
           ))}
         </motion.nav>
 
-        <main>
+        <main id="main-content">
           <motion.div
             style={ms(mainStyle)}
             initial="hidden"
@@ -299,6 +299,7 @@ export function Dashboard() {
   if (error) {
     return (
       <main
+        id="main-content"
         data-theme="dark"
         style={{
           minHeight: "100vh",
@@ -317,8 +318,8 @@ export function Dashboard() {
 
   if (!data) {
     return (
-      <div style={pageStyle} data-theme="dark">
-        <div style={sidebarStyle}>
+      <div style={pageStyle} data-theme="dark" role="status" aria-label="Loading dashboard" aria-busy="true">
+        <div style={sidebarStyle} aria-hidden="true">
           <div style={logoRowStyle}>
             <SkeletonBlock style={{ ...logoBoxStyle, background: "var(--rialto-surface-matte, rgba(232,226,216,0.08))" }} />
             <SkeletonBlock style={{ flex: 1, height: 14, borderRadius: 4, background: "var(--rialto-surface-elevated, rgba(232,226,216,0.06))" }} />

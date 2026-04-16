@@ -16,6 +16,8 @@ const Dashboard = lazy(() =>
 function PageLoader() {
   return (
     <div
+      role="status"
+      aria-label="Loading"
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -26,6 +28,7 @@ function PageLoader() {
       data-theme="dark"
     >
       <div
+        aria-hidden="true"
         style={{
           width: 36,
           height: 36,
@@ -54,6 +57,35 @@ function PageLoader() {
     </div>
   );
 }
+
+const skipLinkStyle: React.CSSProperties = {
+  position: "absolute",
+  left: "-9999px",
+  top: "auto",
+  width: "1px",
+  height: "1px",
+  overflow: "hidden",
+  zIndex: 9999,
+  padding: "var(--rialto-space-sm, 10px) var(--rialto-space-md, 16px)",
+  background: "var(--rialto-accent, #c49a2a)",
+  color: "var(--rialto-text-on-accent, #1a1918)",
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-sm, 14px)",
+  fontWeight: 600,
+  textDecoration: "none",
+  borderRadius: "var(--rialto-radius-default, 8px)",
+};
+
+const skipLinkFocusStyle = `
+  .skip-link:focus {
+    position: fixed !important;
+    left: var(--rialto-space-md, 16px) !important;
+    top: var(--rialto-space-md, 16px) !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+`;
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -87,6 +119,10 @@ export function App() {
 
   return (
     <BrowserRouter>
+      <style>{skipLinkFocusStyle}</style>
+      <a href="#main-content" className="skip-link" style={skipLinkStyle}>
+        Skip to main content
+      </a>
       <VenueThemeProvider theme={null}>
         <AppRoutes />
       </VenueThemeProvider>

@@ -108,7 +108,7 @@ export function Login() {
   if (user) return <Navigate to="/onboarding" />;
 
   return (
-    <main style={pageStyle} data-theme="dark">
+    <main id="main-content" style={pageStyle} data-theme="dark">
       {/* Primary ambient glow */}
       <motion.div
         aria-hidden="true"
