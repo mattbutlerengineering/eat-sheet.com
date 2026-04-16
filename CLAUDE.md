@@ -57,12 +57,13 @@ src/
 
 ## Commands
 
-- `pnpm dev` — Vite dev server (client)
-- `pnpm dev:api` — Wrangler dev (server on :8788)
-- `pnpm test` — Run all tests
-- `pnpm run build` — TypeScript check + Vite build
-- `pnpm db:migrate` — Run D1 migrations locally
-- `pnpm db:seed` — Seed system roles
+- `pnpm dev` — Vite dev server (client on :5173, proxies `/api` → :8788)
+- `npx wrangler dev --port 8788` — Wrangler dev (must use `--port 8788` to match Vite proxy)
+- `pnpm test` — Run all Vitest unit tests
+- `pnpm build` — TypeScript check + Vite build
+- `pnpm test:e2e` — Playwright E2E tests (onboarding flow + accessibility + Lighthouse)
+- `pnpm test:lighthouse` — Lighthouse performance/accessibility audits only
+- `pnpm test:coverage` — Vitest with coverage report
 
 ## Deployment
 
@@ -118,6 +119,11 @@ TypeScript path aliases in `tsconfig.json` point to the corresponding `.d.ts` fi
 - Mock R2 with `vi.fn()` returning `put/get/delete/list/head`
 - JWT test helper: `sign()` from `hono/jwt` with `HS256`
 - Auth tests: create a Hono app with middleware, use `app.request(path, init, env)`
+- Route tests: `vi.mock("../repository")` or `vi.mock("../service")` at module boundary, not D1 directly
+- E2E tests: Playwright in `e2e/`, JWT cookie injection for auth (no Google OAuth in tests)
+- E2E global-setup seeds test user via `wrangler d1 execute --local` (targets Miniflare's D1)
+- `@vitest/coverage-v8` must match vitest major version (v2 requires `@vitest/coverage-v8@^2`)
+- `execFileSync` without `shell: true` for D1 commands — shell interprets SQL parentheses
 
 ## Conventions
 
@@ -140,3 +146,17 @@ TypeScript path aliases in `tsconfig.json` point to the corresponding `.d.ts` fi
 - Every text element needs explicit `fontFamily: "var(--rialto-font-sans, system-ui)"` or `--rialto-font-display` — don't rely on inheritance
 - Color selection UI uses double-ring `boxShadow` (gap ring + color ring) instead of `border` to avoid layout shift
 - All pages use dark theme: `data-theme="dark"` on outer container
+- Rialto Select label is a `<span>`, not `<label>` — clicking it doesn't focus the combobox. `useSelectLabelFocus` hook provides a workaround. Fix upstream: change to `<label htmlFor>` in Rialto source (repo archived)
+- Rialto Select without `label` prop renders a combobox with no accessible name — always pass `label` prop
+
+## Accessibility
+
+- All pages use semantic HTML: `<main id="main-content">`, `<nav aria-label>`, `<h1>`
+- Skip-to-content link in App.tsx targets `#main-content`
+- Error messages use `role="alert"` for screen reader announcements
+- Decorative elements (glows, noise, dividers, SVGs) use `aria-hidden="true"`
+- Global `:focus-visible` ring in index.html (2px accent outline)
+- ProgressBar uses `role="progressbar"` with `aria-valuenow/min/max`
+- Logo fallback letters use `role="img"` + `aria-label`
+- axe-core tests in `e2e/accessibility.spec.ts` — WCAG 2.1 AA, fails on critical/serious
+- Lighthouse audits in `e2e/lighthouse.spec.ts` — performance, a11y, best practices, SEO
