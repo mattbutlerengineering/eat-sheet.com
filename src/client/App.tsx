@@ -12,6 +12,9 @@ const Onboarding = lazy(() =>
 const Dashboard = lazy(() =>
   import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
 );
+const FloorPlan = lazy(() =>
+  import("./pages/FloorPlan").then((m) => ({ default: m.FloorPlan })),
+);
 
 function PageLoader() {
   return (
@@ -96,6 +99,18 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route
+          path="/floor-plan"
+          element={
+            user?.tenantId ? (
+              <FloorPlan />
+            ) : user ? (
+              <Navigate to="/onboarding" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
         <Route
           path="/"
           element={

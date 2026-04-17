@@ -19,16 +19,7 @@
     "paths": {
       "@server/*": ["src/server/*"],
       "@client/*": ["src/client/*"],
-      "@shared/*": ["src/shared/*"],
-      "@mattbutlerengineering/rialto": [
-        "node_modules/@mattbutlerengineering/rialto/dist/lib/lib-entry.d.ts"
-      ],
-      "@mattbutlerengineering/rialto/motion": [
-        "node_modules/@mattbutlerengineering/rialto/dist/lib/tokens/motion.d.ts"
-      ],
-      "@mattbutlerengineering/rialto/styles": [
-        "node_modules/@mattbutlerengineering/rialto/dist/lib/lib-entry.d.ts"
-      ]
+      "@shared/*": ["src/shared/*"]
     }
   },
   "include": ["src", "vite.config.ts", "vitest.config.ts"],

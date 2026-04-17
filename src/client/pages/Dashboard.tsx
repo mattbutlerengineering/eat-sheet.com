@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router";
 import { motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
@@ -13,11 +14,11 @@ const fadeUp = {
 };
 
 const NAV_ITEMS = [
-  { label: "Dashboard", active: true },
-  { label: "Reservations", active: false },
-  { label: "Waitlist", active: false },
-  { label: "Floor Plan", active: false },
-  { label: "Guests", active: false },
+  { label: "Dashboard", active: true, path: "/" },
+  { label: "Reservations", active: false, path: null },
+  { label: "Waitlist", active: false, path: null },
+  { label: "Floor Plan", active: false, path: "/floor-plan" },
+  { label: "Guests", active: false, path: null },
 ] as const;
 
 const STAT_CARDS = [
@@ -130,16 +131,22 @@ function NavItem({
   active,
   accent,
   index,
+  path,
 }: {
   readonly label: string;
   readonly active: boolean;
   readonly accent: string;
   readonly index: number;
+  readonly path: string | null;
 }) {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
 
   const handleMouseEnter = useCallback(() => setHovered(true), []);
   const handleMouseLeave = useCallback(() => setHovered(false), []);
+  const handleClick = useCallback(() => {
+    if (path) navigate(path);
+  }, [navigate, path]);
 
   const background = active
     ? `${accent}1a`
@@ -155,7 +162,7 @@ function NavItem({
     fontWeight: active ? 600 : 400,
     color: active ? accent : "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
     background,
-    cursor: "pointer",
+    cursor: path ? "pointer" : "default",
     whiteSpace: "nowrap" as const,
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -172,6 +179,7 @@ function NavItem({
       style={ms(style)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
       aria-current={active ? "page" : undefined}
     >
       {label}
@@ -232,6 +240,7 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
               active={item.active}
               accent={accent}
               index={i}
+              path={item.path}
             />
           ))}
         </motion.nav>

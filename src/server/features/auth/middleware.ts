@@ -3,6 +3,7 @@ import { verify } from "hono/jwt";
 import { getCookie } from "hono/cookie";
 import type { AppEnv } from "../../types";
 import type { JwtPayload } from "./types";
+import { ForbiddenError } from "../../errors";
 
 export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
@@ -38,6 +39,16 @@ export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
 
   return next();
 });
+
+export function requirePermission(permission: string) {
+  return createMiddleware<AppEnv>(async (c, next) => {
+    const perms = c.var.user.permissions;
+    if (!perms.includes("*") && !perms.includes(permission)) {
+      throw new ForbiddenError("Insufficient permissions");
+    }
+    return next();
+  });
+}
 
 export const optionalAuth = createMiddleware<AppEnv>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
