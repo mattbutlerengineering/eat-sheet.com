@@ -18,7 +18,7 @@
     "test:lighthouse": "playwright test e2e/lighthouse.spec.ts"
   },
   "dependencies": {
-    "@mattbutlerengineering/rialto": "^0.1.3",
+    "@mattbutlerengineering/rialto": "^0.1.4",
     "@sentry/cloudflare": "^10.48.0",
     "@sentry/react": "^10.48.0",
     "arctic": "^2.0.0",
