@@ -1,11 +1,15 @@
 import { Hono } from "hono";
+import { setCookie } from "hono/cookie";
 import type { AppEnv } from "@server/types";
 import { ok } from "@server/response";
 import { NotFoundError } from "@server/errors";
-import { authMiddleware } from "@server/features/auth/middleware";
-import { findTenantById, findVenueTheme, updateTenant, updateVenueTheme } from "./repository";
+import { authMiddleware, requirePermission } from "@server/features/auth/middleware";
+import { signJwt } from "@server/features/auth/service";
+import { findTenantById, findVenueTheme, updateTenant, updateVenueTheme, deleteVenue } from "./repository";
 import type { Venue, VenueTheme } from "@shared/types/venue";
 import type { TenantRow, VenueThemeRow } from "./types";
+
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 
 export const venues = new Hono<AppEnv>();
 
@@ -96,3 +100,54 @@ venues.patch("/:tenantId/venue/theme", async (c) => {
 
   return c.json(ok({ theme: toVenueTheme(themeRow) }));
 });
+
+venues.delete(
+  "/:tenantId/venue",
+  requirePermission("*"),
+  async (c) => {
+    const { tenantId } = c.req.param();
+    const user = c.var.user;
+
+    // Fetch logo_url before deleting
+    const tenantRow = await findTenantById(c.env.DB, tenantId);
+    if (!tenantRow) {
+      throw new NotFoundError(`Venue not found: ${tenantId}`);
+    }
+
+    const deleted = await deleteVenue(c.env.DB, tenantId);
+    if (!deleted) {
+      throw new NotFoundError(`Venue not found: ${tenantId}`);
+    }
+
+    // Delete logo from R2 if present
+    if (tenantRow.logo_url) {
+      // logo_url: /api/onboarding/logos/user-1/abc123.png → key: logos/user-1/abc123.png
+      const prefix = "/api/onboarding/logos/";
+      const r2Key = "logos/" + tenantRow.logo_url.slice(prefix.length);
+      await c.env.LOGOS.delete(r2Key);
+    }
+
+    // Issue new JWT with tenantId: null (tenant is gone)
+    const payload = {
+      sub: user.userId,
+      email: user.email,
+      name: user.name,
+      tenantId: null,
+      roleId: null,
+      permissions: [] as readonly string[],
+      exp: Math.floor(Date.now() / 1000) + COOKIE_MAX_AGE,
+    };
+
+    const token = await signJwt(payload, c.env.JWT_SECRET);
+
+    setCookie(c, "token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Lax",
+      path: "/",
+      maxAge: COOKIE_MAX_AGE,
+    });
+
+    return c.json(ok({ token }));
+  },
+);

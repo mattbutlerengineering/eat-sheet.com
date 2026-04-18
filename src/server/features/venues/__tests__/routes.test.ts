@@ -11,15 +11,17 @@ vi.mock("../repository", () => ({
   findVenueTheme: vi.fn(),
   updateTenant: vi.fn(),
   updateVenueTheme: vi.fn(),
+  deleteVenue: vi.fn(),
 }));
 
-import { findTenantById, findVenueTheme, updateTenant, updateVenueTheme } from "../repository";
+import { findTenantById, findVenueTheme, updateTenant, updateVenueTheme, deleteVenue } from "../repository";
 import { venues } from "../routes";
 
 const mockFindTenantById = findTenantById as ReturnType<typeof vi.fn>;
 const mockFindVenueTheme = findVenueTheme as ReturnType<typeof vi.fn>;
 const mockUpdateTenant = updateTenant as ReturnType<typeof vi.fn>;
 const mockUpdateVenueTheme = updateVenueTheme as ReturnType<typeof vi.fn>;
+const mockDeleteVenue = deleteVenue as ReturnType<typeof vi.fn>;
 
 const JWT_SECRET = "test-secret";
 
@@ -89,7 +91,8 @@ const THEME_ROW: VenueThemeRow = {
 };
 
 const mockDb = {} as unknown as D1Database;
-const env = { JWT_SECRET, DB: mockDb } as AppEnv["Bindings"];
+const mockLogos = { delete: vi.fn() } as unknown as R2Bucket;
+const env = { JWT_SECRET, DB: mockDb, LOGOS: mockLogos } as AppEnv["Bindings"];
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -395,6 +398,149 @@ describe("PATCH /api/t/:tenantId/venue/theme", () => {
     const body = (await res.json()) as Record<string, any>;
     expect(body.ok).toBe(false);
     expect(body.error).toContain("Theme not found");
+  });
+});
+
+describe("DELETE /api/t/:tenantId/venue", () => {
+  async function makeOwnerToken(): Promise<string> {
+    return makeToken({ permissions: ["*"] });
+  }
+
+  it("returns 401 without a token", async () => {
+    const app = buildApp();
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE" },
+      env,
+    );
+
+    expect(res.status).toBe(401);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+  });
+
+  it("returns 403 when user lacks owner permission", async () => {
+    const app = buildApp();
+    const token = await makeToken({ permissions: ["venues:read"] });
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect(res.status).toBe(403);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body.ok).toBe(false);
+  });
+
+  it("returns 200 with token on successful delete", async () => {
+    mockFindTenantById.mockResolvedValueOnce(TENANT_ROW);
+    mockDeleteVenue.mockResolvedValueOnce(true);
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, any>;
+    expect(body.ok).toBe(true);
+    expect(typeof body.data.token).toBe("string");
+    expect(body.data.token.length).toBeGreaterThan(0);
+  });
+
+  it("returns 404 when tenant is not found before delete", async () => {
+    mockFindTenantById.mockResolvedValueOnce(null);
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as Record<string, any>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toContain("Venue not found");
+  });
+
+  it("returns 404 when deleteVenue returns false", async () => {
+    mockFindTenantById.mockResolvedValueOnce(TENANT_ROW);
+    mockDeleteVenue.mockResolvedValueOnce(false);
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as Record<string, any>;
+    expect(body.ok).toBe(false);
+    expect(body.error).toContain("Venue not found");
+  });
+
+  it("deletes R2 logo when logo_url is set", async () => {
+    const rowWithLogo: TenantRow = {
+      ...TENANT_ROW,
+      logo_url: "/api/onboarding/logos/user-1/abc123.png",
+    };
+    mockFindTenantById.mockResolvedValueOnce(rowWithLogo);
+    mockDeleteVenue.mockResolvedValueOnce(true);
+    (mockLogos as any).delete = vi.fn().mockResolvedValueOnce(undefined);
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect((mockLogos as any).delete).toHaveBeenCalledWith("logos/user-1/abc123.png");
+  });
+
+  it("does not call R2 delete when logo_url is null", async () => {
+    const rowNoLogo: TenantRow = { ...TENANT_ROW, logo_url: null };
+    mockFindTenantById.mockResolvedValueOnce(rowNoLogo);
+    mockDeleteVenue.mockResolvedValueOnce(true);
+    const logoDeleteSpy = vi.fn();
+    (mockLogos as any).delete = logoDeleteSpy;
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    expect(logoDeleteSpy).not.toHaveBeenCalled();
+  });
+
+  it("sets token cookie with httpOnly and correct options", async () => {
+    mockFindTenantById.mockResolvedValueOnce(TENANT_ROW);
+    mockDeleteVenue.mockResolvedValueOnce(true);
+
+    const app = buildApp();
+    const token = await makeOwnerToken();
+    const res = await app.request(
+      "/api/t/tenant-1/venue",
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+      env,
+    );
+
+    const setCookieHeader = res.headers.get("set-cookie");
+    expect(setCookieHeader).toContain("token=");
+    expect(setCookieHeader).toContain("HttpOnly");
+    expect(setCookieHeader).toContain("Path=/");
   });
 });
 
