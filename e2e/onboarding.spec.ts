@@ -15,7 +15,7 @@ test.describe("Onboarding flow", () => {
     await expect(page).toHaveURL(/\/onboarding/);
 
     // ─── STEP 1: Venue Info ───────────────────────────────────────────
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("Step 1 of 6")).toBeVisible();
     await expect(page.locator("h1")).toHaveText("What's your venue called?");
 
     // Fill venue name (Rialto Input renders <label> + <input>)
@@ -38,7 +38,7 @@ test.describe("Onboarding flow", () => {
     await continueBtn.click();
 
     // ─── STEP 2: Location ─────────────────────────────────────────────
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
     await expect(page.locator("h1")).toHaveText("Where are you located?");
 
     // Timezone auto-populates on mount, so Continue should be enabled
@@ -51,7 +51,7 @@ test.describe("Onboarding flow", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     // ─── STEP 3: Logo Upload ──────────────────────────────────────────
-    await expect(page.getByText("Step 3 of 5")).toBeVisible();
+    await expect(page.getByText("Step 3 of 6")).toBeVisible();
     await expect(page.locator("h1")).toHaveText("Add your logo");
 
     // Upload the test fixture PNG (hidden input, Playwright handles it)
@@ -67,7 +67,7 @@ test.describe("Onboarding flow", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     // ─── STEP 4: Brand ────────────────────────────────────────────────
-    await expect(page.getByText("Step 4 of 5")).toBeVisible();
+    await expect(page.getByText("Step 4 of 6")).toBeVisible();
     await expect(page.locator("h1")).toHaveText("Your brand");
 
     // Brand auto-initializes on mount — color picker should be visible
@@ -76,8 +76,21 @@ test.describe("Onboarding flow", () => {
     // Continue should be enabled (brand data set on mount)
     await page.getByRole("button", { name: "Continue" }).click();
 
-    // ─── STEP 5: Welcome ──────────────────────────────────────────────
-    await expect(page.getByText("Step 5 of 5")).toBeVisible();
+    // ─── STEP 5: Floor Plan ───────────────────────────────────────────
+    await expect(page.getByText("Step 5 of 6")).toBeVisible();
+    await expect(page.locator("h1")).toHaveText("Design your floor plan");
+
+    // Select Fine Dining template
+    await page.getByText("Fine Dining").click();
+
+    // Verify preview renders
+    await expect(page.getByRole("img", { name: /floor plan preview/i })).toBeVisible();
+
+    // Button should say "Continue" (not "Skip") after selection
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // ─── STEP 6: Welcome ──────────────────────────────────────────────
+    await expect(page.getByText("Step 6 of 6")).toBeVisible();
 
     // Verify venue name in the preview
     await expect(page.getByText("Verde Kitchen").first()).toBeVisible();
@@ -97,7 +110,7 @@ test.describe("Onboarding flow", () => {
   test("completes onboarding skipping logo upload", async ({ page }) => {
     // Navigate directly to /onboarding
     await page.goto("/onboarding");
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("Step 1 of 6")).toBeVisible();
 
     // Step 1: Venue Info
     await page.getByLabel("Venue name").fill("Skipped Logo Cafe");
@@ -106,19 +119,23 @@ test.describe("Onboarding flow", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     // Step 2: Location — timezone auto-populated, just continue
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
 
     // Step 3: Logo — click Skip (no upload)
-    await expect(page.getByText("Step 3 of 5")).toBeVisible();
+    await expect(page.getByText("Step 3 of 6")).toBeVisible();
     await page.getByRole("button", { name: "Skip" }).click();
 
     // Step 4: Brand — auto-initializes, continue
-    await expect(page.getByText("Step 4 of 5")).toBeVisible();
+    await expect(page.getByText("Step 4 of 6")).toBeVisible();
     await page.getByRole("button", { name: "Continue" }).click();
 
-    // Step 5: Welcome — enter
-    await expect(page.getByText("Step 5 of 5")).toBeVisible();
+    // Step 5: Floor Plan — skip
+    await expect(page.getByText("Step 5 of 6")).toBeVisible();
+    await page.getByRole("button", { name: "Skip" }).click();
+
+    // Step 6: Welcome — enter
+    await expect(page.getByText("Step 6 of 6")).toBeVisible();
     await page
       .getByRole("button", { name: /Enter Skipped Logo Cafe/ })
       .click();
@@ -138,11 +155,11 @@ test.describe("Onboarding flow", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     // On step 2 — click Back
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
     await page.getByRole("button", { name: "Back" }).click();
 
     // Should be back on step 1 with data preserved
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("Step 1 of 6")).toBeVisible();
     await expect(page.getByLabel("Venue name")).toHaveValue("Back Test Bistro");
   });
 
@@ -150,7 +167,7 @@ test.describe("Onboarding flow", () => {
     page,
   }) => {
     await page.goto("/onboarding");
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("Step 1 of 6")).toBeVisible();
 
     // Continue should be disabled with no data
     const continueBtn = page.getByRole("button", { name: "Continue" });
@@ -159,5 +176,72 @@ test.describe("Onboarding flow", () => {
     // Fill only name — still disabled (need type + cuisine)
     await page.getByLabel("Venue name").fill("Incomplete Venue");
     await expect(continueBtn).toBeDisabled();
+  });
+
+  test("floor plan step — template selection with table count", async ({ page }) => {
+    await page.goto("/onboarding");
+
+    // Quick-fill steps 1-4
+    await page.getByLabel("Venue name").fill("Floor Plan Test");
+    await selectRialtoOption(page, "Venue type", "Casual Dining");
+    await selectRialtoCuisine(page, "Italian");
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // Step 2: Location
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // Step 3: Logo — skip
+    await page.getByRole("button", { name: "Skip" }).click();
+
+    // Step 4: Brand
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // ─── STEP 5: Floor Plan ───────────────────────────────────────────
+    await expect(page.getByText("Step 5 of 6")).toBeVisible();
+    await expect(page.getByText("Choose a Layout")).toBeVisible();
+
+    // Enter table count
+    await page.getByLabel("Tables").fill("16");
+
+    // Verify Recommended badge appears
+    await expect(page.getByText("Recommended")).toBeVisible();
+
+    // Select Fine Dining
+    await page.getByText("Fine Dining").click();
+
+    // Verify preview renders
+    await expect(page.getByRole("img", { name: /floor plan preview/i })).toBeVisible();
+
+    // Continue to Welcome
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // ─── STEP 6: Welcome ───────────────────────────────────────────
+    await expect(page.getByText("Step 6 of 6")).toBeVisible();
+
+    // Verify floor plan thumbnail in Welcome
+    await expect(page.getByText("Your floor plan")).toBeVisible();
+    await expect(page.getByText("Floor Plan ✓")).toBeVisible();
+  });
+
+  test("floor plan step — skip shows no thumbnail in Welcome", async ({ page }) => {
+    await page.goto("/onboarding");
+
+    // Quick-fill steps 1-4
+    await page.getByLabel("Venue name").fill("No Floor Plan");
+    await selectRialtoOption(page, "Venue type", "Café");
+    await selectRialtoCuisine(page, "American");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("button", { name: "Skip" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // Step 5: Skip floor plan
+    await expect(page.getByText("Step 5 of 6")).toBeVisible();
+    await page.getByRole("button", { name: "Skip" }).click();
+
+    // Step 6: Welcome — no floor plan thumbnail
+    await expect(page.getByText("Step 6 of 6")).toBeVisible();
+    await expect(page.getByText("Your floor plan")).not.toBeVisible();
+    await expect(page.getByText("Floor Plan ✓")).not.toBeVisible();
   });
 });
