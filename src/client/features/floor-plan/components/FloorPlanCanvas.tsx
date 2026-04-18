@@ -297,7 +297,7 @@ export function FloorPlanCanvas({
       style={{ cursor, background: "var(--rialto-surface-recessed, #161412)" }}
     >
       <Layer listening={false}>
-        <CanvasGrid width={canvasWidth} height={canvasHeight} />
+        <CanvasGrid width={canvasWidth} height={canvasHeight} floorTexture={textures["hardwood"]} />
       </Layer>
 
       <Layer>
