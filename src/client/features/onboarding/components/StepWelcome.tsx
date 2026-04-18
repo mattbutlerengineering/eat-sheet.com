@@ -1,6 +1,10 @@
+import { useMemo } from "react";
 import { FlipDot, textToMatrix } from "@mattbutlerengineering/rialto";
 import { motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
+import { TemplateMiniPreview } from "./TemplateMiniPreview";
+import { TEMPLATES, TEMPLATE_SIZES } from "@shared/templates/floor-plan";
+import type { FloorPlanSelection } from "../hooks/useOnboarding";
 
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
 
@@ -9,17 +13,10 @@ interface StepWelcomeProps {
   accent: string;
   logoUrl: string | null;
   cuisines: readonly string[];
+  floorPlan: FloorPlanSelection | null;
   isSubmitting: boolean;
   onEnter: () => void;
 }
-
-const NAV_ITEMS = [
-  { label: "Dashboard", active: true },
-  { label: "Reservations", active: false },
-  { label: "Waitlist", active: false },
-  { label: "Floor Plan", active: false },
-  { label: "Guests", active: false },
-];
 
 const wrapperStyle: React.CSSProperties = {
   display: "flex",
@@ -130,6 +127,7 @@ export function StepWelcome({
   accent,
   logoUrl,
   cuisines,
+  floorPlan,
   isSubmitting,
   onEnter,
 }: StepWelcomeProps) {
@@ -137,6 +135,28 @@ export function StepWelcome({
 
   const initial = venueName.charAt(0).toUpperCase();
   const cuisineLabel = cuisines.slice(0, 3).join(" · ");
+
+  const floorPlanPreview = useMemo(() => {
+    if (!floorPlan) return null;
+    const template = TEMPLATES.find(
+      (t) =>
+        t.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") ===
+        floorPlan.templateId,
+    );
+    const size = TEMPLATE_SIZES.find(
+      (s) => s.label.toLowerCase() === floorPlan.size,
+    );
+    if (!template || !size) return null;
+    return template.build(size.width, size.height);
+  }, [floorPlan]);
+
+  const navItems = [
+    { label: "Dashboard", active: true },
+    { label: "Reservations", active: false },
+    { label: "Waitlist", active: false },
+    { label: floorPlan ? "Floor Plan ✓" : "Floor Plan", active: false },
+    { label: "Guests", active: false },
+  ];
 
   const ctaButtonStyle: React.CSSProperties = {
     padding: "var(--rialto-space-md, 12px) 32px",
@@ -235,7 +255,7 @@ export function StepWelcome({
             </div>
           </div>
 
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <div key={item.label} style={activeNavItemStyle(item.active)}>
               {item.label}
             </div>
@@ -244,11 +264,35 @@ export function StepWelcome({
 
         {/* Main content area */}
         <div style={mainStyle}>
-          <h2 style={welcomeHeadingStyle}>Welcome to {venueName}</h2>
-          <p style={welcomeSubtextStyle}>Your venue is ready.</p>
-          <button type="button" tabIndex={-1} style={previewCTAStyle}>
-            Get Started
-          </button>
+          {floorPlanPreview ? (
+            <>
+              <div style={{
+                fontSize: "var(--rialto-text-xs, 11px)",
+                color: "var(--rialto-text-tertiary)",
+                fontFamily: "var(--rialto-font-sans, system-ui)",
+              }}>
+                Your floor plan
+              </div>
+              <div style={{ width: "100%", maxWidth: 320 }}>
+                <TemplateMiniPreview payload={floorPlanPreview} height={120} />
+              </div>
+              <div style={{
+                fontSize: 10,
+                color: "var(--rialto-text-tertiary)",
+                fontFamily: "var(--rialto-font-sans, system-ui)",
+              }}>
+                {floorPlanPreview.tables.length} tables · {floorPlanPreview.sections.length} sections
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 style={welcomeHeadingStyle}>Welcome to {venueName}</h2>
+              <p style={welcomeSubtextStyle}>Your venue is ready.</p>
+              <button type="button" tabIndex={-1} style={previewCTAStyle}>
+                Get Started
+              </button>
+            </>
+          )}
         </div>
       </motion.div>
 

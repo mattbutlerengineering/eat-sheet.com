@@ -306,6 +306,7 @@ export function Onboarding() {
                 accent={state.brand?.accent ?? "#c49a2a"}
                 logoUrl={state.logoResult?.logoUrl ?? null}
                 cuisines={state.venueInfo?.cuisines ?? []}
+                floorPlan={state.floorPlan}
                 isSubmitting={state.isSubmitting}
                 onEnter={handleSubmit}
               />
