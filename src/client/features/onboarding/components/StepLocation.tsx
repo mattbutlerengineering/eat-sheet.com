@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input, Select } from "@mattbutlerengineering/rialto";
+import { venueLocationSchema } from "@shared/schemas";
 import type { VenueLocationInput } from "@shared/schemas";
 
 interface StepLocationProps {
@@ -96,61 +99,41 @@ const emptyPreviewStyle: React.CSSProperties = {
   fontFamily: "var(--rialto-font-sans, system-ui)",
 };
 
-interface LocationState {
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  timezone: string;
-  phone: string;
-  website: string;
-}
-
-function stateToInput(s: LocationState): VenueLocationInput {
-  return {
-    addressLine1: s.addressLine1,
-    addressLine2: s.addressLine2,
-    city: s.city,
-    state: s.state,
-    zip: s.zip,
-    country: s.country,
-    timezone: s.timezone,
-    phone: s.phone,
-    website: s.website,
-  };
-}
+const errorStyle: React.CSSProperties = {
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-xs, 11px)",
+  color: "var(--rialto-error, #e07070)",
+  marginTop: "var(--rialto-space-xs, 4px)",
+};
 
 export function StepLocation({ data, onChange }: StepLocationProps) {
-  const [loc, setLoc] = useState<LocationState>({
-    addressLine1: data?.addressLine1 ?? "",
-    addressLine2: data?.addressLine2 ?? "",
-    city: data?.city ?? "",
-    state: data?.state ?? "",
-    zip: data?.zip ?? "",
-    country: data?.country ?? "US",
-    timezone: data?.timezone ?? resolveDefaultTimezone(),
-    phone: data?.phone ?? "",
-    website: data?.website ?? "",
+  const { control, watch, formState: { errors } } = useForm<VenueLocationInput>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(venueLocationSchema) as any,
+    defaultValues: {
+      addressLine1: data?.addressLine1 ?? "",
+      addressLine2: data?.addressLine2 ?? "",
+      city: data?.city ?? "",
+      state: data?.state ?? "",
+      zip: data?.zip ?? "",
+      country: data?.country ?? "US",
+      timezone: data?.timezone ?? resolveDefaultTimezone(),
+      phone: data?.phone ?? "",
+      website: data?.website ?? "",
+    },
+    mode: "onTouched",
   });
 
-  // Emit initial state on mount so parent has the default timezone
   useEffect(() => {
-    if (!data) {
-      onChange(stateToInput(loc));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const subscription = watch((values) => {
+      onChange(values as VenueLocationInput);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onChange]);
 
-  function update(patch: Partial<LocationState>) {
-    const next = { ...loc, ...patch };
-    setLoc(next);
-    onChange(stateToInput(next));
-  }
-
+  const watched = watch();
   const hasAddress =
-    loc.addressLine1 || loc.city || loc.state || loc.zip;
+    watched.addressLine1 || watched.city || watched.state || watched.zip;
 
   return (
     <div style={columnStyle} className="step-location">
@@ -163,19 +146,33 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
       `}</style>
       {/* Left: Form */}
       <div style={formColumnStyle}>
-        <Input
-          label="Street address"
-          placeholder="123 Main St"
-          value={loc.addressLine1}
-          onChange={(e) => update({ addressLine1: e.target.value })}
+        <Controller
+          name="addressLine1"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Street address"
+              placeholder="123 Main St"
+              value={field.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+            />
+          )}
         />
 
-        <Input
-          label="Suite / Unit"
-          placeholder="Suite 200"
-          showOptional
-          value={loc.addressLine2}
-          onChange={(e) => update({ addressLine2: e.target.value })}
+        <Controller
+          name="addressLine2"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Suite / Unit"
+              placeholder="Suite 200"
+              showOptional
+              value={field.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+            />
+          )}
         />
 
         <fieldset style={{ border: "none", margin: 0, padding: 0 }}>
@@ -193,50 +190,96 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
             Address details
           </legend>
           <div style={cityStateZipStyle} className="city-state-zip">
-            <Input
-              label="City"
-              placeholder="San Francisco"
-              value={loc.city}
-              onChange={(e) => update({ city: e.target.value })}
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="City"
+                  placeholder="San Francisco"
+                  value={field.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
-            <Input
-              label="State"
-              placeholder="CA"
-              value={loc.state}
-              onChange={(e) => update({ state: e.target.value })}
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="State"
+                  placeholder="CA"
+                  value={field.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
-            <Input
-              label="ZIP"
-              placeholder="94102"
-              value={loc.zip}
-              onChange={(e) => update({ zip: e.target.value })}
+            <Controller
+              name="zip"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="ZIP"
+                  placeholder="94102"
+                  value={field.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
           </div>
         </fieldset>
 
-        <Select
-          label="Timezone"
-          options={TIMEZONE_OPTIONS}
-          value={loc.timezone}
-          onChange={(val) => update({ timezone: val })}
+        <div>
+          <Controller
+            name="timezone"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Timezone"
+                options={TIMEZONE_OPTIONS}
+                value={field.value}
+                onChange={(val) => field.onChange(val)}
+              />
+            )}
+          />
+          {errors.timezone?.message && (
+            <div style={errorStyle}>{errors.timezone.message}</div>
+          )}
+        </div>
+
+        <Controller
+          name="phone"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Phone"
+              placeholder="+1 (555) 000-0000"
+              showOptional
+              value={field.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+              type="tel"
+            />
+          )}
         />
 
-        <Input
-          label="Phone"
-          placeholder="+1 (555) 000-0000"
-          showOptional
-          value={loc.phone}
-          onChange={(e) => update({ phone: e.target.value })}
-          type="tel"
-        />
-
-        <Input
-          label="Website"
-          placeholder="https://yourvenue.com"
-          showOptional
-          value={loc.website}
-          onChange={(e) => update({ website: e.target.value })}
-          type="url"
+        <Controller
+          name="website"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Website"
+              placeholder="https://yourvenue.com"
+              showOptional
+              value={field.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+              onBlur={field.onBlur}
+              type="url"
+            />
+          )}
         />
       </div>
 
@@ -247,23 +290,23 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
 
           {hasAddress ? (
             <div>
-              {loc.addressLine1 && (
-                <div style={addressLineStyle}>{loc.addressLine1}</div>
+              {watched.addressLine1 && (
+                <div style={addressLineStyle}>{watched.addressLine1}</div>
               )}
-              {loc.addressLine2 && (
-                <div style={addressLineStyle}>{loc.addressLine2}</div>
+              {watched.addressLine2 && (
+                <div style={addressLineStyle}>{watched.addressLine2}</div>
               )}
-              {(loc.city || loc.state || loc.zip) && (
+              {(watched.city || watched.state || watched.zip) && (
                 <div style={addressLineStyle}>
-                  {[loc.city, loc.state].filter(Boolean).join(", ")}
-                  {loc.zip ? ` ${loc.zip}` : ""}
+                  {[watched.city, watched.state].filter(Boolean).join(", ")}
+                  {watched.zip ? ` ${watched.zip}` : ""}
                 </div>
               )}
-              {loc.phone && (
-                <div style={mutedStyle}>{loc.phone}</div>
+              {watched.phone && (
+                <div style={mutedStyle}>{watched.phone}</div>
               )}
-              {loc.website && (
-                <div style={accentStyle}>{loc.website}</div>
+              {watched.website && (
+                <div style={accentStyle}>{watched.website}</div>
               )}
             </div>
           ) : (
@@ -273,12 +316,12 @@ export function StepLocation({ data, onChange }: StepLocationProps) {
           )}
         </div>
 
-        {loc.timezone && (
+        {watched.timezone && (
           <div style={previewCardStyle}>
             <div style={previewLabelStyle}>Timezone</div>
             <div style={{ fontSize: "var(--rialto-text-xs, 13px)", color: "var(--rialto-text-secondary, rgba(255,255,255,0.7))", fontFamily: "var(--rialto-font-sans, system-ui)" }}>
-              {TIMEZONE_OPTIONS.find((t) => t.value === loc.timezone)?.label ??
-                loc.timezone}
+              {TIMEZONE_OPTIONS.find((t) => t.value === watched.timezone)?.label ??
+                watched.timezone}
             </div>
           </div>
         )}
