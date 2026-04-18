@@ -328,6 +328,7 @@ export function FloorPlanCanvas({
             key={s.id}
             section={s}
             isSelected={selectedId === s.id}
+            textures={textures}
             onSelect={handleSelectSection}
             onDragEnd={handleSectionDragEnd}
             onTransformEnd={handleSectionTransformEnd}

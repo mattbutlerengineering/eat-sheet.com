@@ -1,11 +1,13 @@
 import { useCallback, useRef } from "react";
-import { Group, Rect, Text } from "react-konva";
+import { Group, Rect, Text, Line } from "react-konva";
 import type Konva from "konva";
 import type { EditorSection } from "../types";
+import type { TextureMap } from "../hooks/useTextures";
 
 interface SectionZoneProps {
   readonly section: EditorSection;
   readonly isSelected: boolean;
+  readonly textures: TextureMap;
   readonly onSelect: (id: string) => void;
   readonly onDragEnd: (id: string, x: number, y: number) => void;
   readonly onTransformEnd: (id: string, width: number, height: number, x: number, y: number) => void;
@@ -14,6 +16,7 @@ interface SectionZoneProps {
 export function SectionZone({
   section,
   isSelected,
+  textures,
   onSelect,
   onDragEnd,
   onTransformEnd,
@@ -50,6 +53,9 @@ export function SectionZone({
     );
   }, [onTransformEnd, section.id, section.width, section.height]);
 
+  const floorTexture = section.floorMaterial ? textures[section.floorMaterial] : undefined;
+  const pillWidth = section.name.length * 7.5 + 16;
+
   return (
     <Group
       ref={groupRef}
@@ -65,30 +71,69 @@ export function SectionZone({
       onTransformEnd={handleTransformEnd}
     >
       {/* Section area fill */}
-      <Rect
-        width={section.width}
-        height={section.height}
-        fill={`${section.color}15`}
-        stroke={isSelected ? section.color : `${section.color}88`}
-        strokeWidth={isSelected ? 2 : 1.5}
-        dash={[8, 4]}
-        cornerRadius={4}
+      {floorTexture ? (
+        <>
+          <Rect
+            width={section.width}
+            height={section.height}
+            fillPatternImage={floorTexture}
+            fillPatternRepeat="repeat"
+            opacity={0.2}
+            stroke={isSelected ? section.color : `${section.color}88`}
+            strokeWidth={isSelected ? 2 : 1.5}
+            cornerRadius={4}
+          />
+          <Rect
+            width={section.width}
+            height={section.height}
+            fill={`${section.color}15`}
+            stroke={isSelected ? section.color : `${section.color}88`}
+            strokeWidth={isSelected ? 2 : 1.5}
+            cornerRadius={4}
+          />
+        </>
+      ) : (
+        <Rect
+          width={section.width}
+          height={section.height}
+          fill={`${section.color}15`}
+          stroke={isSelected ? section.color : `${section.color}88`}
+          strokeWidth={isSelected ? 2 : 1.5}
+          cornerRadius={4}
+        />
+      )}
+      {/* Inner shadow Lines */}
+      <Line
+        points={[4, 2, section.width - 4, 2]}
+        stroke="rgba(0,0,0,0.06)"
+        strokeWidth={1}
+        listening={false}
+      />
+      <Line
+        points={[2, 4, 2, section.height - 4]}
+        stroke="rgba(0,0,0,0.06)"
+        strokeWidth={1}
+        listening={false}
       />
       {/* Label with background pill */}
       <Rect
         x={8}
         y={6}
-        width={section.name.length * 7 + 16}
-        height={18}
+        width={pillWidth}
+        height={20}
         fill={`${section.color}25`}
         cornerRadius={3}
+        shadowColor="#000000"
+        shadowBlur={4}
+        shadowOffsetY={1}
+        shadowOpacity={0.15}
         listening={false}
       />
       <Text
         text={section.name.toUpperCase()}
         x={16}
         y={9}
-        fontSize={10}
+        fontSize={11}
         fontFamily="system-ui, -apple-system, sans-serif"
         fontStyle="600"
         fill={isSelected ? section.color : `${section.color}cc`}
