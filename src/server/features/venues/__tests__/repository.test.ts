@@ -7,6 +7,7 @@ vi.mock("nanoid", () => ({
 
 import {
   createVenueWithTheme,
+  deleteVenue,
   findTenantById,
   findTenantBySlug,
   findVenueTheme,
@@ -261,5 +262,60 @@ describe("updateVenueTheme", () => {
     const db = mockDbWithResult(null);
     await updateVenueTheme(db, "t-1", {});
     expect(db.prepare).not.toHaveBeenCalled();
+  });
+});
+
+describe("deleteVenue", () => {
+  it("deletes tenant and all related records in batch", async () => {
+    const db = mockDb();
+    (db.batch as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { success: true },
+      { success: true },
+      { success: true },
+      { success: true },
+      { success: true, meta: { changes: 1 } },
+    ]);
+    const result = await deleteVenue(db, "tenant-1");
+
+    expect(result).toBe(true);
+    expect(db.batch).toHaveBeenCalledOnce();
+
+    // Verify batch contains deletes in FK-safe order
+    const batchCalls = (db.batch as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+    expect(batchCalls.length).toBe(5); // floor_plans, tenant_members, roles, venue_themes, tenants
+  });
+
+  it("returns false when tenant not found", async () => {
+    const db = mockDb();
+    // Override batch to return results where tenants delete affected 0 rows
+    (db.batch as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { success: true }, // floor_plans
+      { success: true }, // tenant_members
+      { success: true }, // roles
+      { success: true }, // venue_themes
+      { success: true, meta: { changes: 0 } }, // tenants - nothing deleted
+    ]);
+
+    const result = await deleteVenue(db, "nonexistent");
+    expect(result).toBe(false);
+  });
+
+  it("issues deletes in FK-safe order (floor_plans before tenants)", async () => {
+    const db = mockDb();
+    await deleteVenue(db, "tenant-1");
+
+    const prepareCalls = (db.prepare as ReturnType<typeof vi.fn>).mock.calls;
+    const sqls = prepareCalls.map((c) => c[0] as string);
+
+    const floorPlansIdx = sqls.findIndex((s) => s.includes("floor_plans"));
+    const tenantMembersIdx = sqls.findIndex((s) => s.includes("tenant_members"));
+    const rolesIdx = sqls.findIndex((s) => s.includes("roles"));
+    const venueThemesIdx = sqls.findIndex((s) => s.includes("venue_themes"));
+    const tenantsIdx = sqls.findIndex((s) => s.includes("FROM tenants") || (s.includes("tenants") && !s.includes("tenant_members") && !s.includes("venue_themes")));
+
+    expect(floorPlansIdx).toBeLessThan(tenantsIdx);
+    expect(tenantMembersIdx).toBeLessThan(tenantsIdx);
+    expect(rolesIdx).toBeLessThan(tenantsIdx);
+    expect(venueThemesIdx).toBeLessThan(tenantsIdx);
   });
 });
