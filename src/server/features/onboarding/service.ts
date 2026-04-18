@@ -4,6 +4,8 @@ import { generateSlug } from "@server/features/venues/service";
 import { createVenueWithTheme } from "@server/features/venues/repository";
 import { buildJwtPayload, signJwt } from "@server/features/auth/service";
 import { findUserByEmail } from "@server/features/auth/repository";
+import { createFloorPlan, saveFloorPlan, type SaveFloorPlanData } from "@server/features/floor-plans/repository";
+import { TEMPLATES, TEMPLATE_SIZES } from "@shared/templates/floor-plan";
 import { NotFoundError } from "@server/errors";
 import type { OnboardingCompleteInput } from "@shared/schemas/venue";
 
@@ -80,6 +82,70 @@ export async function completeOnboarding(
     userId,
     ownerRoleId: ownerRole.id,
   });
+
+  if (input.floorPlan) {
+    const tenantRow = await db
+      .prepare("SELECT id FROM tenants WHERE slug = ?")
+      .bind(slug)
+      .first<{ id: string }>();
+
+    if (tenantRow) {
+      const template = TEMPLATES.find(
+        (t) =>
+          t.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") === input.floorPlan!.templateId,
+      );
+
+      const size = TEMPLATE_SIZES.find(
+        (s) => s.label.toLowerCase() === input.floorPlan!.size,
+      );
+
+      if (template && size) {
+        const plan = await createFloorPlan(db, tenantRow.id, "Floor 1");
+        const payload = template.build(size.width, size.height);
+
+        const layoutData = {
+          tables: payload.tables.map((t) => ({
+            id: t.id, x: t.x, y: t.y,
+            width: t.width, height: t.height, rotation: t.rotation,
+          })),
+          sections: payload.sections.map((s) => ({
+            id: s.id, x: s.x, y: s.y, width: s.width, height: s.height,
+          })),
+          walls: payload.walls.map((w) => ({
+            id: w.id, x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2,
+            thickness: w.thickness,
+            ...(w.wallType ? { wallType: w.wallType } : {}),
+          })),
+        };
+
+        const saveData: SaveFloorPlanData = {
+          planId: plan.id,
+          tenantId: tenantRow.id,
+          canvasWidth: size.width,
+          canvasHeight: size.height,
+          layoutDataJson: JSON.stringify(layoutData),
+          tables: payload.tables.map((t) => ({
+            id: t.id,
+            label: t.label,
+            shape: t.shape,
+            minCapacity: t.minCapacity,
+            maxCapacity: t.maxCapacity,
+            sectionId: t.sectionId,
+          })),
+          sections: payload.sections.map((s) => ({
+            id: s.id,
+            name: s.name,
+            color: s.color,
+          })),
+        };
+
+        await saveFloorPlan(db, saveData);
+      }
+    }
+  }
 
   // Fetch full user row so buildJwtPayload has the correct shape
   const userRow = await findUserByEmail(db, userEmail);
