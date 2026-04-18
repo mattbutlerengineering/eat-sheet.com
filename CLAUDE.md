@@ -180,6 +180,10 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - **3D visual techniques:** Wood grain (horizontal `<Line>` for rect, concentric `<Circle>` for round), chair cushions (inner rect), place setting plates, contact shadows (soft halo under furniture), 3D walls (offset polygon for top face)
 - **Windows:** `wallType: "window"` on WallLayout (optional, defaults to "wall"). Glass fill with cyan tint + reflection highlight. Thinner (4px) than walls (6px).
 - **Shared templates:** `src/shared/templates/floor-plan.ts` exports `TEMPLATES`, `TEMPLATE_SIZES`, `templateIdFromName()` — used by both client (preview) and server (onboarding creation). `src/client/features/floor-plan/templates.ts` re-exports from shared.
+- **SVG assets:** Tables, chairs, booths, bar stools, place settings are SVG files in `src/client/features/floor-plan/assets/` rendered as Konva `<Image>` nodes — not procedural shapes. `useTextures()` hook preloads all assets on canvas mount.
+- **Texture fills:** Floor and sections use tileable PNG textures (`src/client/features/floor-plan/textures/`) via Konva `fillPatternImage`. Sections have optional `floorMaterial` field (hardwood/concrete/carpet/tile/marble).
+- **Vite asset imports:** `src/client/vite-env.d.ts` declares `*.svg` and `*.png` module types for static imports
+- **Venue deletion:** `DELETE /:tenantId/venue` — Owner only (`"*"` permission). `deleteVenue()` uses `db.batch()` in FK-safe order: floor_plans → tenant_members → roles → venue_themes → tenants. Also cleans R2 logo and reissues JWT with null tenantId.
 - **Templates:** 7 templates (Blank, Fine Dining, Casual Bistro, Bar & Lounge, Café, Banquet Hall, Open Kitchen). TemplatePicker modal shown on create. 4 sizes: Cozy/Standard/Spacious/Grand.
 - **Onboarding integration:** Floor plan template picker is step 5 of 6 in onboarding (optional, skippable). `completeOnboarding()` creates floor plan records server-side when a template is selected.
 - **Template coordinates:** Use fractional positions (0.0–1.0 × canvas size) so layouts fill the room at any size.
