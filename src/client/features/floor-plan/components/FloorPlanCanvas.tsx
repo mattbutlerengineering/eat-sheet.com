@@ -7,6 +7,7 @@ import { TableShape } from "./TableShape";
 import { SectionZone } from "./SectionZone";
 import { WallShape } from "./WallShape";
 import { useFloorPlanEditorContext, snapToGrid } from "../hooks/useFloorPlanEditor";
+import { useTextures } from "../hooks/useTextures";
 import type { EditorTable } from "../types";
 
 interface FloorPlanCanvasProps {
@@ -42,6 +43,7 @@ export function FloorPlanCanvas({
   accentColor,
 }: FloorPlanCanvasProps) {
   const { state, dispatch } = useFloorPlanEditorContext();
+  const { textures } = useTextures();
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -337,6 +339,7 @@ export function FloorPlanCanvas({
             table={t}
             isSelected={selectedId === t.id}
             accentColor={accentColor}
+            textures={textures}
             onSelect={handleSelectTable}
             onDragEnd={handleTableDragEnd}
             onTransformEnd={handleTableTransformEnd}
