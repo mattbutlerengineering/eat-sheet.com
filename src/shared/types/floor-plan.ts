@@ -66,6 +66,7 @@ export interface FloorPlanSection {
   readonly floorPlanId: string;
   readonly name: string;
   readonly color: string;
+  readonly floorMaterial?: "hardwood" | "concrete" | "carpet" | "tile" | "marble" | undefined;
 }
 
 // --- API response types ---
@@ -107,6 +108,7 @@ export interface SaveSectionPayload {
   readonly id: string;
   readonly name: string;
   readonly color: string;
+  readonly floorMaterial?: "hardwood" | "concrete" | "carpet" | "tile" | "marble" | undefined;
   readonly x: number;
   readonly y: number;
   readonly width: number;
