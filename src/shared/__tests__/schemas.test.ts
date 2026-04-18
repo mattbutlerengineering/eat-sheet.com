@@ -86,12 +86,12 @@ describe("venueLocationSchema", () => {
     }
   });
 
-  it("rejects an invalid URL", () => {
+  it("accepts any string for website", () => {
     const result = venueLocationSchema.safeParse({
       timezone: "America/Chicago",
-      website: "not-a-valid-url",
+      website: "myrestaurant.com",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts an empty string for website", () => {

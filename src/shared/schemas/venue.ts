@@ -17,7 +17,7 @@ export const venueLocationSchema = z.object({
   country: z.string().max(2).default("US"),
   timezone: z.string().min(1, "Timezone is required"),
   phone: z.string().max(20).optional().default(""),
-  website: z.string().url().or(z.literal("")).optional().default(""),
+  website: z.string().max(200).optional().default(""),
 });
 export type VenueLocationInput = z.infer<typeof venueLocationSchema>;
 
