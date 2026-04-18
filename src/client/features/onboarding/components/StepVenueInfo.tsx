@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { Input, Select, AnimatedTag, TagGroup } from "@mattbutlerengineering/rialto";
 import { CUISINE_OPTIONS, VENUE_TYPES, VENUE_TYPE_LABELS } from "@shared/types";
 import type { VenueType } from "@shared/types";
+import { venueInfoSchema } from "@shared/schemas";
 import type { VenueInfoInput } from "@shared/schemas";
 
 interface StepVenueInfoProps {
@@ -108,47 +111,49 @@ const sectionLabelStyle: React.CSSProperties = {
   marginBottom: "var(--rialto-space-xs, 4px)",
 };
 
+const errorStyle: React.CSSProperties = {
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-xs, 11px)",
+  color: "var(--rialto-error, #e07070)",
+  marginTop: "var(--rialto-space-xs, 4px)",
+};
+
 export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
-  const [name, setName] = useState(data?.name ?? "");
-  const [type, setType] = useState<string>(data?.type ?? "");
-  const [cuisines, setCuisines] = useState<string[]>(data?.cuisines ?? []);
+  const { control, watch, setValue, formState: { errors } } = useForm<VenueInfoInput>({
+    resolver: zodResolver(venueInfoSchema),
+    defaultValues: {
+      name: data?.name ?? "",
+      type: data?.type ?? ("" as VenueInfoInput["type"]),
+      cuisines: data?.cuisines ?? [],
+    },
+    mode: "onTouched",
+  });
+
+  const name = watch("name");
+  const type = watch("type");
+  const cuisines = watch("cuisines");
+
+  // Keep selectedCuisine as local state (it's UI-only, not form data)
   const [selectedCuisine, setSelectedCuisine] = useState("");
 
-  function emit(
-    nextName: string,
-    nextType: string,
-    nextCuisines: string[],
-  ) {
-    onChange({
-      name: nextName,
-      type: nextType as VenueType,
-      cuisines: nextCuisines,
+  // Sync to parent on every change
+  useEffect(() => {
+    const subscription = watch((values) => {
+      if (values.name !== undefined && values.type !== undefined && values.cuisines !== undefined) {
+        onChange(values as VenueInfoInput);
+      }
     });
-  }
-
-  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = e.target.value;
-    setName(val);
-    emit(val, type, cuisines);
-  }
-
-  function handleTypeChange(val: string) {
-    setType(val);
-    emit(name, val, cuisines);
-  }
+    return () => subscription.unsubscribe();
+  }, [watch, onChange]);
 
   function handleAddCuisine(val: string) {
     if (!val || cuisines.includes(val)) return;
-    const next = [...cuisines, val];
-    setCuisines(next);
+    setValue("cuisines", [...cuisines, val], { shouldValidate: true });
     setSelectedCuisine("");
-    emit(name, type, next);
   }
 
   function handleRemoveCuisine(cuisine: string) {
-    const next = cuisines.filter((c) => c !== cuisine);
-    setCuisines(next);
-    emit(name, type, next);
+    setValue("cuisines", cuisines.filter((c) => c !== cuisine), { shouldValidate: true });
   }
 
   const availableCuisines = CUISINE_SELECT_OPTIONS.filter(
@@ -161,19 +166,46 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
     <div style={columnStyle} className="step-venue-info">
       {/* Left: Form */}
       <div style={formColumnStyle}>
-        <Input
-          label="Venue name"
-          placeholder="e.g. Verde Kitchen"
-          value={name}
-          onChange={handleNameChange}
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <div>
+              <Input
+                label="Venue name"
+                placeholder="e.g. Verde Kitchen"
+                value={field.value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
+                onBlur={field.onBlur}
+              />
+              {errors.name && (
+                <div role="alert" style={errorStyle}>
+                  {errors.name.message}
+                </div>
+              )}
+            </div>
+          )}
         />
 
-        <Select
-          label="Venue type"
-          options={VENUE_TYPE_OPTIONS}
-          value={type}
-          onChange={handleTypeChange}
-          placeholder="Select a type"
+        <Controller
+          name="type"
+          control={control}
+          render={({ field }) => (
+            <div>
+              <Select
+                label="Venue type"
+                options={VENUE_TYPE_OPTIONS}
+                value={field.value}
+                onChange={(val: string) => { field.onChange(val); field.onBlur(); }}
+                placeholder="Select a type"
+              />
+              {errors.type && (
+                <div role="alert" style={errorStyle}>
+                  {errors.type.message}
+                </div>
+              )}
+            </div>
+          )}
         />
 
         <div>
@@ -184,6 +216,11 @@ export function StepVenueInfo({ data, onChange }: StepVenueInfoProps) {
             onChange={handleAddCuisine}
             placeholder="Add a cuisine..."
           />
+          {errors.cuisines && (
+            <div role="alert" style={errorStyle}>
+              {errors.cuisines.message}
+            </div>
+          )}
 
           {cuisines.length > 0 && (
             <div style={{ ...tagRowStyle, marginTop: 10 }}>
