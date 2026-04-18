@@ -34,6 +34,7 @@ const saveSectionSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1).max(50),
   color: hexColorSchema,
+  floorMaterial: z.enum(["hardwood", "concrete", "carpet", "tile", "marble"]).optional(),
   x: z.number().min(-10000).max(10000),
   y: z.number().min(-10000).max(10000),
   width: z.number().min(40).max(5000),
