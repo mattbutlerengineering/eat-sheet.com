@@ -118,6 +118,7 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 ## Testing Patterns
 
 - Tests co-located in `__tests__/` next to source
+- React component tests: `@testing-library/react` + `jsdom` — vitest auto-selects jsdom via `environmentMatchGlobs` for `.test.tsx` files
 - Mock D1 with `vi.fn()` returning `prepare/bind/first/run/all`
 - Mock R2 with `vi.fn()` returning `put/get/delete/list/head`
 - JWT test helper: `sign()` from `hono/jwt` with `HS256`
@@ -178,7 +179,9 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - **Floor rename:** Double-click tab → inline edit. Calls `PATCH /:tenantId/floor-plans/:planId/name`
 - **3D visual techniques:** Wood grain (horizontal `<Line>` for rect, concentric `<Circle>` for round), chair cushions (inner rect), place setting plates, contact shadows (soft halo under furniture), 3D walls (offset polygon for top face)
 - **Windows:** `wallType: "window"` on WallLayout (optional, defaults to "wall"). Glass fill with cyan tint + reflection highlight. Thinner (4px) than walls (6px).
-- **Templates:** 7 templates in `src/client/features/floor-plan/templates.ts` (Blank, Fine Dining, Casual Bistro, Bar & Lounge, Café, Banquet Hall, Open Kitchen). TemplatePicker modal shown on create. 4 sizes: Cozy/Standard/Spacious/Grand.
+- **Shared templates:** `src/shared/templates/floor-plan.ts` exports `TEMPLATES`, `TEMPLATE_SIZES`, `templateIdFromName()` — used by both client (preview) and server (onboarding creation). `src/client/features/floor-plan/templates.ts` re-exports from shared.
+- **Templates:** 7 templates (Blank, Fine Dining, Casual Bistro, Bar & Lounge, Café, Banquet Hall, Open Kitchen). TemplatePicker modal shown on create. 4 sizes: Cozy/Standard/Spacious/Grand.
+- **Onboarding integration:** Floor plan template picker is step 5 of 6 in onboarding (optional, skippable). `completeOnboarding()` creates floor plan records server-side when a template is selected.
 - **Template coordinates:** Use fractional positions (0.0–1.0 × canvas size) so layouts fill the room at any size.
 - **Konva layers:** Walls + sections + tables must be in the SAME `<Layer>` for `<Transformer>` to attach to any of them. Separate layers break cross-type selection.
 - **Section resize:** Sections are resizable via Transformer but `rotateEnabled={selectedType === "table"}` disables rotation for sections (stay axis-aligned).
