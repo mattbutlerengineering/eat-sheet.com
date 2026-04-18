@@ -5,7 +5,7 @@ import { createVenueWithTheme } from "@server/features/venues/repository";
 import { buildJwtPayload, signJwt } from "@server/features/auth/service";
 import { findUserByEmail } from "@server/features/auth/repository";
 import { createFloorPlan, saveFloorPlan, type SaveFloorPlanData } from "@server/features/floor-plans/repository";
-import { TEMPLATES, TEMPLATE_SIZES } from "@shared/templates/floor-plan";
+import { TEMPLATES, TEMPLATE_SIZES, templateIdFromName } from "@shared/templates/floor-plan";
 import { NotFoundError } from "@server/errors";
 import type { OnboardingCompleteInput } from "@shared/schemas/venue";
 
@@ -91,11 +91,7 @@ export async function completeOnboarding(
 
     if (tenantRow) {
       const template = TEMPLATES.find(
-        (t) =>
-          t.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "") === input.floorPlan!.templateId,
+        (t) => templateIdFromName(t.name) === input.floorPlan!.templateId,
       );
 
       const size = TEMPLATE_SIZES.find(

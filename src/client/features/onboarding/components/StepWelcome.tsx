@@ -3,7 +3,7 @@ import { FlipDot, textToMatrix } from "@mattbutlerengineering/rialto";
 import { motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { TemplateMiniPreview } from "./TemplateMiniPreview";
-import { TEMPLATES, TEMPLATE_SIZES } from "@shared/templates/floor-plan";
+import { TEMPLATES, TEMPLATE_SIZES, templateIdFromName } from "@shared/templates/floor-plan";
 import type { FloorPlanSelection } from "../hooks/useOnboarding";
 
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
@@ -139,9 +139,7 @@ export function StepWelcome({
   const floorPlanPreview = useMemo(() => {
     if (!floorPlan) return null;
     const template = TEMPLATES.find(
-      (t) =>
-        t.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") ===
-        floorPlan.templateId,
+      (t) => templateIdFromName(t.name) === floorPlan.templateId,
     );
     const size = TEMPLATE_SIZES.find(
       (s) => s.label.toLowerCase() === floorPlan.size,

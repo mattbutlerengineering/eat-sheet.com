@@ -43,7 +43,7 @@ export const venueBrandSchema = z.object({
 });
 export type VenueBrandInput = z.infer<typeof venueBrandSchema>;
 
-const floorPlanSelectionSchema = z.object({
+export const floorPlanSelectionSchema = z.object({
   templateId: z.string().min(1),
   size: z.string().min(1),
   tableCount: z.number().int().min(1).optional(),

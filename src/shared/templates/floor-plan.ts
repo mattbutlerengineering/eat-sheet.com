@@ -22,6 +22,10 @@ export const TEMPLATE_SIZES: readonly TemplateSize[] = [
   { label: "Grand", sub: "~5,000 sq ft", width: 2000, height: 1200 },
 ] as const;
 
+export function templateIdFromName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 // --- Helpers ---
 
 function perimeterWalls(w: number, h: number, t: number = 6): SaveWallPayload[] {

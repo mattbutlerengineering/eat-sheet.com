@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { TEMPLATES, TEMPLATE_SIZES } from "@shared/templates/floor-plan";
+import { TEMPLATES, TEMPLATE_SIZES, templateIdFromName } from "@shared/templates/floor-plan";
 import { TemplateMiniPreview } from "./TemplateMiniPreview";
 import type { FloorPlanSelection } from "../hooks/useOnboarding";
 
@@ -9,13 +9,6 @@ interface StepFloorPlanProps {
 }
 
 const ONBOARDING_TEMPLATES = TEMPLATES.filter((t) => t.name !== "Blank");
-
-function templateIdFromName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function autoSelectSize(tableCount: number): string {
   if (tableCount <= 8) return "cozy";
@@ -271,8 +264,9 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
       <div style={leftPanelStyle}>
         {/* Table count input */}
         <div>
-          <p style={sectionLabelStyle}>How many tables?</p>
+          <label htmlFor="table-count" style={sectionLabelStyle}>How many tables?</label>
           <input
+            id="table-count"
             type="number"
             min={1}
             placeholder="e.g. 12"
@@ -284,8 +278,9 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
 
         {/* Seat count input */}
         <div>
-          <p style={sectionLabelStyle}>How many seats?</p>
+          <label htmlFor="seat-count" style={sectionLabelStyle}>How many seats?</label>
           <input
+            id="seat-count"
             type="number"
             min={1}
             placeholder="e.g. 48"
@@ -389,7 +384,17 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
 
       {/* Right panel */}
       <div style={rightPanelStyle}>
-        <p style={sectionLabelStyle}>Preview</p>
+        <div>
+          <p style={sectionLabelStyle}>Preview</p>
+          <p style={{
+            margin: "2px 0 0",
+            fontFamily: "var(--rialto-font-sans, system-ui)",
+            fontSize: "var(--rialto-text-xs, 11px)",
+            color: "var(--rialto-text-tertiary)",
+          }}>
+            You can customize this later in the editor
+          </p>
+        </div>
 
         {previewPayload !== null ? (
           <>
