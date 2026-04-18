@@ -128,6 +128,23 @@ export async function updateTenant(
     .run();
 }
 
+export async function deleteVenue(
+  db: D1Database,
+  tenantId: string,
+): Promise<boolean> {
+  const results = await db.batch([
+    db.prepare("DELETE FROM floor_plans WHERE tenant_id = ?").bind(tenantId),
+    db.prepare("DELETE FROM tenant_members WHERE tenant_id = ?").bind(tenantId),
+    db.prepare("DELETE FROM roles WHERE tenant_id = ? AND is_system = 0").bind(tenantId),
+    db.prepare("DELETE FROM venue_themes WHERE tenant_id = ?").bind(tenantId),
+    db.prepare("DELETE FROM tenants WHERE id = ?").bind(tenantId),
+  ]);
+
+  // Last result is the tenants delete — check if a row was actually removed
+  const tenantResult = results[results.length - 1];
+  return (tenantResult?.meta?.changes ?? 0) > 0;
+}
+
 export async function updateVenueTheme(
   db: D1Database,
   tenantId: string,

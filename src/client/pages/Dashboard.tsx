@@ -4,6 +4,7 @@ import { motion, type MotionStyle } from "framer-motion";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 import { useAuth } from "../hooks/useAuth";
 import { VenueThemeProvider } from "../providers/VenueTheme";
+import { DeleteVenueDialog } from "../features/venues/components/DeleteVenueDialog";
 import type { VenueWithTheme } from "@shared/types";
 
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
@@ -197,7 +198,26 @@ function SkeletonBlock({ style }: { readonly style: React.CSSProperties }) {
   );
 }
 
-function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
+const deleteVenueLinkStyle: React.CSSProperties = {
+  fontFamily: "var(--rialto-font-sans, system-ui)",
+  fontSize: "var(--rialto-text-xs, 12px)",
+  color: "var(--rialto-error, #e07070)",
+  background: "transparent",
+  border: "none",
+  padding: "6px 10px",
+  cursor: "pointer",
+  textAlign: "left" as const,
+  borderRadius: "var(--rialto-radius-sharp, 6px)",
+  marginTop: "auto",
+};
+
+function DashboardContent({
+  data,
+  onDeleteVenue,
+}: {
+  readonly data: VenueWithTheme;
+  readonly onDeleteVenue: () => void;
+}) {
   const { venue, theme } = data;
   const accent = theme.accent ?? DEFAULT_ACCENT;
   const initial = venue.name.charAt(0).toUpperCase();
@@ -243,6 +263,16 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
               path={item.path}
             />
           ))}
+
+          <motion.button
+            type="button"
+            variants={fadeUp}
+            transition={spring}
+            style={ms(deleteVenueLinkStyle)}
+            onClick={onDeleteVenue}
+          >
+            Delete Venue
+          </motion.button>
         </motion.nav>
 
         <main id="main-content">
@@ -283,8 +313,14 @@ function DashboardContent({ data }: { readonly data: VenueWithTheme }) {
 
 export function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<VenueWithTheme | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const handleOpenDelete = useCallback(() => setShowDeleteDialog(true), []);
+  const handleCloseDelete = useCallback(() => setShowDeleteDialog(false), []);
+  const handleDeleted = useCallback(() => navigate("/"), [navigate]);
 
   useEffect(() => {
     if (!user?.tenantId) return;
@@ -359,5 +395,16 @@ export function Dashboard() {
     );
   }
 
-  return <DashboardContent data={data} />;
+  return (
+    <>
+      <DashboardContent data={data} onDeleteVenue={handleOpenDelete} />
+      <DeleteVenueDialog
+        venueName={data.venue.name}
+        tenantId={user!.tenantId!}
+        open={showDeleteDialog}
+        onClose={handleCloseDelete}
+        onDeleted={handleDeleted}
+      />
+    </>
+  );
 }
