@@ -132,6 +132,7 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 
 ## Conventions
 
+- Forms use `react-hook-form` + `@hookform/resolvers/zod` with shared Zod schemas. Use `Controller` for Rialto components, `mode: "onTouched"`, sync to parent via `watch()` subscription.
 - All types use `readonly` for immutability
 - Use `nanoid()` for all ID generation
 - Domain errors in services, HTTP mapping in routes
