@@ -9,6 +9,7 @@ import { StepVenueInfo } from "../features/onboarding/components/StepVenueInfo";
 import { StepLocation } from "../features/onboarding/components/StepLocation";
 import { StepLogo } from "../features/onboarding/components/StepLogo";
 import { StepBrand } from "../features/onboarding/components/StepBrand";
+import { StepFloorPlan } from "../features/onboarding/components/StepFloorPlan";
 import { StepWelcome } from "../features/onboarding/components/StepWelcome";
 import { noiseOverlayStyle } from "../styles/noise";
 
@@ -17,6 +18,7 @@ const STEP_TITLES = [
   "Where are you located?",
   "Add your logo",
   "Your brand",
+  "Design your floor plan",
   "Welcome",
 ];
 
@@ -111,7 +113,7 @@ const slideVariants = {
 
 export function Onboarding() {
   const { user, loading } = useAuth();
-  const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand, submitStart, submitSuccess, submitError } = useOnboarding();
+  const { state, next, back, setVenueInfo, setLocation, setLogoResult, setBrand, setFloorPlan, submitStart, submitSuccess, submitError } = useOnboarding();
   const navigate = useNavigate();
   const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
 
@@ -129,6 +131,7 @@ export function Onboarding() {
           location,
           brand,
           logoUrl: logoResult?.logoUrl ?? null,
+          floorPlan: state.floorPlan ?? undefined,
         }),
       });
       const body = await res.json() as { ok: boolean; error?: string };
@@ -165,7 +168,7 @@ export function Onboarding() {
   }
 
   const { currentStep } = state;
-  const isLastStep = currentStep === 5;
+  const isLastStep = currentStep === 6;
 
   // Determine if Continue should be enabled
   const canAdvance = (() => {
@@ -178,6 +181,8 @@ export function Onboarding() {
         return true; // Logo is optional
       case 4:
         return Boolean(state.brand?.accent);
+      case 5:
+        return true; // Floor plan is optional
       default:
         return true;
     }
@@ -215,7 +220,7 @@ export function Onboarding() {
   const glowOpacity = currentStep >= 4 ? 0.1 : 0.06;
 
   return (
-    <main id="main-content" style={pageStyle} data-theme="dark" aria-label={`Onboarding step ${currentStep} of 5: ${title}`}>
+    <main id="main-content" style={pageStyle} data-theme="dark" aria-label={`Onboarding step ${currentStep} of 6: ${title}`}>
       {/* Ambient glow that shifts with accent color */}
       <div
         aria-hidden="true"
@@ -247,7 +252,7 @@ export function Onboarding() {
             exit={{ opacity: 0, y: state.direction > 0 ? -8 : 8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <div style={stepLabelStyle}>Step {currentStep} of 5</div>
+            <div style={stepLabelStyle}>Step {currentStep} of 6</div>
             <h1 style={stepTitleStyle}>{title}</h1>
           </motion.div>
         </AnimatePresence>
@@ -290,11 +295,18 @@ export function Onboarding() {
               />
             )}
             {currentStep === 5 && (
+              <StepFloorPlan
+                data={state.floorPlan}
+                onChange={setFloorPlan}
+              />
+            )}
+            {currentStep === 6 && (
               <StepWelcome
                 venueName={state.venueInfo?.name ?? "Your Venue"}
                 accent={state.brand?.accent ?? "#c49a2a"}
                 logoUrl={state.logoResult?.logoUrl ?? null}
                 cuisines={state.venueInfo?.cuisines ?? []}
+                floorPlan={state.floorPlan}
                 isSubmitting={state.isSubmitting}
                 onEnter={handleSubmit}
               />
@@ -345,7 +357,7 @@ export function Onboarding() {
               type="button"
               {...(canAdvance ? { whileHover: { boxShadow: `0 4px 24px ${glowColor}60` }, whileTap: { scale: 0.97 } } : {})}
             >
-              {currentStep === 3 && !state.logoResult ? "Skip" : "Continue"}
+              {(currentStep === 3 && !state.logoResult) || (currentStep === 5 && !state.floorPlan) ? "Skip" : "Continue"}
             </motion.button>
           )}
         </div>

@@ -3,6 +3,7 @@ import {
   onboardingReducer,
   initialState,
 } from "../hooks/useOnboarding";
+import type { FloorPlanSelection } from "../hooks/useOnboarding";
 import type { VenueInfoInput, VenueLocationInput } from "@shared/schemas";
 
 describe("onboardingReducer", () => {
@@ -16,10 +17,10 @@ describe("onboardingReducer", () => {
     expect(next.direction).toBe(1);
   });
 
-  it("does not advance past step 5", () => {
-    const atStep5 = { ...initialState, currentStep: 5 };
-    const result = onboardingReducer(atStep5, { type: "NEXT" });
-    expect(result.currentStep).toBe(5);
+  it("does not advance past step 6", () => {
+    const atStep6 = { ...initialState, currentStep: 6 };
+    const result = onboardingReducer(atStep6, { type: "NEXT" });
+    expect(result.currentStep).toBe(6);
   });
 
   it("BACK goes to previous step with direction -1", () => {
@@ -106,5 +107,35 @@ describe("onboardingReducer", () => {
     const result = onboardingReducer(frozen, { type: "NEXT" });
     expect(result).not.toBe(frozen);
     expect(result.currentStep).toBe(2);
+  });
+
+  it("SET_FLOOR_PLAN sets floor plan selection", () => {
+    const selection: FloorPlanSelection = {
+      templateId: "fine-dining",
+      size: "standard",
+      tableCount: 16,
+      seatCount: 64,
+    };
+    const result = onboardingReducer(initialState, {
+      type: "SET_FLOOR_PLAN",
+      payload: selection,
+    });
+    expect(result.floorPlan).toEqual(selection);
+  });
+
+  it("SET_FLOOR_PLAN with null clears selection", () => {
+    const withPlan = {
+      ...initialState,
+      floorPlan: { templateId: "fine-dining", size: "standard" } as FloorPlanSelection,
+    };
+    const result = onboardingReducer(withPlan, {
+      type: "SET_FLOOR_PLAN",
+      payload: null,
+    });
+    expect(result.floorPlan).toBeNull();
+  });
+
+  it("initial state has floorPlan as null", () => {
+    expect(initialState.floorPlan).toBeNull();
   });
 });

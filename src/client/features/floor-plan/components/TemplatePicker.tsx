@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { TEMPLATES, type FloorPlanTemplate } from "../templates";
+import { TEMPLATES, TEMPLATE_SIZES, type FloorPlanTemplate } from "../templates";
 
 const overlayStyle: React.CSSProperties = {
   position: "fixed",
@@ -115,12 +115,6 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
 };
 
-const SIZES = [
-  { label: "Cozy", sub: "~1,000 sq ft", width: 800, height: 600 },
-  { label: "Standard", sub: "~2,000 sq ft", width: 1200, height: 800 },
-  { label: "Spacious", sub: "~3,500 sq ft", width: 1600, height: 1000 },
-  { label: "Grand", sub: "~5,000 sq ft", width: 2000, height: 1200 },
-] as const;
 
 interface TemplateCardProps {
   readonly template: FloorPlanTemplate;
@@ -192,7 +186,7 @@ export function TemplatePicker({ accentColor, onSelect, onClose }: TemplatePicke
 
   const handleCreate = useCallback(() => {
     const template = TEMPLATES[selectedIdx]!;
-    const size = SIZES[sizeIdx]!;
+    const size = TEMPLATE_SIZES[sizeIdx]!;
     onSelect(template, size.width, size.height);
   }, [selectedIdx, sizeIdx, onSelect]);
 
@@ -223,7 +217,7 @@ export function TemplatePicker({ accentColor, onSelect, onClose }: TemplatePicke
         <div>
           <div style={sizeLabelStyle}>Floor Plan Size</div>
           <div style={{ ...sizeRowStyle, marginTop: 8 }}>
-            {SIZES.map((size, i) => {
+            {TEMPLATE_SIZES.map((size, i) => {
               const active = sizeIdx === i;
               return (
                 <button

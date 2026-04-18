@@ -43,10 +43,18 @@ export const venueBrandSchema = z.object({
 });
 export type VenueBrandInput = z.infer<typeof venueBrandSchema>;
 
+export const floorPlanSelectionSchema = z.object({
+  templateId: z.string().min(1),
+  size: z.string().min(1),
+  tableCount: z.number().int().min(1).optional(),
+  seatCount: z.number().int().min(1).optional(),
+});
+
 export const onboardingCompleteSchema = z.object({
   venueInfo: venueInfoSchema,
   location: venueLocationSchema,
   brand: venueBrandSchema,
   logoUrl: z.string().nullable().default(null),
+  floorPlan: floorPlanSelectionSchema.optional(),
 });
 export type OnboardingCompleteInput = z.infer<typeof onboardingCompleteSchema>;

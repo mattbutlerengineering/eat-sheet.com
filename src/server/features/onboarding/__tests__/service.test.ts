@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock dependencies before importing the service
 vi.mock("@server/features/venues/color-extraction", () => ({
@@ -39,10 +39,26 @@ vi.mock("nanoid", () => ({
   nanoid: vi.fn(() => "test-nanoid"),
 }));
 
+vi.mock("@server/features/floor-plans/repository", () => ({
+  createFloorPlan: vi.fn(async () => ({
+    id: "fp-1",
+    tenant_id: "t-1",
+    name: "Floor 1",
+    sort_order: 1,
+    canvas_width: 1200,
+    canvas_height: 800,
+    layout_data: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  })),
+  saveFloorPlan: vi.fn(async () => {}),
+}));
+
 import { handleLogoUpload, completeOnboarding } from "../service";
 import { createVenueWithTheme } from "@server/features/venues/repository";
 import { generateSlug } from "@server/features/venues/service";
 import { findUserByEmail } from "@server/features/auth/repository";
+import { createFloorPlan, saveFloorPlan } from "@server/features/floor-plans/repository";
 
 function mockR2(): R2Bucket {
   return {
@@ -59,10 +75,10 @@ function mockR2(): R2Bucket {
 function mockDb(ownerRoleId: string | null = "role_owner") {
   const stmt = {
     bind: vi.fn(() => stmt),
-    first: vi.fn(async () =>
-      ownerRoleId ? { id: ownerRoleId } : null,
-    ),
-    run: vi.fn(async () => ({ success: true })),
+    first: vi.fn()
+      .mockResolvedValueOnce(ownerRoleId ? { id: ownerRoleId } : null)
+      .mockResolvedValue({ id: "t-1" }),
+    run: vi.fn(async () => ({ success: true, meta: { changes: 1 } })),
     all: vi.fn(async () => ({
       results: [
         {
@@ -111,6 +127,10 @@ describe("handleLogoUpload", () => {
 });
 
 describe("completeOnboarding", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   const validInput = {
     venueInfo: {
       name: "Verde Kitchen",
@@ -180,5 +200,51 @@ describe("completeOnboarding", () => {
     await expect(
       completeOnboarding(db, "user-1", "test@test.com", validInput, "secret"),
     ).rejects.toThrow("Owner role not found");
+  });
+
+  it("creates floor plan when floorPlan is provided", async () => {
+    const db = mockDb();
+    const inputWithFloorPlan = {
+      ...validInput,
+      floorPlan: {
+        templateId: "fine-dining",
+        size: "standard",
+        tableCount: 16,
+        seatCount: 64,
+      },
+    };
+
+    await completeOnboarding(
+      db,
+      "user-1",
+      "test@test.com",
+      inputWithFloorPlan,
+      "secret",
+    );
+
+    expect(createFloorPlan).toHaveBeenCalledWith(db, expect.any(String), "Floor 1");
+    expect(saveFloorPlan).toHaveBeenCalledWith(
+      db,
+      expect.objectContaining({
+        planId: "fp-1",
+        canvasWidth: 1200,
+        canvasHeight: 800,
+      }),
+    );
+  });
+
+  it("does not create floor plan when floorPlan is absent", async () => {
+    const db = mockDb();
+
+    await completeOnboarding(
+      db,
+      "user-1",
+      "test@test.com",
+      validInput,
+      "secret",
+    );
+
+    expect(createFloorPlan).not.toHaveBeenCalled();
+    expect(saveFloorPlan).not.toHaveBeenCalled();
   });
 });

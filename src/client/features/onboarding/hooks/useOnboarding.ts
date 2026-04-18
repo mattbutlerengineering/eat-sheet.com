@@ -5,6 +5,13 @@ import type {
   VenueBrandInput,
 } from "@shared/schemas";
 
+export interface FloorPlanSelection {
+  readonly templateId: string;
+  readonly size: string;
+  readonly tableCount?: number | undefined;
+  readonly seatCount?: number | undefined;
+}
+
 export interface OnboardingState {
   readonly currentStep: number;
   readonly direction: 1 | -1;
@@ -15,6 +22,7 @@ export interface OnboardingState {
     extractedColors: readonly string[];
   } | null;
   readonly brand: VenueBrandInput | null;
+  readonly floorPlan: FloorPlanSelection | null;
   readonly isSubmitting: boolean;
   readonly error: string | null;
 }
@@ -29,6 +37,7 @@ type OnboardingAction =
       payload: { logoUrl: string; extractedColors: readonly string[] };
     }
   | { type: "SET_BRAND"; payload: VenueBrandInput }
+  | { type: "SET_FLOOR_PLAN"; payload: FloorPlanSelection | null }
   | { type: "SUBMIT_START" }
   | { type: "SUBMIT_SUCCESS" }
   | { type: "SUBMIT_ERROR"; payload: string };
@@ -40,11 +49,12 @@ export const initialState: OnboardingState = {
   location: null,
   logoResult: null,
   brand: null,
+  floorPlan: null,
   isSubmitting: false,
   error: null,
 };
 
-const MAX_STEP = 5;
+const MAX_STEP = 6;
 const MIN_STEP = 1;
 
 export function onboardingReducer(
@@ -72,6 +82,8 @@ export function onboardingReducer(
       return { ...state, logoResult: action.payload };
     case "SET_BRAND":
       return { ...state, brand: action.payload };
+    case "SET_FLOOR_PLAN":
+      return { ...state, floorPlan: action.payload };
     case "SUBMIT_START":
       return { ...state, isSubmitting: true, error: null };
     case "SUBMIT_SUCCESS":
@@ -100,6 +112,8 @@ export function useOnboarding() {
     }) => dispatch({ type: "SET_LOGO_RESULT", payload }),
     setBrand: (payload: VenueBrandInput) =>
       dispatch({ type: "SET_BRAND", payload }),
+    setFloorPlan: (payload: FloorPlanSelection | null) =>
+      dispatch({ type: "SET_FLOOR_PLAN", payload }),
     submitStart: () => dispatch({ type: "SUBMIT_START" }),
     submitSuccess: () => dispatch({ type: "SUBMIT_SUCCESS" }),
     submitError: (message: string) =>
