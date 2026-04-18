@@ -77,10 +77,10 @@ const sectionLabelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "var(--rialto-input-bg, rgba(255,255,255,0.06))",
-  border: "1px solid var(--rialto-border)",
+  background: "var(--rialto-input-bg, #2a2520)",
+  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
   borderRadius: "var(--rialto-radius-sm, 6px)",
-  color: "var(--rialto-text-primary)",
+  color: "var(--rialto-text-primary, #e8e2d8)",
   fontFamily: "var(--rialto-font-sans, system-ui)",
   fontSize: "var(--rialto-text-sm, 14px)",
   padding: "var(--rialto-space-sm, 10px) var(--rialto-space-md, 12px)",
