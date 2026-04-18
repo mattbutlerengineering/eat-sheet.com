@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@mattbutlerengineering/rialto':
-        specifier: ^0.1.4
-        version: 0.1.4(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        specifier: ^0.1.7
+        version: 0.1.7(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@sentry/cloudflare':
         specifier: ^10.48.0
         version: 10.48.0(@cloudflare/workers-types@4.20260414.1)
@@ -914,8 +914,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@mattbutlerengineering/rialto@0.1.4':
-    resolution: {integrity: sha512-5ns+6euEfnvKjlofr1b3TjBD9ljXTd7sDNMOiaXDyUn/lMfxPsx6Ap0UXqeF2zucody4vl+8CsOkQUR7NFplcA==, tarball: https://npm.pkg.github.com/download/@mattbutlerengineering/rialto/0.1.4/53ebe0b1253c09dac6f4ff4cbd5a9238d1aa005e}
+  '@mattbutlerengineering/rialto@0.1.7':
+    resolution: {integrity: sha512-qcLB3NPLjNPa+ddqREY0aBQj+EM6IEPNqF8f6aLcrUrjx3+DwaWQC9iVQytYFTqfUC61h+Xcvg4UZPC+fvsHVA==, tarball: https://npm.pkg.github.com/download/@mattbutlerengineering/rialto/0.1.7/5b9603ba81fa2936a549d63146517356d5281e15}
     peerDependencies:
       framer-motion: ^12.0.0
       lucide-react: '>=0.400.0'
@@ -3457,7 +3457,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mattbutlerengineering/rialto@0.1.4(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+  '@mattbutlerengineering/rialto@0.1.7(framer-motion@12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(lucide-react@0.468.0(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
       framer-motion: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       lucide-react: 0.468.0(react@19.2.5)
