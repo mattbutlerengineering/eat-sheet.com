@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { label: "Reservations", active: false, path: null },
   { label: "Waitlist", active: false, path: null },
   { label: "Floor Plan", active: false, path: "/floor-plan" },
-  { label: "Guests", active: false, path: null },
+  { label: "Guests", active: false, path: "/guests" },
 ] as const;
 
 const STAT_CARDS = [
