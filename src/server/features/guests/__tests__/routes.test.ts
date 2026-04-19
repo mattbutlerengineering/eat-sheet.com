@@ -121,6 +121,7 @@ describe("GET /api/t/:tenantId/guests", () => {
     expect(body.data).toHaveLength(1);
     expect(body.meta).toEqual({ total: 1, page: 1, limit: 50 });
     const guest = (body.data as Record<string, unknown>[])[0];
+    if (!guest) throw new Error("Expected guest in response");
     expect(guest.name).toBe("Sarah Johnson");
     expect(guest.tags).toEqual(["regular", "vip"]);
     expect(guest.visitCount).toBe(5);
