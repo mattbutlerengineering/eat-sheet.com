@@ -24,3 +24,4 @@ export type {
   SaveFloorPlanPayload,
 } from "./floor-plan";
 export { TABLE_SHAPES, TABLE_SHAPE_LABELS } from "./floor-plan";
+export type { Guest } from "./guest";

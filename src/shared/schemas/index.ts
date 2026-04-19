@@ -20,3 +20,5 @@ export type {
   RenameFloorPlanInput,
   SaveFloorPlanInput,
 } from "./floor-plan";
+export { createGuestSchema, updateGuestSchema } from "./guest";
+export type { CreateGuestInput, UpdateGuestInput } from "./guest";
