@@ -132,7 +132,8 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 
 ## Conventions
 
-- Forms use `react-hook-form` + `@hookform/resolvers/zod` with shared Zod schemas. Use `Controller` for Rialto components, `mode: "onTouched"`, sync to parent via `watch()` subscription.
+- Forms use `react-hook-form` + `@hookform/resolvers/zod` with shared Zod schemas. Use `Controller` for Rialto components, `mode: "onTouched"`, sync to parent via `watch()` subscription. `@hookform/resolvers` v5 type-mismatches on Zod schemas with `.default()` — cast `zodResolver(schema) as any` when needed.
+- Zod `updateSchema.partial()` infers `string | undefined` for optional fields — cast `parsed.data as { readonly name?: string; ... }` when passing to repository under `exactOptionalPropertyTypes`
 - All types use `readonly` for immutability
 - Use `nanoid()` for all ID generation
 - Domain errors in services, HTTP mapping in routes
@@ -158,6 +159,8 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - All pages use dark theme: `data-theme="dark"` on outer container
 - Rialto Select label is a `<span>`, not `<label>` — clicking it doesn't focus the combobox. `useSelectLabelFocus` hook provides a workaround. Fix upstream: change to `<label htmlFor>` in Rialto source (repo archived)
 - Rialto Select without `label` prop renders a combobox with no accessible name — always pass `label` prop
+- Rialto `Input.error` is `boolean`, not `string` — display error messages in a separate `<div role="alert">`, pass `error={!!errors.field}` to Input
+- Rialto `Input.onChange` is `ChangeEventHandler<HTMLInputElement>` — with react-hook-form Controller, wrap as `onChange={(e) => field.onChange(e.target.value)}`
 
 ## Floor Plan Editor
 
@@ -202,3 +205,12 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - Logo fallback letters use `role="img"` + `aria-label`
 - axe-core tests in `e2e/accessibility.spec.ts` — WCAG 2.1 AA, fails on critical/serious
 - Lighthouse audits in `e2e/lighthouse.spec.ts` — performance, a11y, best practices, SEO
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@mattbutlerengineering/rialto": "^0.1.7",
+    "@mattbutlerengineering/rialto": "^0.1.11",
     "@sentry/cloudflare": "^10.48.0",
     "@sentry/react": "^10.48.0",
     "arctic": "^2.0.0",
