@@ -32,6 +32,16 @@
             "timeout": 15000
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_FILE_PATHS\" | grep -qE 'src/server/db/migrations/.*\\.sql' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"REMINDER: Mirror this migration into src/server/db/schema.sql (the canonical schema for new tenants). The two files must stay in sync.\"}}' || true",
+            "timeout": 3000
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -41,6 +51,16 @@
           {
             "type": "command",
             "command": "echo \"$CLAUDE_FILE_PATHS\" | grep -q 'src/server/db/migrations/' && echo 'BLOCKED: Migration already applied to production. Create a new migration file instead.' && exit 1 || true",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qE '(^| )git add (-A|--all|\\.)( |$)' && echo 'BLOCKED: stage specific paths instead of `git add -A` or `git add .` (per global preference in ~/.claude/CLAUDE.md). Pass explicit filenames to git add.' && exit 1 || true",
             "timeout": 3000
           }
         ]
