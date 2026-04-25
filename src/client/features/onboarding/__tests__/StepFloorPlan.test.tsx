@@ -51,4 +51,70 @@ describe("StepFloorPlan", () => {
     expect(screen.getByPlaceholderText("e.g. 12")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("e.g. 48")).toBeInTheDocument();
   });
+
+  it("preserves user's size selection when table count changes afterward", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    fireEvent.click(screen.getByText("Fine Dining"));
+    onChange.mockClear();
+    // User explicitly picks Spacious
+    fireEvent.click(screen.getByText("Spacious"));
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: "spacious" }),
+    );
+    // Then types a table count that would otherwise auto-pick "cozy"
+    fireEvent.change(screen.getByPlaceholderText("e.g. 12"), {
+      target: { value: "4" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: "spacious", tableCount: 4 }),
+    );
+  });
+
+  it("auto-suggests size from table count only before user picks one", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    fireEvent.click(screen.getByText("Fine Dining"));
+    onChange.mockClear();
+    fireEvent.change(screen.getByPlaceholderText("e.g. 12"), {
+      target: { value: "20" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: "spacious", tableCount: 20 }),
+    );
+  });
+
+  it("clamps absurd table counts", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    fireEvent.click(screen.getByText("Fine Dining"));
+    onChange.mockClear();
+    fireEvent.change(screen.getByPlaceholderText("e.g. 12"), {
+      target: { value: "999999" },
+    });
+    const last = onChange.mock.calls.at(-1)?.[0] as { tableCount: number };
+    expect(last.tableCount).toBe(500);
+  });
+
+  it("treats preloaded size as a user choice (no auto-override on resume)", () => {
+    const selection: FloorPlanSelection = {
+      templateId: "fine-dining",
+      size: "grand",
+    };
+    render(<StepFloorPlan data={selection} onChange={onChange} />);
+    onChange.mockClear();
+    fireEvent.change(screen.getByPlaceholderText("e.g. 12"), {
+      target: { value: "4" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: "grand", tableCount: 4 }),
+    );
+  });
+
+  it("exposes labelled groups for template and size pickers", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    expect(
+      screen.getByRole("group", { name: /choose a template/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: /room size/i }),
+    ).toBeInTheDocument();
+  });
 });
