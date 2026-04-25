@@ -24,17 +24,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": {
-          "tool": [
-            "Edit",
-            "Write"
-          ],
-          "filePattern": "*.{ts,tsx}"
-        },
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "npx tsc --noEmit --pretty 2>&1 | head -5",
+            "command": "echo \"$CLAUDE_FILE_PATHS\" | grep -qE '\\.tsx?\"' && npx tsc --noEmit --pretty 2>&1 | head -5 || true",
             "timeout": 15000
           }
         ]
@@ -42,16 +36,11 @@
     ],
     "PreToolUse": [
       {
-        "matcher": {
-          "tool": [
-            "Edit"
-          ],
-          "filePattern": "src/server/db/migrations/*.sql"
-        },
+        "matcher": "Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'BLOCKED: Migration already applied to production. Create a new migration file instead.' && exit 1",
+            "command": "echo \"$CLAUDE_FILE_PATHS\" | grep -q 'src/server/db/migrations/' && echo 'BLOCKED: Migration already applied to production. Create a new migration file instead.' && exit 1 || true",
             "timeout": 3000
           }
         ]
