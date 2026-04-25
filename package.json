@@ -24,7 +24,7 @@
     "@sentry/react": "^10.48.0",
     "arctic": "^2.0.0",
     "framer-motion": "^12.38.0",
-    "hono": "^4.0.0",
+    "hono": "^4.12.14",
     "jpeg-js": "^0.4.4",
     "konva": "^10.2.5",
     "lucide-react": "^0.468.0",
