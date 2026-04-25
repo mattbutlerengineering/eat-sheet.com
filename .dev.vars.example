@@ -1,0 +1,23 @@
+# Local-only secrets for `wrangler dev` (gitignored as `.dev.vars`).
+# Copy this file to `.dev.vars` and fill in real values:
+#
+#   cp .dev.vars.example .dev.vars
+#
+# In production these same names are set via `wrangler secret put <NAME>`.
+# Do not commit `.dev.vars` — it's gitignored.
+
+# Random 32+ char string. Generate with: openssl rand -hex 32
+JWT_SECRET=replace-me-with-32-plus-random-hex
+
+# Google OAuth credentials — create at https://console.cloud.google.com/
+# (APIs & Services -> Credentials -> Create OAuth client ID, Web application).
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# Local dev redirect — must match exactly in the Google console's
+# "Authorized redirect URIs". Production is https://eat-sheet.com/api/auth/callback.
+GOOGLE_REDIRECT_URI=http://localhost:5173/api/auth/callback
+
+# Sentry DSN — get from https://sentry.io/settings/<org>/projects/eat-sheet/keys/
+# Leave blank locally if you don't want to report errors to Sentry during dev.
+SENTRY_DSN=
