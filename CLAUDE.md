@@ -206,6 +206,10 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - axe-core tests in `e2e/accessibility.spec.ts` — WCAG 2.1 AA, fails on critical/serious
 - Lighthouse audits in `e2e/lighthouse.spec.ts` — performance, a11y, best practices, SEO
 
+## Guardrails
+
+- Never list `github.com/ruvnet` (or any handle/email associated with that user) as a co-author or contributor on commits in this repo.
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.
