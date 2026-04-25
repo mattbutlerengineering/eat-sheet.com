@@ -132,7 +132,6 @@ function buildRgbaPng(width: number, height: number, rgba: Uint8Array): Uint8Arr
 
   // Deflate the raw data using pako (available via upng-js's dependency)
   // For tests we use Node's zlib synchronously
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const zlib = require("zlib") as typeof import("zlib");
   const compressed = zlib.deflateSync(raw);
   const idat = new Uint8Array(compressed.buffer, compressed.byteOffset, compressed.byteLength);

@@ -159,6 +159,7 @@ export function StepLogo({ logoResult, uploadError, onUpload }: StepLogoProps) {
           }}
           aria-label="Upload logo"
         >
+          {/* eslint-disable-next-line no-restricted-syntax -- Hidden file input drives a custom click target; Rialto ImageUpload would replace the surrounding UX */}
           <input
             ref={fileInputRef}
             type="file"

@@ -287,6 +287,7 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
 
       <div>
         <label style={labelStyle}>Label</label>
+        {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
         <input
           type="text"
           value={table.label}
@@ -308,6 +309,7 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
       <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)" }}>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Min Seats</label>
+          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
           <input
             type="number"
             value={table.minCapacity}
@@ -319,6 +321,7 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
         </div>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Max Seats</label>
+          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
           <input
             type="number"
             value={table.maxCapacity}
@@ -384,6 +387,7 @@ function SectionPanel({ section }: SectionPanelProps) {
 
       <div>
         <label style={labelStyle}>Name</label>
+        {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
         <input
           type="text"
           value={section.name}
@@ -396,6 +400,7 @@ function SectionPanel({ section }: SectionPanelProps) {
       <div>
         <label style={labelStyle}>Color</label>
         <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)", alignItems: "center" }}>
+          {/* eslint-disable-next-line no-restricted-syntax -- Rialto has no color picker; native <input type="color"> is correct here */}
           <input
             type="color"
             value={section.color}
@@ -411,6 +416,7 @@ function SectionPanel({ section }: SectionPanelProps) {
               flexShrink: 0,
             }}
           />
+          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate hex text input to Rialto Input */}
           <input
             type="text"
             value={section.color}
@@ -497,6 +503,7 @@ function FloorPlanSettingsPanel() {
       <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)" }}>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Width</label>
+          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
           <input
             type="number"
             value={state.canvasWidth}
@@ -509,6 +516,7 @@ function FloorPlanSettingsPanel() {
         </div>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Height</label>
+          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
           <input
             type="number"
             value={state.canvasHeight}

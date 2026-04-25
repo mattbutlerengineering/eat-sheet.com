@@ -220,6 +220,7 @@ export function DeleteVenueDialog({
               <label htmlFor="confirm-venue-name" style={labelStyle}>
                 Type the venue name to confirm
               </label>
+              {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
               <input
                 ref={inputRef}
                 id="confirm-venue-name"

@@ -108,7 +108,6 @@ const errorStyle: React.CSSProperties = {
 
 export function StepLocation({ data, onChange }: StepLocationProps) {
   const { control, watch, formState: { errors } } = useForm<VenueLocationInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(venueLocationSchema) as any,
     defaultValues: {
       addressLine1: data?.addressLine1 ?? "",

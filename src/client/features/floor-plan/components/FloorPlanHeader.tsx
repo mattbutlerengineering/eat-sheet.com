@@ -168,6 +168,7 @@ function TabButton({
 
   if (editing) {
     return (
+      // eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate inline rename input to Rialto Input
       <input
         type="text"
         value={editValue}

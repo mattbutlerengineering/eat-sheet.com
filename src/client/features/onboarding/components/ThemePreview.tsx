@@ -118,6 +118,7 @@ export function ThemePreview({ accent, venueName }: ThemePreviewProps) {
         >
           Sample field
         </div>
+        {/* eslint-disable-next-line no-restricted-syntax -- Decorative readonly preview of theme input styles, not a real form field */}
         <input
           readOnly
           tabIndex={-1}

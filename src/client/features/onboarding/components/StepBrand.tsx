@@ -118,7 +118,6 @@ export function StepBrand({
       const source = extractedColors.length > 0 ? "extracted" : "manual";
       onChange(buildBrand(accent, source));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function selectColor(color: string, source: "extracted" | "manual") {
@@ -158,6 +157,7 @@ export function StepBrand({
         <div>
           <div style={sectionLabelStyle}>Custom color</div>
           <div style={colorPickerRowStyle}>
+            {/* eslint-disable-next-line no-restricted-syntax -- Rialto has no color picker; native <input type="color"> is correct here */}
             <input
               type="color"
               value={accent}
