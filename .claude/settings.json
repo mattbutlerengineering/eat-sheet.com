@@ -34,6 +34,16 @@
         ]
       },
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_FILE_PATHS\" | grep -qE 'src/client/.*\\.tsx?(\"|$)' && pnpm exec eslint $CLAUDE_FILE_PATHS 2>&1 | tail -10 || true",
+            "timeout": 15000
+          }
+        ]
+      },
+      {
         "matcher": "Write",
         "hooks": [
           {
