@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { motion, type MotionStyle } from "framer-motion";
+import { AnimatePresence, motion, type MotionStyle } from "framer-motion";
 import { Input } from "@mattbutlerengineering/rialto";
 
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
@@ -343,9 +343,20 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
                   onClick={() => handleTemplateSelect(meta.id)}
                   style={templateCardStyle(isSelected)}
                 >
-                  {isRecommended && (
-                    <span style={recommendedBadgeStyle}>Recommended</span>
-                  )}
+                  <AnimatePresence>
+                    {isRecommended && (
+                      <motion.span
+                        key="recommended"
+                        style={ms(recommendedBadgeStyle)}
+                        initial={{ opacity: 0, scale: 0.7, y: -2 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                      >
+                        Recommended
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                   <span
                     style={{
                       display: "block",
@@ -433,7 +444,25 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
 
         {previewPayload !== null ? (
           <>
-            <TemplateMiniPreview payload={previewPayload} height={340} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${selectedTemplateId}:${selectedSize}`}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.16, ease: "easeOut" }}
+              >
+                <TemplateMiniPreview
+                  payload={previewPayload}
+                  height={340}
+                  ariaLabel={
+                    selectedTemplate
+                      ? `${selectedTemplate.name} floor plan preview at ${selectedSize} size, ${previewPayload.tables.length} tables`
+                      : undefined
+                  }
+                />
+              </motion.div>
+            </AnimatePresence>
             {/* Summary pill */}
             <div>
               <span style={summaryPillStyle}>
@@ -469,6 +498,13 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
         )}
       </motion.div>
       <style>{`
+        .step-floor-plan button[aria-pressed="false"] {
+          transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+        .step-floor-plan button[aria-pressed="false"]:hover {
+          border-color: var(--rialto-border-strong, rgba(255,255,255,0.2));
+          background: var(--rialto-surface-raised-hover, rgba(255,255,255,0.1));
+        }
         @media (max-width: 720px) {
           .step-floor-plan { flex-direction: column; min-height: 0; }
           .step-floor-plan > div:first-child { flex: 1 1 auto; border-right: none; border-bottom: 1px solid var(--rialto-border); }

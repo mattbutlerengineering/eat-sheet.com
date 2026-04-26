@@ -3,6 +3,7 @@ import type { SaveFloorPlanPayload, SaveWallPayload } from "@shared/types/floor-
 interface TemplateMiniPreviewProps {
   readonly payload: SaveFloorPlanPayload;
   readonly height?: number | undefined;
+  readonly ariaLabel?: string | undefined;
 }
 
 function wallStyle(
@@ -33,16 +34,24 @@ function wallStyle(
 export function TemplateMiniPreview({
   payload,
   height = 300,
+  ariaLabel,
 }: TemplateMiniPreviewProps) {
   const { canvasWidth, canvasHeight, tables, sections, walls } = payload;
 
   const scaleX = 100 / canvasWidth;
   const scaleY = 100 / canvasHeight;
 
+  const label =
+    ariaLabel ??
+    `Floor plan preview with ${tables.length} table${tables.length === 1 ? "" : "s"}` +
+      (sections.length > 0
+        ? ` and ${sections.length} section${sections.length === 1 ? "" : "s"}`
+        : "");
+
   return (
     <div
       role="img"
-      aria-label="Floor plan preview"
+      aria-label={label}
       style={{
         background: "#d4cfc8",
         borderRadius: "var(--rialto-radius-default, 8px)",

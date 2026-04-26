@@ -46,6 +46,14 @@ describe("StepFloorPlan", () => {
     expect(screen.getByRole("img", { name: /floor plan preview/i })).toBeInTheDocument();
   });
 
+  it("preview aria-label includes the selected template name and size", () => {
+    const selection: FloorPlanSelection = { templateId: "fine-dining", size: "spacious" };
+    render(<StepFloorPlan data={selection} onChange={onChange} />);
+    expect(
+      screen.getByRole("img", { name: /fine dining .* spacious/i }),
+    ).toBeInTheDocument();
+  });
+
   it("renders table and seat inputs", () => {
     render(<StepFloorPlan data={null} onChange={onChange} />);
     expect(screen.getByPlaceholderText("e.g. 12")).toBeInTheDocument();
