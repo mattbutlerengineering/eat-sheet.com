@@ -40,6 +40,17 @@ describe("StepFloorPlan", () => {
     expect(screen.getByText("Recommended")).toBeInTheDocument();
   });
 
+  it("shows Recommended badge when only seat count is entered", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    fireEvent.change(screen.getByPlaceholderText("e.g. 48"), { target: { value: "60" } });
+    expect(screen.getByText("Recommended")).toBeInTheDocument();
+  });
+
+  it("does not show Recommended badge when neither count is entered", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    expect(screen.queryByText("Recommended")).not.toBeInTheDocument();
+  });
+
   it("renders preview when template selected", () => {
     const selection: FloorPlanSelection = { templateId: "fine-dining", size: "standard" };
     render(<StepFloorPlan data={selection} onChange={onChange} />);

@@ -36,14 +36,19 @@ interface TemplateMeta {
   readonly id: string;
   readonly name: string;
   readonly tableCount: number;
+  readonly totalSeats: number;
 }
 
 const TEMPLATE_META: readonly TemplateMeta[] = ONBOARDING_TEMPLATES.map(
-  (tmpl) => ({
-    id: templateIdFromName(tmpl.name),
-    name: tmpl.name,
-    tableCount: tmpl.build(STANDARD_W, STANDARD_H).tables.length,
-  }),
+  (tmpl) => {
+    const payload = tmpl.build(STANDARD_W, STANDARD_H);
+    return {
+      id: templateIdFromName(tmpl.name),
+      name: tmpl.name,
+      tableCount: payload.tables.length,
+      totalSeats: payload.tables.reduce((sum, t) => sum + t.maxCapacity, 0),
+    };
+  },
 );
 
 function autoSelectSize(tableCount: number): string {
@@ -53,14 +58,28 @@ function autoSelectSize(tableCount: number): string {
   return "grand";
 }
 
-function findRecommendedTemplate(tableCount: number | undefined): string | null {
-  if (tableCount === undefined || tableCount <= 0) return null;
+// Normalized distance: |a - b| / max(a, b). Range [0, 1]. 0 = perfect match.
+function normalizedDiff(a: number, b: number): number {
+  const m = Math.max(a, b);
+  return m === 0 ? 0 : Math.abs(a - b) / m;
+}
+
+function findRecommendedTemplate(
+  tableCount: number | undefined,
+  seatCount: number | undefined,
+): string | null {
+  const hasTables = tableCount !== undefined && tableCount > 0;
+  const hasSeats = seatCount !== undefined && seatCount > 0;
+  if (!hasTables && !hasSeats) return null;
+
   let bestId: string | null = null;
-  let bestDiff = Infinity;
+  let bestScore = Infinity;
   for (const meta of TEMPLATE_META) {
-    const diff = Math.abs(meta.tableCount - tableCount);
-    if (diff < bestDiff) {
-      bestDiff = diff;
+    let score = 0;
+    if (hasTables) score += normalizedDiff(meta.tableCount, tableCount);
+    if (hasSeats) score += normalizedDiff(meta.totalSeats, seatCount);
+    if (score < bestScore) {
+      bestScore = score;
       bestId = meta.id;
     }
   }
@@ -200,8 +219,8 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
   const sizeWasChosenByUser = useRef<boolean>(data?.size !== undefined);
 
   const recommendedId = useMemo(
-    () => findRecommendedTemplate(tableCount),
-    [tableCount],
+    () => findRecommendedTemplate(tableCount, seatCount),
+    [tableCount, seatCount],
   );
 
   const selectedTemplate = useMemo(
