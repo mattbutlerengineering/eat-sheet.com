@@ -43,11 +43,12 @@ export const venueBrandSchema = z.object({
 });
 export type VenueBrandInput = z.infer<typeof venueBrandSchema>;
 
+// Server contract: only the fields needed to instantiate a floor plan.
+// tableCount / seatCount are client-side recommendation hints and are
+// stripped before submission.
 export const floorPlanSelectionSchema = z.object({
   templateId: z.string().min(1),
   size: z.string().min(1),
-  tableCount: z.number().int().min(1).optional(),
-  seatCount: z.number().int().min(1).optional(),
 });
 
 export const onboardingCompleteSchema = z.object({

@@ -3,6 +3,7 @@ import {
   venueInfoSchema,
   venueLocationSchema,
   venueBrandSchema,
+  floorPlanSelectionSchema,
 } from "../schemas/venue";
 
 describe("venueInfoSchema", () => {
@@ -151,6 +152,50 @@ describe("venueBrandSchema", () => {
       expect(result.data.surface).toBeNull();
       expect(result.data.surfaceElevated).toBeNull();
       expect(result.data.textPrimary).toBeNull();
+    }
+  });
+});
+
+describe("floorPlanSelectionSchema", () => {
+  it("accepts the minimum server contract", () => {
+    const result = floorPlanSelectionSchema.safeParse({
+      templateId: "fine-dining",
+      size: "standard",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an empty templateId", () => {
+    const result = floorPlanSelectionSchema.safeParse({
+      templateId: "",
+      size: "standard",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects an empty size", () => {
+    const result = floorPlanSelectionSchema.safeParse({
+      templateId: "fine-dining",
+      size: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("strips client-side hint fields (tableCount, seatCount)", () => {
+    const result = floorPlanSelectionSchema.safeParse({
+      templateId: "fine-dining",
+      size: "standard",
+      tableCount: 12,
+      seatCount: 48,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({
+        templateId: "fine-dining",
+        size: "standard",
+      });
+      expect(result.data).not.toHaveProperty("tableCount");
+      expect(result.data).not.toHaveProperty("seatCount");
     }
   });
 });

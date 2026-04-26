@@ -209,8 +209,6 @@ describe("completeOnboarding", () => {
       floorPlan: {
         templateId: "fine-dining",
         size: "standard",
-        tableCount: 16,
-        seatCount: 64,
       },
     };
 

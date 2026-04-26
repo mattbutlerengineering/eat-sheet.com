@@ -131,7 +131,9 @@ export function Onboarding() {
           location,
           brand,
           logoUrl: logoResult?.logoUrl ?? null,
-          floorPlan: state.floorPlan ?? undefined,
+          floorPlan: state.floorPlan
+            ? { templateId: state.floorPlan.templateId, size: state.floorPlan.size }
+            : undefined,
         }),
       });
       const body = await res.json() as { ok: boolean; error?: string };
