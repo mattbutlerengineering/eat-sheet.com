@@ -65,6 +65,7 @@ src/
 - `pnpm test:e2e` — Playwright E2E tests (onboarding flow + accessibility + Lighthouse)
 - `pnpm test:lighthouse` — Lighthouse performance/accessibility audits only
 - `pnpm test:coverage` — Vitest with coverage report
+- `pnpm lint` — ESLint (currently enforces Rialto-only form elements in `src/client/**`)
 - `/deploy` — Skill: test → build → migration check → deploy → verify
 - `/new-feature <name>` — Skill: scaffold full feature module (routes/service/repo/types/schema/tests)
 - `/create-migration <name>` — Skill: scaffold new D1 migration with sequential numbering
@@ -161,6 +162,7 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 - Rialto Select without `label` prop renders a combobox with no accessible name — always pass `label` prop
 - Rialto `Input.error` is `boolean`, not `string` — display error messages in a separate `<div role="alert">`, pass `error={!!errors.field}` to Input
 - Rialto `Input.onChange` is `ChangeEventHandler<HTMLInputElement>` — with react-hook-form Controller, wrap as `onChange={(e) => field.onChange(e.target.value)}`
+- ESLint enforces Rialto components: raw `<input>`, `<select>`, `<textarea>` in `src/client/**` fail `pnpm lint` via `no-restricted-syntax`. Legitimate exceptions (color picker, hidden file input, decorative readonly preview) carry inline `// eslint-disable-next-line no-restricted-syntax -- <reason>`; tracked migrations use `-- TODO(rialto):` markers.
 
 ## Floor Plan Editor
 
