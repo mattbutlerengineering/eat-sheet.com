@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Input, NumberInput } from "@mattbutlerengineering/rialto";
 import { useFloorPlanEditorContext } from "../hooks/useFloorPlanEditor";
 import type { EditorTable, EditorSection } from "../types";
 import type { TableShape } from "@shared/types/floor-plan";
@@ -60,20 +61,6 @@ const labelStyle: React.CSSProperties = {
   letterSpacing: "var(--rialto-tracking-wide, 0.12em)",
   color: "var(--rialto-text-tertiary, rgba(232,226,216,0.4))",
   marginBottom: "var(--rialto-space-xs, 4px)",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "8px 10px",
-  borderRadius: "var(--rialto-radius-sharp, 6px)",
-  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
-  background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
-  color: "var(--rialto-text-primary, #e8e2d8)",
-  fontFamily: "var(--rialto-font-sans, system-ui)",
-  fontSize: "var(--rialto-text-xs, 12px)",
-  outline: "none",
-  boxSizing: "border-box" as const,
-  transition: "border-color 0.2s ease",
 };
 
 const sectionTitleStyle: React.CSSProperties = {
@@ -250,29 +237,23 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
   );
 
   const handleMinCapacityChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val >= 1) {
-        dispatch({
-          type: "UPDATE_TABLE_PROPS",
-          id: table.id,
-          changes: { minCapacity: val },
-        });
-      }
+    (val: number) => {
+      dispatch({
+        type: "UPDATE_TABLE_PROPS",
+        id: table.id,
+        changes: { minCapacity: val },
+      });
     },
     [dispatch, table.id],
   );
 
   const handleMaxCapacityChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val >= 1) {
-        dispatch({
-          type: "UPDATE_TABLE_PROPS",
-          id: table.id,
-          changes: { maxCapacity: val },
-        });
-      }
+    (val: number) => {
+      dispatch({
+        type: "UPDATE_TABLE_PROPS",
+        id: table.id,
+        changes: { maxCapacity: val },
+      });
     },
     [dispatch, table.id],
   );
@@ -285,17 +266,13 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
     <div style={panelStyle}>
       <div style={sectionTitleStyle}>Table Properties</div>
 
-      <div>
-        <label style={labelStyle}>Label</label>
-        {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
-        <input
-          type="text"
-          value={table.label}
-          onChange={handleLabelChange}
-          maxLength={20}
-          style={inputStyle}
-        />
-      </div>
+      <Input
+        label="Label"
+        type="text"
+        value={table.label}
+        onChange={handleLabelChange}
+        maxLength={20}
+      />
 
       <div>
         <div style={labelStyle}>Shape</div>
@@ -307,28 +284,24 @@ function TablePanel({ table, accentColor }: TablePanelProps) {
       </div>
 
       <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)" }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Min Seats</label>
-          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
-          <input
-            type="number"
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <NumberInput
+            label="Min Seats"
             value={table.minCapacity}
             onChange={handleMinCapacityChange}
             min={1}
             max={100}
-            style={inputStyle}
+            size="small"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Max Seats</label>
-          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
-          <input
-            type="number"
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <NumberInput
+            label="Max Seats"
             value={table.maxCapacity}
             onChange={handleMaxCapacityChange}
             min={1}
             max={100}
-            style={inputStyle}
+            size="small"
           />
         </div>
       </div>
@@ -385,21 +358,17 @@ function SectionPanel({ section }: SectionPanelProps) {
     <div style={panelStyle}>
       <div style={sectionTitleStyle}>Section Properties</div>
 
-      <div>
-        <label style={labelStyle}>Name</label>
-        {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
-        <input
-          type="text"
-          value={section.name}
-          onChange={handleNameChange}
-          maxLength={50}
-          style={inputStyle}
-        />
-      </div>
+      <Input
+        label="Name"
+        type="text"
+        value={section.name}
+        onChange={handleNameChange}
+        maxLength={50}
+      />
 
       <div>
         <label style={labelStyle}>Color</label>
-        <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)", alignItems: "flex-end" }}>
           {/* eslint-disable-next-line no-restricted-syntax -- Rialto has no color picker; native <input type="color"> is correct here */}
           <input
             type="color"
@@ -414,16 +383,19 @@ function SectionPanel({ section }: SectionPanelProps) {
               background: "transparent",
               cursor: "pointer",
               flexShrink: 0,
+              marginBottom: 1,
             }}
+            aria-label="Color picker"
           />
-          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate hex text input to Rialto Input */}
-          <input
-            type="text"
-            value={section.color}
-            onChange={handleColorChange}
-            maxLength={7}
-            style={{ ...inputStyle, fontFamily: "var(--rialto-font-mono, monospace)" }}
-          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Input
+              type="text"
+              value={section.color}
+              onChange={handleColorChange}
+              maxLength={7}
+              aria-label="Color hex value"
+            />
+          </div>
         </div>
       </div>
 
@@ -477,21 +449,15 @@ function FloorPlanSettingsPanel() {
   const { state, dispatch } = useFloorPlanEditorContext();
 
   const handleWidthChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val >= 400 && val <= 5000) {
-        dispatch({ type: "SET_CANVAS_SIZE", width: val, height: state.canvasHeight });
-      }
+    (val: number) => {
+      dispatch({ type: "SET_CANVAS_SIZE", width: val, height: state.canvasHeight });
     },
     [dispatch, state.canvasHeight],
   );
 
   const handleHeightChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val >= 300 && val <= 5000) {
-        dispatch({ type: "SET_CANVAS_SIZE", width: state.canvasWidth, height: val });
-      }
+    (val: number) => {
+      dispatch({ type: "SET_CANVAS_SIZE", width: state.canvasWidth, height: val });
     },
     [dispatch, state.canvasWidth],
   );
@@ -501,30 +467,26 @@ function FloorPlanSettingsPanel() {
       <div style={sectionTitleStyle}>Floor Plan</div>
 
       <div style={{ display: "flex", gap: "var(--rialto-space-sm, 8px)" }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Width</label>
-          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
-          <input
-            type="number"
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <NumberInput
+            label="Width"
             value={state.canvasWidth}
             onChange={handleWidthChange}
             min={400}
             max={5000}
             step={40}
-            style={inputStyle}
+            size="small"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Height</label>
-          {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto NumberInput */}
-          <input
-            type="number"
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <NumberInput
+            label="Height"
             value={state.canvasHeight}
             onChange={handleHeightChange}
             min={300}
             max={5000}
             step={40}
-            style={inputStyle}
+            size="small"
           />
         </div>
       </div>
