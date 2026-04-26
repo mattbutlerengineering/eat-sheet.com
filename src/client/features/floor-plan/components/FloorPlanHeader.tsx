@@ -168,7 +168,7 @@ function TabButton({
 
   if (editing) {
     return (
-      // eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate inline rename input to Rialto Input
+      // eslint-disable-next-line no-restricted-syntax -- Inline tab-rename chrome (80px, accent-bordered); Rialto Input form layout doesn't fit
       <input
         type="text"
         value={editValue}

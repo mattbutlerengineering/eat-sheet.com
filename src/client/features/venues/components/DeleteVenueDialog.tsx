@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, type MotionStyle } from "framer-motion";
+import { Input } from "@mattbutlerengineering/rialto";
 import { spring } from "@mattbutlerengineering/rialto/motion";
 
 const ms = (s: React.CSSProperties): MotionStyle => s as MotionStyle;
@@ -52,32 +53,6 @@ const warningTextStyle: React.CSSProperties = {
   margin: 0,
 };
 
-const labelStyle: React.CSSProperties = {
-  fontFamily: "var(--rialto-font-sans, system-ui)",
-  fontSize: "var(--rialto-text-xs, 12px)",
-  color: "var(--rialto-text-secondary, rgba(232,226,216,0.5))",
-  marginBottom: "var(--rialto-space-xs, 6px)",
-  display: "block",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  background: "var(--rialto-surface-recessed, rgba(232,226,216,0.04))",
-  border: "1px solid var(--rialto-border, rgba(255,255,255,0.1))",
-  borderRadius: "var(--rialto-radius-sharp, 6px)",
-  padding: "10px 12px",
-  fontFamily: "var(--rialto-font-sans, system-ui)",
-  fontSize: "var(--rialto-text-sm, 13px)",
-  color: "var(--rialto-text-primary, #e8e2d8)",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const inputFocusStyle: React.CSSProperties = {
-  ...inputStyle,
-  borderColor: "rgba(255,255,255,0.25)",
-};
-
 const buttonRowStyle: React.CSSProperties = {
   display: "flex",
   gap: "var(--rialto-space-sm, 8px)",
@@ -128,7 +103,6 @@ export function DeleteVenueDialog({
   const [confirmText, setConfirmText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const confirmed = confirmText === venueName;
@@ -180,8 +154,6 @@ export function DeleteVenueDialog({
     (e: React.ChangeEvent<HTMLInputElement>) => setConfirmText(e.target.value),
     [],
   );
-  const handleInputFocus = useCallback(() => setInputFocused(true), []);
-  const handleInputBlur = useCallback(() => setInputFocused(false), []);
 
   return (
     <AnimatePresence>
@@ -216,25 +188,16 @@ export function DeleteVenueDialog({
               tables, and settings. This action cannot be undone.
             </p>
 
-            <div>
-              <label htmlFor="confirm-venue-name" style={labelStyle}>
-                Type the venue name to confirm
-              </label>
-              {/* eslint-disable-next-line no-restricted-syntax -- TODO(rialto): migrate to Rialto Input */}
-              <input
-                ref={inputRef}
-                id="confirm-venue-name"
-                type="text"
-                value={confirmText}
-                onChange={handleConfirmTextChange}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                style={inputFocused ? inputFocusStyle : inputStyle}
-                placeholder={venueName}
-                disabled={loading}
-                autoComplete="off"
-              />
-            </div>
+            <Input
+              ref={inputRef}
+              label="Type the venue name to confirm"
+              type="text"
+              value={confirmText}
+              onChange={handleConfirmTextChange}
+              placeholder={venueName}
+              disabled={loading}
+              autoComplete="off"
+            />
 
             {error && (
               <div role="alert" style={errorStyle}>
