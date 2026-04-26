@@ -101,6 +101,18 @@ describe("StepFloorPlan", () => {
     );
   });
 
+  it("auto-suggests size from seat count when no table count is given", () => {
+    render(<StepFloorPlan data={null} onChange={onChange} />);
+    fireEvent.click(screen.getByText("Fine Dining"));
+    onChange.mockClear();
+    fireEvent.change(screen.getByPlaceholderText("e.g. 48"), {
+      target: { value: "100" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ size: "grand", seatCount: 100 }),
+    );
+  });
+
   it("clamps absurd table counts", () => {
     render(<StepFloorPlan data={null} onChange={onChange} />);
     fireEvent.click(screen.getByText("Fine Dining"));

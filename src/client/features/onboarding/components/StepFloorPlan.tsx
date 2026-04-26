@@ -51,11 +51,26 @@ const TEMPLATE_META: readonly TemplateMeta[] = ONBOARDING_TEMPLATES.map(
   },
 );
 
-function autoSelectSize(tableCount: number): string {
-  if (tableCount <= 8) return "cozy";
-  if (tableCount <= 14) return "standard";
-  if (tableCount <= 20) return "spacious";
-  return "grand";
+// Bucket capacity into a room size. Prefers tableCount (more direct
+// mapping to template footprints); falls back to seatCount with an
+// implicit ~4 seats/table heuristic when only seats were provided.
+function autoSelectSize(
+  tableCount: number | undefined,
+  seatCount: number | undefined,
+): string | null {
+  if (tableCount !== undefined && tableCount > 0) {
+    if (tableCount <= 8) return "cozy";
+    if (tableCount <= 14) return "standard";
+    if (tableCount <= 20) return "spacious";
+    return "grand";
+  }
+  if (seatCount !== undefined && seatCount > 0) {
+    if (seatCount <= 32) return "cozy";
+    if (seatCount <= 56) return "standard";
+    if (seatCount <= 80) return "spacious";
+    return "grand";
+  }
+  return null;
 }
 
 // Normalized distance: |a - b| / max(a, b). Range [0, 1]. 0 = perfect match.
@@ -282,11 +297,9 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
   function handleTableCountChange(value: string) {
     const count = clampCount(value);
     setTableCount(count);
-    // Only auto-suggest size if the user hasn't explicitly picked one yet.
-    const nextSize =
-      count !== undefined && !sizeWasChosenByUser.current
-        ? autoSelectSize(count)
-        : selectedSize;
+    const nextSize = !sizeWasChosenByUser.current
+      ? autoSelectSize(count, seatCount) ?? selectedSize
+      : selectedSize;
     if (nextSize !== selectedSize) setSelectedSize(nextSize);
     if (count !== undefined && selectedTemplateId !== null) {
       onChange({
@@ -301,10 +314,14 @@ export function StepFloorPlan({ data, onChange }: StepFloorPlanProps) {
   function handleSeatCountChange(value: string) {
     const count = clampCount(value);
     setSeatCount(count);
+    const nextSize = !sizeWasChosenByUser.current
+      ? autoSelectSize(tableCount, count) ?? selectedSize
+      : selectedSize;
+    if (nextSize !== selectedSize) setSelectedSize(nextSize);
     if (selectedTemplateId !== null) {
       onChange({
         templateId: selectedTemplateId,
-        size: selectedSize,
+        size: nextSize,
         tableCount,
         seatCount: count,
       });
