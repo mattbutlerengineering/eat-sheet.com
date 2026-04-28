@@ -1,5 +1,9 @@
 # eat-sheet.com
 
+<!-- acmm:begin -->
+![ACMM Level 6 — Fully Autonomous](https://img.shields.io/badge/ACMM%20Level%206%20%E2%80%94%20Fully%20Autonomous-5319e7?style=flat-square)
+<!-- acmm:end -->
+
 Multi-tenant SaaS hospitality platform for restaurants — reservations, waitlist, floor plans, and guest management. Built on Cloudflare Workers + React 19.
 
 ## Tech stack

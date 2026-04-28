@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "description": "Auto-QA self-tuning config for ACMM L5. Tunes sensitivity based on PR acceptance rate.",
+  "source": "docs/SECURITY-AI.md and ACMM audit",
+  "metrics": {
+    "pr_acceptance_rate": {
+      "source": "metrics/acmm-pr-history.jsonl",
+      "window_days": 30,
+      "thresholds": {
+        "healthy": 0.70,
+        "warning": 0.50,
+        "critical": 0.30
+      }
+    },
+    "test_coverage": {
+      "source": "pnpm test:coverage output",
+      "thresholds": {
+        "lines": 70,
+        "branches": 60,
+        "functions": 70,
+        "statements": 70
+      },
+      "auto_raise": {
+        "enabled": false,
+        "cadence_days": 90,
+        "note": "Raise only after quarterly review; never lower a threshold once raised"
+      }
+    },
+    "acmm_level": {
+      "source": ".claude/acmm/state.json",
+      "target": 5,
+      "block_on_regression": true
+    }
+  },
+  "tuning_rules": [
+    {
+      "if": "pr_acceptance_rate < critical",
+      "then": "file meta-improvement issue with label 'process-regression'"
+    },
+    {
+      "if": "pr_acceptance_rate < warning",
+      "then": "add comment to next PR: 'Acceptance rate is below 50% — please review recent meta-improvement issues'"
+    },
+    {
+      "if": "acmm_level regresses",
+      "then": "block deploy, file meta-improvement issue immediately"
+    }
+  ],
+  "note": "This file is the encoded policy. The runtime equivalent is nightly-compliance.yml. See ACMM L5 'Self-tuning' criterion."
+}

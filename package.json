@@ -16,7 +16,10 @@
     "lint": "eslint .",
     "test:e2e": "playwright test --ignore-snapshots",
     "test:e2e:ui": "playwright test --ui",
-    "test:lighthouse": "playwright test e2e/lighthouse.spec.ts"
+    "test:lighthouse": "playwright test e2e/lighthouse.spec.ts",
+    "acmm": "node scripts/acmm/audit.js",
+    "acmm:apply": "node scripts/acmm/audit.js --apply",
+    "acmm:badge": "node scripts/acmm/audit.js --badge"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

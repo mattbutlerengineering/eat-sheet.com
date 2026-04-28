@@ -1,0 +1,72 @@
+# Merge Queue / Auto-Merge Config
+
+> **ACMM L6 ("Strategist") signal.** The repo has an encoded merge-queue or auto-merge policy that agents can trigger after checks pass.
+
+## Current state
+
+GitHub Actions billing is intentionally **unpaid** (see CLAUDE.md), so the GitHub-native merge queue is not active. The equivalent policy is encoded here for when budget allows.
+
+## Auto-merge eligibility (`.github/policies/change-tiers.yaml`)
+
+| Tier | Auto-merge? | Requirement |
+|------|-------------|-------------|
+| `tier:trivial` | ✅ Yes | CI green, no unresolved threads, no human approval required |
+| `tier:standard` | ❌ No | 1 human reviewer approval required |
+| `tier:sensitive` | ❌ No | Specialist agent + human approval |
+| `tier:critical` | ❌ No | User (Matt) + specialist agent approval |
+
+## Merge queue config (for future activation)
+
+When GitHub Actions budget is restored, enable this in the repo settings:
+
+```yaml
+# .github/merge-queue.yml (future)
+merge-queue:
+  # Only trivial PRs auto-merge via queue
+  tiers:
+    - label: "tier:trivial"
+      auto_merge: true
+      checks:
+        - "coverage-gate"
+        - "lint"
+        - "typecheck"
+      required_approvals: 0
+    - label: "tier:standard"
+      auto_merge: false
+      required_approvals: 1
+    - label: "tier:sensitive"
+      auto_merge: false
+      required_approvals: 1
+      required_agents: ["migration-safety-reviewer", "rialto-reviewer"]
+    - label: "tier:critical"
+      auto_merge: false
+      required_approvals: 1
+      required_approvals_override: "Matt"
+      required_agents: ["migration-safety-reviewer", "rialto-reviewer", "floor-plan-reviewer"]
+```
+
+## Manual equivalent (current process)
+
+Until the queue is active:
+
+1. **Trivial PRs** (docs-only, lint fixes): Human or agent merges after CI green
+2. **Standard PRs**: Agent opens PR → `tier-classifier` labels → human reviews → merge
+3. **Sensitive PRs**: Agent opens PR → specialist agents comment → human approves → merge
+4. **Critical PRs**: User (Matt) must personally approve via GitHub UI
+
+## Agent-triggered merge
+
+Agents may merge `tier:trivial` PRs they did not author:
+
+```bash
+gh pr merge --auto --merge --delete-branch
+```
+
+Agents must **never** merge:
+- PRs they authored (wait for human or other agent)
+- `tier:critical` or `tier:sensitive` PRs
+- PRs with unresolved review threads
+
+## Why this is L6
+
+At L6, the system doesn't just follow rules — it has a **strategic understanding of when to auto-merge vs. when human judgment is required**. The merge policy is encoded, not implicit.

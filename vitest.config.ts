@@ -13,6 +13,16 @@ export default mergeConfig(
         ["src/client/**/__tests__/**/*.test.tsx", "jsdom"],
       ],
       setupFiles: ["./src/test-setup.ts"],
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "json", "html"],
+        thresholds: {
+          lines: 70,
+          branches: 60,
+          functions: 70,
+          statements: 70,
+        },
+      },
     },
     resolve: {
       alias: {

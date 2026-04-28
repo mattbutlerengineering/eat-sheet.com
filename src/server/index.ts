@@ -10,6 +10,7 @@ import { venues } from "./features/venues/routes";
 import { floorPlans } from "./features/floor-plans/routes";
 import { onboarding } from "./features/onboarding/routes";
 import { guests } from "./features/guests/routes";
+import { default as metrics } from "./features/metrics/routes";
 
 const app = new Hono<AppEnv>();
 
@@ -38,6 +39,7 @@ app.route("/api/t", venues);
 app.route("/api/t", floorPlans);
 app.route("/api/onboarding", onboarding);
 app.route("/api/t", guests);
+app.route("/api/metrics", metrics);
 
 // Serve static assets and SPA fallback
 app.get("*", async (c) => {

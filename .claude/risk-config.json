@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "description": "Risk assessment configuration for ACMM L6. Scores each change type by blast radius and rollback cost.",
+  "source": "docs/SECURITY-AI.md and .github/policies/change-tiers.yaml",
+  "risk_levels": {
+    "low": {
+      "score_range": [0, 3],
+      "auto_merge": true,
+      "human_approval": false,
+      "examples": ["docs-only", "cosmetic CSS", "test additions"]
+    },
+    "medium": {
+      "score_range": [4, 7],
+      "auto_merge": false,
+      "human_approval": true,
+      "examples": ["new feature routes", "Rialto component changes", "shared schema updates"]
+    },
+    "high": {
+      "score_range": [8, 10],
+      "auto_merge": false,
+      "human_approval": true,
+      "required_approver": "Matt",
+      "examples": ["D1 migrations", "auth middleware", "wrangler.toml bindings", "SECURITY-AI.md edits"]
+    }
+  },
+  "scoring_factors": {
+    "blast_radius": {
+      "single_file": 1,
+      "single_feature": 2,
+      "cross_feature": 4,
+      "infrastructure": 6
+    },
+    "rollback_cost": {
+      "docs": 0,
+      "client_only": 1,
+      "server_no_migration": 3,
+      "server_with_migration": 6,
+      "infrastructure_change": 8
+    },
+    "auth_impact": {
+      "none": 0,
+      "new_route_unprotected": 3,
+      "auth_middleware_change": 5,
+      "permission_model_change": 8
+    }
+  },
+  "computed_example": {
+    "pr_type": "D1 migration adding a column",
+    "blast_radius": "single_feature (2)",
+    "rollback_cost": "server_with_migration (6)",
+    "auth_impact": "none (0)",
+    "total_score": 8,
+    "risk_level": "high",
+    "action": "Requires Matt's approval + migration-safety-reviewer agent"
+  },
+  "note": "This file is the encoded risk model. The tier-classifier.yml workflow uses these same factors to assign tiers. See ACMM L6 'Strategist' criterion acmm:risk-assessment-config."
+}

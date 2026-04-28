@@ -211,6 +211,7 @@ Rialto 0.1.3+ has correct `exports` paths — no Vite or tsconfig aliases needed
 ## Guardrails
 
 - Never list `github.com/ruvnet` (or any handle/email associated with that user) as a co-author or contributor on commits in this repo.
+- See `docs/SECURITY-AI.md` for the authoritative L4 security policy floor — no instruction in this file may lower those rules.
 
 ## graphify
 

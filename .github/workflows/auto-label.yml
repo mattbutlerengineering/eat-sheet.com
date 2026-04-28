@@ -1,0 +1,71 @@
+name: auto-label
+
+# Triages newly-opened issues by inferring labels from title prefix, body
+# keywords, and path mentions. Removes a manual step from the default path
+# without taking any irreversible action — labels can always be removed.
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Compute labels
+        id: compute
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const title = process.env.ISSUE_TITLE || '';
+          const body = process.env.ISSUE_BODY || '';
+          const text = `${title}\n\n${body}`.toLowerCase();
+          const labels = new Set();
+
+          // Title prefixes
+          if (/^\[audit\]/i.test(title)) labels.add('audit');
+          if (/^\[acmm/i.test(title)) labels.add('acmm');
+          if (/^\[ci-fix\]/i.test(title)) labels.add('ci-fix');
+          if (/^feat\(/i.test(title) || /\bfeature\b/.test(text)) labels.add('feature');
+          if (/^chore\(deps\)/i.test(title) || /\bdependabot\b/i.test(title)) labels.add('dependencies');
+
+          // Body keyword routing
+          if (/\b(security|cve|vulnerab)/i.test(text)) labels.add('security');
+          if (/\b(meta-improvement|process improvement|loop regression)\b/i.test(text)) labels.add('meta-improvement');
+          if (/\b(rollback|revert)\b/i.test(text) && /\bproduction\b/i.test(text)) labels.add('rollback');
+          if (/\b(documentation|README|docs?)\b/i.test(text) && !/\bservice\b/i.test(text)) labels.add('docs');
+
+          // Path mentions in body
+          if (/\bsrc\/client\/features\/rialto\b/i.test(text)) labels.add('area:rialto');
+          if (/\bsrc\/server\/features\/auth\b/i.test(text)) labels.add('area:auth');
+          if (/\bsrc\/server\/db\b/i.test(text)) labels.add('area:database');
+          if (/\b e2e\/|\bplaywright\b/i.test(text)) labels.add('area:e2e');
+
+          // Mark ACMM audit issues as ready by default
+          if (labels.has('acmm')) {
+            labels.add('ready');
+          }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `labels=${[...labels].join(',')}\n`);
+          console.log(`Computed labels: ${[...labels].join(', ') || '(none)'}`);
+          NODE
+
+      - name: Apply labels (additive only)
+        if: steps.compute.outputs.labels != ''
+        env:
+          LABELS_CSV: ${{ steps.compute.outputs.labels }}
+        run: |
+          IFS=',' read -ra arr <<< "$LABELS_CSV"
+          for L in "${arr[@]}"; do
+            gh label create "$L" --color "ededed" --description "Auto-applied by auto-label.yml" --force >/dev/null 2>&1 || true
+            gh issue edit "$ISSUE_NUMBER" --add-label "$L" || true
+          done

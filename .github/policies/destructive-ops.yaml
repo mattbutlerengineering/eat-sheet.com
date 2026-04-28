@@ -1,0 +1,101 @@
+# Git, database, and infrastructure operations that agents must never perform.
+# Source of truth: docs/SECURITY-AI.md § Destructive git ops, § Database & migrations, § Infrastructure & deploys.
+
+$schema: ./README.md
+domain: destructive-ops
+source: docs/SECURITY-AI.md
+severity: critical
+
+# Bash command patterns that are categorically forbidden.
+# Reviewer agents and pre-execution hooks scan agent-emitted commands
+# against these regexes. A match blocks execution unless explicit user
+# approval was issued in this turn.
+forbidden_commands:
+  git:
+    - pattern: "git push (--force|-f)\\s+.*\\b(main|master|prod|production|release)\\b"
+      reason: force-push to a protected branch — never permitted
+    - pattern: "git push --force-with-lease.*\\bmain\\b"
+      reason: requires explicit per-push user approval
+    - pattern: "git (reset --hard|checkout \\.|restore \\.|clean -fdx)"
+      reason: would discard uncommitted user work; verify clean state first
+    - pattern: "git commit.*--no-verify"
+      reason: bypasses pre-commit hooks (eslint, typecheck)
+    - pattern: "git commit.*(--no-gpg-sign|-c commit\\.gpgsign=false)"
+      reason: bypasses signing when signing is configured
+    - pattern: "git branch -D"
+      reason: may delete unpushed work; check `git log` first
+    - pattern: "git config (--global|--system)"
+      reason: never modify git config — see docs/SECURITY-AI.md
+  database:
+    - pattern: "wrangler d1 execute .*--remote.*(DROP TABLE|DROP INDEX|ALTER TABLE .* DROP)"
+      reason: destructive D1 ops need ADR + per-call user approval
+    - pattern: "wrangler d1 execute .*--remote.*DROP DATABASE"
+      reason: catastrophic; needs ADR + per-call user approval
+    - pattern: "DELETE FROM .* (?!WHERE)"
+      reason: full-table delete; needs per-call user approval
+  infrastructure:
+    - pattern: "wrangler delete"
+      reason: would destroy the production Worker
+    - pattern: "wrangler secret delete"
+      reason: per-call user approval required
+    - pattern: "wrangler r2 bucket delete"
+      reason: per-call user approval required
+    - pattern: "wrangler r2 object delete"
+      reason: per-call user approval required
+    - pattern: "rm -rf\\s+/"
+      reason: forbidden under any circumstances
+
+# Files that must not be modified without specific authorization.
+restricted_paths:
+  - path: ".env*"
+    rule: never commit (except .env.example with placeholder values only)
+    severity: critical
+  - path: ".dev.vars"
+    rule: never commit (contains secrets)
+    severity: critical
+  - path: ".github/CODEOWNERS"
+    rule: requires user approval AND commit message references reason
+    severity: critical
+  - path: ".github/workflows/coverage-gate.yml"
+    rule: per-change user approval (gate workflow)
+    severity: critical
+  - path: ".github/workflows/tier-classifier.yml"
+    rule: per-change user approval (gate workflow)
+    severity: critical
+  - path: "src/server/db/migrations/[0-9]*.sql"
+    rule: never edit a migration file once applied to production
+    severity: critical
+  - path: "wrangler.toml"
+    rule: requires user approval for binding changes; production deploys gated
+    severity: high
+  - path: "src/server/db/schema.sql"
+    rule: requires migration-safety-reviewer agent invocation
+    severity: high
+  - path: "src/server/features/auth/**"
+    rule: requires code-reviewer agent
+    severity: high
+  - path: "scripts/acmm/backfill-metrics.js"
+    rule: forbidden to execute (committed but un-runnable per gaming guardrail)
+    severity: critical
+  - path: "scripts/check-*.js"
+    rule: requires user approval — these are the gate enforcement
+    severity: high
+
+# Approval gates that must never be bypassed.
+unbypassable_gates:
+  - name: ready -> in-progress -> has-pr issue label state machine
+    rule: agents picking up issues must transition through these states; skipping forbidden
+  - name: pre-commit hook (eslint, typecheck)
+    rule: failure means fix the cause; never --no-verify
+  - name: migration-safety-reviewer agent
+    rule: required for any PR touching src/server/db/migrations/ or src/server/db/schema.sql
+  - name: rialto-reviewer agent
+    rule: required for any PR touching src/client/features/**/components/
+  - name: scripts/check-destructive-migrations.js
+    rule: must run on every commit including a D1 migration
+
+on_violation:
+  block: true
+  notify: open meta-improvement issue with label "security"
+  remediation: |
+    Most violations indicate the agent attempted a destructive action without explicit user approval. Stop the session, document what was attempted in an issue, and require the user to authorize the action before any retry.

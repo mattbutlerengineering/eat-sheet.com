@@ -1,0 +1,63 @@
+name: auto-issue
+
+# Scans the repo for gaps the autonomous loop should pick up and files
+# GitHub issues for each finding. Uses the ACMM audit --apply flow
+# which dedupes against state.issuesCreated[criterionId] so re-runs
+# don't spam.
+
+on:
+  schedule:
+    # 04:00 UTC daily — staggered from the RemoteTrigger's 17:00 UTC slot
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are you triggering this manually?"
+        required: false
+        default: "On-demand audit"
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: auto-issue
+  cancel-in-progress: false
+
+jobs:
+  acmm-apply:
+    name: Run ACMM audit and file gap issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run audit with --apply
+        # Deduplicates issues for next-level gaps.
+        # Exits 0 even when gaps exist — diagnostic, not gating.
+        run: node scripts/acmm/audit.js --apply
+
+      - name: Echo summary
+        if: always()
+        run: |
+          echo "Auto-issue run complete."
+          echo "Check .claude/acmm/state.json for issuesCreated entries."
+          echo "New gaps → GitHub issues with 'ready' label."
